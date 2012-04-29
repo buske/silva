@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -eu
+set -o pipefail
+
+model=$1
+test=$2
+./fld.py --model=$1 $test

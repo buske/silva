@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+
+from __future__ import division, with_statement
+
+import sys
+import cPickle
+
+from pybrain.datasets import SupervisedDataSet
+from pybrain.tools.shortcuts import buildNetwork
+from pybrain.supervised.trainers import BackpropTrainer
+from pybrain.tools.validation import CrossValidator
+from pybrain.tools.validation import ModuleValidator
+
+modelfile, testfile = sys.argv[1:]
+
+def read_data(file):
+    with open(file) as ifp:
+        # Read training dataset
+        ds = None
+        for line in ifp:
+            line = line.strip()
+            if not line or line.startswith('#'): continue
+            values = [float(val) for val in line.split()]
+            soln = int(values.pop(0))
+            if ds is None:
+                ds = SupervisedDataSet(len(values), 1)
+                
+            ds.addSample(values, (soln,))
+
+    print >>sys.stderr, "Loaded %s into dataset with %d points" % (file, len(ds))
+    return ds
+
+
+test_ds = read_data(testfile)
+
+with open(modelfile) as ifp:
+    net = cPickle.load(ifp)
+
+out = net.activateOnDataset(test_ds)
+assert len(out) == len(test_ds['target'])
+for score, target in zip(out, test_ds['target']):
+    print "%.6f\t%d" % (score, target)

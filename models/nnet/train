@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+
+from __future__ import division, with_statement
+
+import sys
+import cPickle
+
+from pybrain.datasets import SupervisedDataSet
+from pybrain.tools.shortcuts import buildNetwork
+from pybrain.supervised.trainers import BackpropTrainer
+from pybrain.tools.validation import CrossValidator
+from pybrain.tools.validation import ModuleValidator
+
+modelfile, trainfile = sys.argv[1:]
+
+def read_data(file):
+    with open(file) as ifp:
+        # Read training dataset
+        ds = None
+        for line in ifp:
+            line = line.strip()
+            if not line or line.startswith('#'): continue
+            values = [float(val) for val in line.split()]
+            soln = int(values.pop(0))
+            if ds is None:
+                ds = SupervisedDataSet(len(values), 1)
+                
+            ds.addSample(values, (soln,))
+
+    print >>sys.stderr, "Loaded %s into dataset with %d points" % (file, len(ds))
+    return ds
+
+
+train_ds = read_data(trainfile)
+
+# Build simple neural net
+n_hidden = 8
+net = buildNetwork(train_ds.indim, train_ds.outdim, 1)
+
+# Train the neural net
+trainer = BackpropTrainer(net, train_ds, weightdecay=0.01, momentum=0.1)
+#trainer.trainEpochs(100)
+trainer.trainUntilConvergence(maxEpochs=500)
+
+with open(modelfile, 'wb') as ofp:
+    cPickle.dump(net, ofp, 2)

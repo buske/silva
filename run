@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -eu
+set -o pipefail
+
+export SYNORDER_PATH=${SYNORDER_PATH:-$(dirname $0)}
+export TMPDIR=${TMPDIR:-./}
+
+MODELROOT=$SYNORDER_PATH/models
+model=forest
+
+function usage {
+    cat <<EOF
+Usage: $0 OUTDIR
+
+Runs pre-trained model on files in OUTDIR (created with preprocess_vcf)
+
+Ranked results printed to stdout.
+EOF
+    exit 1
+}
+
+if [[ $# -ne 1 ]]; then
+    usage
+fi
+
+echo "Command: $0 $@" >&2
+
+outdir=$(readlink -e $1)
+
+if [[ ! -e $ARFF2MAT ]]; then
+    echo "Could not find: $ARFF2MAT" >&2
+    exit 1
+elif [[ ! -e $MODELROOT/$model/test ]]; then
+    echo "Could not find: $MODELROOT/$model/test" >&2
+    exit 1
+fi
+
+i=0
+for mat in $outdir/*.mat; do
+    base=$(basename $mat .mat)
+    modelfile="$base.model"
+    synfile="$base.rare"
+    if [[ ! -e $modelfile ]]; then
+	echo "Error: could not find saved model: $modelfile" >&2
+	echo "Was OUTDIR created by calling preprocess_vcf?" >&2
+    fi
+    pushd $MODELROOT/$model > /dev/null
+    ./test $modelfile $mat | cut -f 1 | paste - $synfile $mat | sort -k 1,1nr
+    popd > /dev/null
+done
+
+echo "$0: SUCCESS" >&2

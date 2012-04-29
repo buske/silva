@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -eu
+set -o pipefail
+
+model=$1
+test=$2
+
+# Requires gerp to be present in header or will fail
+gerp_col=$(grep "^#" "$test" | tr -d "#" | tr "\t" "\n" | cat -n | grep gerp | awk '{print $1}') \
+    || (echo "Error: 'gerp' column not specified in header line" >&2; exit 1)
+grep -v '^#' $test | cut -f 1,$gerp_col | awk '{print $2 "\t" $1}'
+
+echo "$0: SUCCESS" >&2

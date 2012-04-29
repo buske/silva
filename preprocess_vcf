@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+set -eu
+set -o pipefail
+
+
+export SYNORDER_PATH=${SYNORDER_PATH:-$(dirname $0)}
+export TMPDIR=${TMPDIR:-./}
+SYNONYMOUS="$SYNORDER_PATH/input/synonymous.py -O $SYNORDER_PATH/data/refGene.pkl"
+
+function usage {
+    cat <<EOF
+Usage: $0 VCF OUTDIR
+
+Annotates rare, synonymous variants in VCF file,
+creating files necessary to run this tool.
+
+Creates OUTDIR if it does not exit.
+Will use TMPDIR='$TMPDIR' as needed.
+
+Existing files in OUTDIR are NOT overwritten.
+EOF
+    exit 1
+}
+
+
+if [[ $# -ne 2 ]]; then
+    usage
+fi
+vcf="$1"
+outdir="$2"
+
+if [[ ! -e "$vcf" ]]; then
+    echo -e "Error: missing input file: $vcf\n" >&2
+    usage
+fi
+
+base=$(basename "$vcf" .vcf)
+
+function skip_if_exists {
+    local f="$1"
+    if [[ -e $f ]]; then
+	echo "Found existing: $f..." >&2
+	return 1
+    else
+	return 0
+    fi
+}
+
+# Filter to just synonymous variants
+# Adds gene and transcript information
+out=$base.syn
+skip_if_exists $outdir/$out \
+    && echo "Filtering for synonymous exonic variants..." >&2 \
+    && $SYNONYMOUS filter $vcf > $TMPDIR/$out \
+    && mv $TMPDIR/$out $outdir/$out
+
+# Annotate with 1000 Genomes Project AF
+out=$base.rare
+skip_if_exists $outdir/$out \
+    && echo "Annotating with 1000 Genomes Project allele frequency..." >&2 \
+    && $SYNORDER_PATH/input/1000gp.py $outdir/$base.syn \
+    | awk -F"\t" '$1 == "." && $1 < 0.05;' | cut -f 2- > $TMPDIR/$out \
+    && mv $TMPDIR/$out $outdir/$out
+
+# Annotate with mrna sequence
+out=$base.mrna
+skip_if_exists $outdir/$out \
+    && echo "Annotating with mRNA sequence..." >&2 \
+    && $SYNONYMOUS annotate $outdir/$base.rare > $TMPDIR/$out \
+    && mv $TMPDIR/$out $outdir/$out
+
+# Annotate with features
+out=$outdir/$base.mat
+skip_if_exists $out \
+    && echo "Annotating features from MRNA file..." >&2 \
+    && $SYNORDER_PATH/convert/mrna2mat.sh $outdir/$base.mrna $outdir/$base
+
+# Reformat matrix for WEKA
+out=$base.arff
+skip_if_exists $out \
+    && echo "Creating ARFF file (for WEKA)..." >&2 \
+    && $SYNORDER_PATH/convert/mat2arff.sh "$id" 0 $outdir/$base{.mat,}

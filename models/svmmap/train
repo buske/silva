@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -eu
+set -o pipefail
+
+model=$1
+train=$2
+
+# Try to use /tmp
+id="/tmp/buske.$(uuidgen)"
+touch $id.touch || id="/data/buske/tmp/$(uuidgen)"
+rm -f $id.touch
+
+function to_svm {
+    # $1 is CLASS
+    awk -F"\t" '{OFS="\t"; printf "%s qid:1",$1; for(i=2;i<=NF;i++) {printf " %d:%s",i-1,$i;} print "";}'
+}
+
+
+function cleanup {
+    rm -f $id.*
+}
+function die {
+    cleanup
+    exit 1
+}
+
+trap die INT TERM EXIT
+
+svmtrain=$id.svm.train
+svmmodel=$model
+
+# Format datasets for svm
+grep -v '^#' $train | to_svm > $svmtrain
+
+# Train
+./svm_map_learn -c 1 <(echo $svmtrain) $svmmodel >&2
+
+trap - INT TERM EXIT
+cleanup
+
+echo "$0: SUCCESS" >&2
+

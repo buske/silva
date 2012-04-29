@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+from __future__ import with_statement, division
+
+import sys
+import cPickle
+
+from numpy import array, concatenate
+
+modelfile, testfile = sys.argv[1:]
+
+def read_data(file):
+    with open(file) as ifp:
+        # Read training dataset
+        data = []
+        solutions = []
+        for line in ifp:
+            line = line.strip()
+            if not line or line.startswith('#'): continue
+            values = [float(val) for val in line.split()]
+            soln = int(values.pop(0))
+            data.append(values)
+            solutions.append(soln)
+            
+        print >>sys.stderr, "Loaded %s into dataset with %d points" % (file, len(data))
+        return array(solutions, dtype=int), array(data, dtype=float)
+            
+test_solns, test_data = read_data(testfile)
+
+from milk.supervised import randomforest
+
+with open(modelfile) as ifp:
+    model = cPickle.load(ifp)
+
+for soln, vector in zip(test_solns, test_data):
+    pred, votes = model.apply(vector)
+    print "%d\t%d" % (votes, soln)

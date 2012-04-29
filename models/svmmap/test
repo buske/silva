@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -eu
+set -o pipefail
+
+model=$1
+test=$2
+
+# Try to use /tmp
+id="/tmp/buske.$(uuidgen)"
+touch $id.touch || id="/data/buske/tmp/$(uuidgen)"
+rm -f $id.touch
+
+function to_svm {
+    # $1 is CLASS
+    awk -F"\t" '{OFS="\t"; printf "%s qid:1",$1; for(i=2;i<=NF;i++) {printf " %d:%s",i-1,$i;} print "";}'
+}
+
+
+function cleanup {
+    rm -f $id.*
+}
+function die {
+    cleanup
+    exit 1
+}
+
+trap die INT TERM EXIT
+
+svmtest=$id.svm.test
+out=$id.svm.out
+
+# Format datasets for svm
+grep -v '^#' $test | to_svm > $svmtest
+
+# Test
+./svm_map_classify <(echo $svmtest) $svmmodel $out >&2
+
+cat $out | tr -d "[] " | tr "," "\n" | awk '{printf "%.6f\n",$1;}' | paste - <(grep -v '^#' $test | cut -f 1)
+
+trap - INT TERM EXIT
+cleanup
+
+echo "$0: SUCCESS" >&2
+
