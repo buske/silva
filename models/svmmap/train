@@ -34,7 +34,7 @@ svmmodel=$model
 grep -v '^#' $train | to_svm > $svmtrain
 
 # Train
-./svm_map_learn -c 1 <(echo $svmtrain) $svmmodel >&2
+$SYNORDER_PATH/tools/svmmap/svm_map_learn -c 1 <(echo $svmtrain) $svmmodel >&2
 
 trap - INT TERM EXIT
 cleanup
