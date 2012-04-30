@@ -19,7 +19,7 @@ from datetime import datetime
 from itertools import chain, imap
 from subprocess import Popen, PIPE
 
-sys.path.insert(0, os.path.expandvars("$SYNORDER_PATH/lib/synorder.py"))
+sys.path.insert(0, os.path.expandvars("$SYNORDER_PATH/lib"))
 from synorder import maybe_gzip_open, print_args
 
 MAXENT_PATH = os.path.expandvars('$SYNORDER_PATH/tools/maxent/latest')
