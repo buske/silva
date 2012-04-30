@@ -48,7 +48,7 @@ class FLD(object):
         if not train and filename and not os.path.isfile(filename):
             raise IOError("Could not find model file: %s" % filename)
         else:
-            if os.path.isfile(self.filename):
+            if self.filename and os.path.isfile(self.filename):
                 try:
                     self.load()
                 except Exception, e:

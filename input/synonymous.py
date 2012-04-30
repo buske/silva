@@ -26,6 +26,8 @@ from collections import defaultdict
 from string import maketrans
 from random import sample
 
+assert os.getenv('SYNORDER_PATH') is not None, \
+    "Error: SYNORDER_PATH is unset."
 sys.path.insert(0, os.path.expandvars('$SYNORDER_PATH/lib'))
 from synorder import maybe_gzip_open
 

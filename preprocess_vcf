@@ -14,11 +14,13 @@ Usage: $0 VCF OUTDIR
 
 Annotates rare, synonymous variants in VCF file,
 creating files necessary to run this tool.
+OUTDIR should be a directory specific to the VCF file.
+
+Existing files in OUTDIR are NOT overwritten, so this
+script can be stopped and resumed.
 
 Creates OUTDIR if it does not exit.
 Will use TMPDIR='$TMPDIR' as needed.
-
-Existing files in OUTDIR are NOT overwritten.
 EOF
     exit 1
 }
@@ -59,8 +61,10 @@ skip_if_exists $outdir/$out \
 out=$base.rare
 skip_if_exists $outdir/$out \
     && echo "Annotating with 1000 Genomes Project allele frequency..." >&2 \
-    && $SYNORDER_PATH/input/1000gp.py $outdir/$base.syn \
-    | awk -F"\t" '$1 == "." && $1 < 0.05;' | cut -f 2- > $TMPDIR/$out \
+    && cut -f 1,2,4 $outdir/$base.syn \
+    | $SYNORDER_PATH/input/1000gp.py dummy $datadir/1000gp.refGene.pkl \
+    | paste - $outdir/$base.syn \
+    | awk -F"\t" '$1 == "." || $1 < 0.05;' | cut -f 2- > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
 
 # Annotate with mrna sequence

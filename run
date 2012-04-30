@@ -6,14 +6,16 @@ set -o pipefail
 export SYNORDER_PATH=${SYNORDER_PATH:-$(dirname $0)}
 export TMPDIR=${TMPDIR:-./}
 
-MODELROOT=$SYNORDER_PATH/models
-model=forest
-
+modeldir=$SYNORDER_PATH/models/forest
+trained=$modeldir/
 function usage {
     cat <<EOF
 Usage: $0 OUTDIR
 
-Runs pre-trained model on files in OUTDIR (created with preprocess_vcf)
+Runs pre-trained model on OUTDIR (created with preprocess_vcf)
+
+Pretrained models found in: $modeldir
+As necessary, uses TMPDIR='$TMPDIR'
 
 Ranked results printed to stdout.
 EOF
@@ -28,26 +30,43 @@ echo "Command: $0 $@" >&2
 
 outdir=$(readlink -e $1)
 
-if [[ ! -e $ARFF2MAT ]]; then
-    echo "Could not find: $ARFF2MAT" >&2
-    exit 1
-elif [[ ! -e $MODELROOT/$model/test ]]; then
-    echo "Could not find: $MODELROOT/$model/test" >&2
+if [[ ! -e $modeldir/test ]]; then
+    echo "Could not find test script: $modeldir/test" >&2
     exit 1
 fi
 
-i=0
 for mat in $outdir/*.mat; do
-    base=$(basename $mat .mat)
-    modelfile="$base.model"
-    synfile="$base.rare"
-    if [[ ! -e $modelfile ]]; then
-	echo "Error: could not find saved model: $modelfile" >&2
-	echo "Was OUTDIR created by calling preprocess_vcf?" >&2
+    if [[ ! -e $mat ]]; then
+	echo "Error: expected .mat file in OUTDIR." >&2
+	echo "Was preprocess_vcf successful?" >&2
+	continue
     fi
-    pushd $MODELROOT/$model > /dev/null
-    ./test $modelfile $mat | cut -f 1 | paste - $synfile $mat | sort -k 1,1nr
-    popd > /dev/null
+
+    base=$(basename $mat .mat)
+    synfile="$base.rare"
+    if [[ ! -e $synfile ]]; then
+	echo "Error: expected $synfile file in OUTDIR." >&2
+	echo "Was preprocess_vcf successful?" >&2
+	continue
+    fi
+    for modelfile in $modeldir/trained/*.model; do
+	pushd $modeldir > /dev/null
+	if [[ ! -e $modelfile ]]; then
+	    echo "Error: could not find saved model: $modelfile" >&2
+	    echo "Was preprocess_vcf successful?" >&2
+	    exit 1
+	fi
+
+	# Run saved model on MAT file and created score file
+	scorefile=$(basename $modelfile .model).scored
+	if [[ ! -e $outdir/$scorefile ]]; then
+	    ./test $modelfile $mat | cut -f 1 > $outdir/.$scorefile \
+		&& mv $outdir/.$scorefile $outdir/$scorefile
+	fi
+	popd > /dev/null
+    done
 done
+
+
 
 echo "$0: SUCCESS" >&2

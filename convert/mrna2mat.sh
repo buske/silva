@@ -3,9 +3,8 @@
 set -eu
 set -o pipefail
 
-srcdir=$HOME/src/synonymous
-tooldir=$HOME/src/tools/synonymous
-datadir=/data/buske/synonymous
+tooldir=$SYNORDER_PATH/tools
+datadir=$SYNORDER_PATH/data
 MRNA_COL=10
 CODON_COLS="3-4,7-9"
 
@@ -24,9 +23,7 @@ mrna="$1"
 out="$(readlink -f $2)"
 outdir="$(dirname "$out")"
 
-temp="/tmp/buske.$(uuidgen)"
-touch $temp.touch || $temp="/data/buske/tmp/$(uuidgen)"
-rm -f $temp.touch
+temp="$TMPDIR/$(uuidgen)"
 
 function cleanup {
     rm -f $temp.*
@@ -68,25 +65,23 @@ function run {
 }
 
 n_cols=0
-n_cols=$(expr $n_cols + 1); run cpg     .                $srcdir/cpg.py -q $in &
-n_cols=$(expr $n_cols + 1); run splice  .                $srcdir/splice.py -q $in &
-n_cols=$(expr $n_cols + 1); run ese3    $tooldir/ese3    ./ese3.py      -q $in &
-n_cols=$(expr $n_cols + 1); run fas-ess $tooldir/fas-ess ./fas-ess.py   -q $in &
-n_cols=$(expr $n_cols + 1); run pesx    $tooldir/pesx    ./pesx.py      -q $in &
-n_cols=$(expr $n_cols + 1); cat $mrna \
-    | run 0_gerp . /home/buske/bin/genomedata-query -q $datadir/hg19.genomedata gerp &
+n_cols=$(expr $n_cols + 1); run cpg     $tooldir/other   ./cpg.py     -q $in &
+n_cols=$(expr $n_cols + 1); run splice  $tooldir/other   ./splice.py  -q $in &
+n_cols=$(expr $n_cols + 1); run ese3    $tooldir/ese3    ./ese3.py    -q $in &
+n_cols=$(expr $n_cols + 1); run fas-ess $tooldir/fas-ess ./fas-ess.py -q $in &
+n_cols=$(expr $n_cols + 1); run pesx    $tooldir/pesx    ./pesx.py    -q $in &
+n_cols=$(expr $n_cols + 1); cut -f 1,2 $mrna \
+    | run 0_gerp $tooldir/other ./gerp.py dummy $datadir/gerp.refGene.pkl &
 wait
 
 n_cols=$(expr $n_cols + 1); run maxent  $tooldir/maxent  ./maxent.py    -q $in &
 n_cols=$(expr $n_cols + 1); run unafold-50 $tooldir/unafold ./unafold.py -d 50 -q $in &
 n_cols=$(expr $n_cols + 1); run unafold-100 $tooldir/unafold ./unafold.py -d 100 -q $in &
-#n_cols=$(expr $n_cols + 1); run unafold-500 $tooldir/unafold ./unafold.py -d 500 -q $in &
 
 n_cols=$(expr $n_cols + 1); grep -v "^#" $mrna | cut -f $CODON_COLS \
-    | run codon . $srcdir/codon_usage.py -q - &
+    | run codon $tooldir/other ./codon_usage.py -q - &
 wait
 
-#    | perl -pe 's/\t(\t|$)/\tna\1/g' \
 found_n_cols=$(ls -1 $out.*.col | wc -l)
 if [[ $found_n_cols -ne $n_cols ]]; then
     echo "Error: found only $found_n_cols / $n_cols column annotations." >&2

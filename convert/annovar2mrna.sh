@@ -3,6 +3,8 @@
 set -eu
 set -o pipefail
 
+bin=$SYNORDER_PATH/input/synonymous.py
+refgene=$SYNORDER_PATH/data/refGene.pkl
 
 function usage {
     cat <<EOF
@@ -13,8 +15,6 @@ EOF
     exit 1
 }
 
-thisdir="$(dirname "$(readlink -e "$0")")"
-bin=$thisdir/refgene.py
 
 if [[ $# -eq 2 ]]; then
     afsubset=$2
@@ -54,13 +54,11 @@ function recolumn {
 
 function lookup_mrna {
     # Lookup mrna and filter to third-position variants
-    $bin -O /data/buske/synonymous/refGene.pkl - \
+    $bin -O $refgene - \
 	| awk -F"\t" '/^#/ || $9 == 2;'
 }
 
-id=/tmp/buske.$(uuidgen)
-touch $id.touch || id=/data/buske/tmp/$(uuidgen)
-rm -f $id.touch
+id=$TMPDIR/$(uuidgen)
 
 function cleanup {
     rm -f $id.*
