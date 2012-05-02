@@ -14,7 +14,7 @@ import os
 import sys
 import re
 
-sys.path.insert(0, os.path.expandvars('$SYNORDER_PATH/lib'))
+sys.path.insert(0, os.path.expandvars('$SYNORDER_PATH/src/share'))
 from synorder import maybe_gzip_open, print_args
 
 def script(filename, quiet=False, verbose=False, **kwargs):

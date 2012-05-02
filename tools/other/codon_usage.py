@@ -17,7 +17,7 @@ from __future__ import division, with_statement
 import os
 import sys
 
-sys.path.insert(0, os.path.expandvars('$SYNORDER_PATH/lib'))
+sys.path.insert(0, os.path.expandvars('$SYNORDER_PATH/src/share'))
 from synorder import maybe_gzip_open, print_args
 
 COMPLEMENT = dict(zip('ACGT', 'TGCA'))
