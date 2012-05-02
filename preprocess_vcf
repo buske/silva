@@ -5,8 +5,10 @@ set -o pipefail
 
 
 export SYNORDER_PATH=${SYNORDER_PATH:-$(dirname $0)}
-export TMPDIR=${TMPDIR:-./}
+export TMPDIR=${TMPDIR:-.}
 SYNONYMOUS="$SYNORDER_PATH/input/synonymous.py -O $SYNORDER_PATH/data/refGene.pkl"
+
+controldir=$SYNORDER_PATH/data/control
 
 function usage {
     cat <<EOF
@@ -21,6 +23,7 @@ script can be stopped and resumed.
 
 Creates OUTDIR if it does not exit.
 Will use TMPDIR='$TMPDIR' as needed.
+Control data found in: $controldir
 EOF
     exit 1
 }
@@ -85,3 +88,9 @@ out=$base.arff
 skip_if_exists $out \
     && echo "Creating ARFF file (for WEKA)..." >&2 \
     && $SYNORDER_PATH/convert/mat2arff.sh "$id" 0 $outdir/$base{.mat,}
+
+# Standardize according to training dataset
+out=$base.std.arff
+java -Xmx1800m weka.filters.unsupervised.attribute.Standardize
+    -b  -i -o /dev/null -r $in -s $TMPDIR/$out
+    && mv $TMPDIR/$out $outdir/$out

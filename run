@@ -4,17 +4,18 @@ set -eu
 set -o pipefail
 
 export SYNORDER_PATH=${SYNORDER_PATH:-$(dirname $0)}
-export TMPDIR=${TMPDIR:-./}
+export TMPDIR=${TMPDIR:-.}
 
 modeldir=$SYNORDER_PATH/models/forest
-trained=$modeldir/
+traineddir=$modeldir/trained
+
 function usage {
     cat <<EOF
 Usage: $0 OUTDIR
 
 Runs pre-trained model on OUTDIR (created with preprocess_vcf)
 
-Pretrained models found in: $modeldir
+Pretrained models found in: $traineddir
 As necessary, uses TMPDIR='$TMPDIR'
 
 Ranked results printed to stdout.
@@ -49,7 +50,7 @@ for mat in $outdir/*.mat; do
 	echo "Was preprocess_vcf successful?" >&2
 	continue
     fi
-    for modelfile in $modeldir/trained/*.model; do
+    for modelfile in $traineddir/*.model; do
 	pushd $modeldir > /dev/null
 	if [[ ! -e $modelfile ]]; then
 	    echo "Error: could not find saved model: $modelfile" >&2
