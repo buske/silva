@@ -20,7 +20,7 @@ import cPickle
 from numpy import loadtxt, cov, dot
 from numpy.linalg import inv
 
-sys.path.insert(0, os.path.expandvars("$SYNORDER_PATH/share"))
+sys.path.insert(0, os.path.expandvars("$SYNORDER_PATH/src/share"))
 from synorder import maybe_gzip_open
 
 
