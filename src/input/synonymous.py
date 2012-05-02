@@ -28,7 +28,7 @@ from random import sample
 
 assert os.getenv('SYNORDER_PATH') is not None, \
     "Error: SYNORDER_PATH is unset."
-sys.path.insert(0, os.path.expandvars('$SYNORDER_PATH/common'))
+sys.path.insert(0, os.path.expandvars('$SYNORDER_PATH/src/share'))
 from synorder import maybe_gzip_open
 
 STOP = '*'
