@@ -3,6 +3,8 @@
 set -eu
 set -o pipefail
 
+src=$SYNORDER_PATH/tools/svmmap
+
 model=$1
 train=$2
 
@@ -34,7 +36,7 @@ svmmodel=$model
 grep -v '^#' $train | to_svm > $svmtrain
 
 # Train
-$SYNORDER_PATH/tools/svmmap/svm_map_learn -c 1 <(echo $svmtrain) $svmmodel >&2
+$src/svm_map_learn -c 1 <(echo $svmtrain) $svmmodel >&2
 
 trap - INT TERM EXIT
 cleanup

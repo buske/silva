@@ -3,6 +3,8 @@
 set -eu
 set -o pipefail
 
+src=$SYNORDER_PATH/tools/svmmap
+
 model=$1
 test=$2
 
@@ -34,7 +36,7 @@ out=$id.svm.out
 grep -v '^#' $test | to_svm > $svmtest
 
 # Test
-$SYNORDER_PATH/tools/svmmap/svm_map_classify <(echo $svmtest) $svmmodel $out >&2
+$src/svm_map_classify <(echo $svmtest) $svmmodel $out >&2
 
 cat $out | tr -d "[] " | tr "," "\n" | awk '{printf "%.6f\n",$1;}' | paste - <(grep -v '^#' $test | cut -f 1)
 

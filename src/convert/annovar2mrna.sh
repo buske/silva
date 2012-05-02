@@ -3,7 +3,7 @@
 set -eu
 set -o pipefail
 
-bin=$SYNORDER_PATH/input/synonymous.py
+bin=$SYNORDER_PATH/src/input/synonymous.py
 refgene=$SYNORDER_PATH/data/refGene.pkl
 
 function usage {

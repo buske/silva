@@ -6,8 +6,8 @@ set -o pipefail
 export SYNORDER_PATH=${SYNORDER_PATH:-$(dirname $0)}
 export TMPDIR=${TMPDIR:-.}
 
-modeldir=$SYNORDER_PATH/models/forest
-traineddir=$modeldir/trained
+modeldir=$SYNORDER_PATH/src/models/forest
+traineddir=$SYNORDER_PATH/control/models
 
 function usage {
     cat <<EOF
@@ -36,14 +36,15 @@ if [[ ! -e $modeldir/test ]]; then
     exit 1
 fi
 
-for mat in $outdir/*.mat; do
+ext=.std.mat
+for mat in $outdir/*$ext; do
     if [[ ! -e $mat ]]; then
-	echo "Error: expected .mat file in OUTDIR." >&2
+	echo "Error: expected $ext file in OUTDIR." >&2
 	echo "Was preprocess_vcf successful?" >&2
 	continue
     fi
 
-    base=$(basename $mat .mat)
+    base=$(basename $mat $ext)
     synfile="$base.rare"
     if [[ ! -e $synfile ]]; then
 	echo "Error: expected $synfile file in OUTDIR." >&2

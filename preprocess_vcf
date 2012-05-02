@@ -6,9 +6,11 @@ set -o pipefail
 
 export SYNORDER_PATH=${SYNORDER_PATH:-$(dirname $0)}
 export TMPDIR=${TMPDIR:-.}
-SYNONYMOUS="$SYNORDER_PATH/input/synonymous.py -O $SYNORDER_PATH/data/refGene.pkl"
+SYNONYMOUS="$SYNORDER_PATH/src/input/synonymous.py -O $SYNORDER_PATH/data/refGene.pkl"
 
-controldir=$SYNORDER_PATH/data/control
+controldir=$SYNORDER_PATH/control
+control=$controldir/NA10851.merged.arff
+src=$SYNORDER_PATH/src
 
 function usage {
     cat <<EOF
@@ -65,9 +67,9 @@ out=$base.rare
 skip_if_exists $outdir/$out \
     && echo "Annotating with 1000 Genomes Project allele frequency..." >&2 \
     && cut -f 1,2,4 $outdir/$base.syn \
-    | $SYNORDER_PATH/input/1000gp.py dummy $datadir/1000gp.refGene.pkl \
-    | paste - $outdir/$base.syn \
-    | awk -F"\t" '$1 == "." || $1 < 0.05;' | cut -f 2- > $TMPDIR/$out \
+       | $src/input/1000gp.py dummy $datadir/1000gp.refGene.pkl \
+       | paste - $outdir/$base.syn \
+       | awk -F"\t" '$1 == "." || $1 < 0.05;' | cut -f 2- > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
 
 # Annotate with mrna sequence
@@ -78,19 +80,30 @@ skip_if_exists $outdir/$out \
     && mv $TMPDIR/$out $outdir/$out
 
 # Annotate with features
-out=$outdir/$base.mat
+out=$outdir/$base.raw.mat
 skip_if_exists $out \
     && echo "Annotating features from MRNA file..." >&2 \
-    && $SYNORDER_PATH/convert/mrna2mat.sh $outdir/$base.mrna $outdir/$base
+    && $src/convert/mrna2mat.sh $outdir/$base{.mrna,}
 
 # Reformat matrix for WEKA
-out=$base.arff
+out=$outdir/$base.raw.arff
 skip_if_exists $out \
     && echo "Creating ARFF file (for WEKA)..." >&2 \
-    && $SYNORDER_PATH/convert/mat2arff.sh "$id" 0 $outdir/$base{.mat,}
+    && $src/convert/mat2arff.sh "$id" 0 $outdir/$base{.raw.mat,}
 
 # Standardize according to training dataset
 out=$base.std.arff
-java -Xmx1800m weka.filters.unsupervised.attribute.Standardize
-    -b  -i -o /dev/null -r $in -s $TMPDIR/$out
+skip_if_exists $outdir/$out \
+    && echo "Standardizing ARFF file according to control data..." >&2 \
+    && java -Xmx1800m weka.filters.unsupervised.attribute.Standardize \
+       -b -i $control -o /dev/null -r $outdir/$base.raw.arff -s $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
+
+# Convert back into mat for analysis
+out=$base.std.mat
+skip_if_exists $outdir/$out \
+    && echo "Creating MAT file to provide to model..." >&2 \
+    && $src/convert/arff2mat.sh $outdir/$base.std.arff > $TMPDIR/$out \
+    && mv $TMPDIR/$out $outdir/$out
+
+echo "$0: SUCCESS" >&2
