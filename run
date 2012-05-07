@@ -9,7 +9,7 @@ export CLASSPATH="${SYNORDER_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"
 export PYTHONPATH="${SYNORDER_PATH}/lib/python2.6:${PYTHONPATH:-}"
 
 modeldir=$SYNORDER_PATH/src/models/forest
-traineddir=$SYNORDER_PATH/control/models
+traineddir=$SYNORDER_PATH/data/control/models
 
 function usage {
     cat <<EOF

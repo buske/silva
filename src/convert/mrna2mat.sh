@@ -3,7 +3,7 @@
 set -eu
 set -o pipefail
 
-tooldir=$SYNORDER_PATH/tools
+featuredir=$SYNORDER_PATH/src/features
 datadir=$SYNORDER_PATH/data
 MRNA_COL=11
 CODON_COLS="4-5,8-10"
@@ -65,21 +65,21 @@ function run {
 }
 
 n_cols=0
-n_cols=$(expr $n_cols + 1); run cpg     $tooldir/other   ./cpg.py     -q $in &
-n_cols=$(expr $n_cols + 1); run splice  $tooldir/other   ./splice.py  -q $in &
-n_cols=$(expr $n_cols + 1); run ese3    $tooldir/ese3    ./ese3.py    -q $in &
-n_cols=$(expr $n_cols + 1); run fas-ess $tooldir/fas-ess ./fas-ess.py -q $in &
-n_cols=$(expr $n_cols + 1); run pesx    $tooldir/pesx    ./pesx.py    -q $in &
+n_cols=$(expr $n_cols + 1); run cpg     $featuredir/other   ./cpg.py     -q $in &
+n_cols=$(expr $n_cols + 1); run splice  $featuredir/other   ./splice.py  -q $in &
+n_cols=$(expr $n_cols + 1); run ese3    $featuredir/ese3    ./ese3.py    -q $in &
+n_cols=$(expr $n_cols + 1); run fas-ess $featuredir/fas-ess ./fas-ess.py -q $in &
+n_cols=$(expr $n_cols + 1); run pesx    $featuredir/pesx    ./pesx.py    -q $in &
 n_cols=$(expr $n_cols + 1); cut -f 1,2 $mrna \
-    | run 0_gerp $tooldir/other ./gerp.py dummy $datadir/gerp.refGene.pkl &
+    | run 0_gerp $featuredir/other ./gerp.py dummy $datadir/gerp.refGene.pkl* &
 wait
 
-n_cols=$(expr $n_cols + 1); run maxent  $tooldir/maxent  ./maxent.py    -q $in &
-n_cols=$(expr $n_cols + 1); run unafold-50 $tooldir/unafold ./unafold.py -d 50 -q $in &
-n_cols=$(expr $n_cols + 1); run unafold-100 $tooldir/unafold ./unafold.py -d 100 -q $in &
+n_cols=$(expr $n_cols + 1); run maxent  $featuredir/maxent  ./maxent.py    -q $in &
+n_cols=$(expr $n_cols + 1); run unafold-50 $featuredir/unafold ./unafold.py -d 50 -q $in &
+n_cols=$(expr $n_cols + 1); run unafold-100 $featuredir/unafold ./unafold.py -d 100 -q $in &
 
 n_cols=$(expr $n_cols + 1); grep -v "^#" $mrna | cut -f $CODON_COLS \
-    | run codon $tooldir/other ./codon_usage.py -q - &
+    | run codon $featuredir/other ./codon_usage.py -q - &
 wait
 
 found_n_cols=$(ls -1 $out.*.col | wc -l)

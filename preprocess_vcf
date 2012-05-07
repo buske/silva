@@ -9,9 +9,9 @@ export TMPDIR=${TMPDIR:-.}
 export CLASSPATH="${SYNORDER_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"
 export PYTHONPATH="${SYNORDER_PATH}/lib/python2.6:${PYTHONPATH:-}"
 
-synonymous="${SYNORDER_PATH}/src/input/synonymous.py -O ${SYNORDER_PATH}/data/refGene.pkl"
+synonymous="${SYNORDER_PATH}/src/input/synonymous.py -O ${SYNORDER_PATH}/data/refGene.pkl*"
 
-controldir=$SYNORDER_PATH/control
+controldir=$SYNORDER_PATH/data/control
 control=$controldir/NA10851.merged.arff
 src=$SYNORDER_PATH/src
 data=$SYNORDER_PATH/data
@@ -73,7 +73,7 @@ out=$base.rare
 skip_if_exists $outdir/$out \
     && echo "Filtering by 1000 Genomes Project allele frequency..." >&2 \
     && cut -f 1,2,5 $outdir/$base.syn \
-       | $src/input/1000gp.py dummy $data/1000gp.refGene.pkl \
+       | $src/input/1000gp.py dummy $data/1000gp.refGene.pkl* \
        | paste - $outdir/$base.syn \
        | awk -F"\t" '$1 == "." || $1 < 0.05;' | cut -f 2- > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
