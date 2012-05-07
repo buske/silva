@@ -3,6 +3,9 @@
 set -eu
 set -o pipefail
 
+custom_args="-q lunchQ -e ~/logs/ -o ~/logs/"
+
+
 function usage {
     cat <<EOF
 Please run this script from the tool's root folder.
@@ -35,12 +38,12 @@ for vcf in "$@"; do
 
     id=$(uuidgen)
     qsub -b y -N "pre_$id" -l h_vmem=6G -l num_proc=4 \
-	-q lunchQ -e ~/logs/ -o ~/logs/ \
+	$custom_args \
 	-S /bin/bash -v "PATH=$PATH" \
 	"$(pwd)/preprocess_vcf $vcf $outdir"
 
     qsub -b y -N "run_$id" -hold_jid "pre_$id" -l h_vmem=2G \
-	-q coffeeQ -e ~/logs/ -o ~/logs/ \
+	$custom_args \
 	-S /bin/bash -v "PATH=$PATH" \
-	"$(pwd)/run $outdir > $outdir/RESULTS"
+	"$(pwd)/run $outdir > $TMPDIR/RESULTS && mv -v $TMPDIR/RESULTS $outdir/RESULTS"
 done

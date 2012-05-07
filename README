@@ -1,0 +1,27 @@
+========
+SYNORDER
+========
+
+XXX: Add citation
+
+Requirements
+============
+
+1. Linux x86_64 
+
+2. Python 2.6.X
+
+Includes
+========
+milk 0.4.2, with slight modification
+weka 3.6.6
+
+Running Synorder
+================
+
+Local machine
+-------------
+
+SGE Cluster
+-----------
+
