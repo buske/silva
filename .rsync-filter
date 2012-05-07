@@ -1,0 +1,7 @@
+- .*
+- *~
+- src/bench/
+- src/control/
+- tools/svmmap/
+- lib/
+- tools/milk/build
