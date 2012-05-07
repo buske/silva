@@ -517,6 +517,7 @@ def random_controls(genes, filename, match_cpg=False, avoid_splice=False):
 
         tokens = line.split()
         chrom, pos, id, ref, alt, gene_id, tx_id = tokens[:7]
+        chrom = chrom[3:] if chrom.startswith('chr') else chrom
         pos = int(pos)
         tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
         if not tx:
@@ -595,6 +596,7 @@ def filter_variants(genes, filename, protein_coords=False):
             id = '.'
         else:
             chrom, pos, id, ref, alts = tokens[:5]
+            chrom = chrom[3:] if chrom.startswith('chr') else chrom
             alt = alts.split(',')[0]
             # Only process SNVs
             if len(ref) != 1 or len(alt) != 1:
@@ -630,6 +632,7 @@ def annotate_variants(genes, filename):
 
         tokens = line.split()
         chrom, pos, id, ref, alt, gene_id, tx_id = tokens[:7]
+        chrom = chrom[3:] if chrom.startswith('chr') else chrom
         pos = int(pos)
 
         tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
