@@ -69,6 +69,6 @@ for line in sys.stdin:
     try:
         value = '%.4f' % table[chrom.lstrip('chr')][int(pos)]
     except (IndexError, KeyError):
-        value = 'nan'
+        value = 'na'
         
     print value

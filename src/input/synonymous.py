@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 """
-VARIANTS is tab-delimited, with fields: chrom, pos, ref, alt, ....
+VARIANTS is tab-delimited, with fields: chrom, pos, id, ref, alt, ...
+(compatible with VCF format; id is not used)
 If ACTION is 'filter', only synonymous variants are printed, and two columns
 are added: gene name and transcript name (for the longest transcript in
 which the variant is synonymous).
-If ACTION is 'annotate' or 'generate', VARIANTS should contain the 6 columns
+If ACTION is 'annotate' or 'generate', VARIANTS should contain the 7 columns
 outputted by first 'filter'ing. 
 If ACTION is 'annotate', additional columns are added: strand, codon, 
 codon_offset, and pre-mRNA sequence.
@@ -311,15 +312,21 @@ class Transcript(object):
 
     def is_synonymous(self, pos, ref, alt):
         """Is ref -> alt at pos (1-indexed, genomic) a synonymous change?"""
-        cds_pos = self.project_to_cds(pos)
-        assert cds_pos is not None
+        try:
+            cds_pos = self.project_to_cds(pos)
+            assert cds_pos is not None
+        except AssertionError:
+            return False
+        
         # Make nucs tx strand
         if self._strand == '-':
             alt = COMPLEMENT[alt]
             ref = COMPLEMENT[ref]
 
-        assert self._mrna[cds_pos] == ref
-            
+        assert self._mrna[cds_pos] == ref, \
+               "Reference mismatch: %s:%s (%s)  %s != %s" % \
+               (self._chrom, pos, self._strand, self._mrna[cds_pos], ref)
+        
         frame = cds_pos % 3
         codon_start = cds_pos - frame
         old_codon = self._mrna[codon_start:codon_start+3]
@@ -450,16 +457,22 @@ def get_transcript(genes, pos, ref, alt, gene_id, tx_id):
         return
 
     txs = [x for x in txs if x.tx() == tx_id]
-    if len(txs) != 1:
+    if len(txs) == 0:
         print >>sys.stderr, "Missing entry for transcript: %s" % tx_id
         return
-    tx = txs[0]
-
-    if tx.is_synonymous(pos, ref, alt):
-        return tx
     else:
+        # Possibly multiple transcripts with same accession
+        txs = filter(lambda tx: tx.is_synonymous(pos, ref, alt), txs)
+
+    if len(txs) == 0:
         print >>sys.stderr, "Mutation g.%d%s>%s does not appear to be" \
-            "synonymous in %s" % (pos, ref, alt, tx_id)
+              "synonymous in %s" % (pos, ref, alt, tx_id)
+        return
+    elif len(txs) == 1:
+        return txs[0]
+    else:
+        print >>sys.stderr, "Mutation g.%d%s>%s is not uniquely" \
+              "synonymous among copies of %s" % (pos, ref, alt, tx_id)
         return
 
 def random_synonymous_site(tx, cpg=None, avoid_splice=False):
@@ -496,14 +509,14 @@ def random_synonymous_site(tx, cpg=None, avoid_splice=False):
     return sample(sites, 1)[0]
 
 def random_controls(genes, filename, match_cpg=False, avoid_splice=False):
-    fields = ['chrom', 'pos', 'ref', 'alt', 'gene', 'tx']
+    fields = ['chrom', 'pos', 'id', 'ref', 'alt', 'gene', 'tx']
     print '#%s' % '\t'.join(fields)
     for line in maybe_gzip_open(filename):
         line = line.rstrip()
         if not line or line.startswith('#'): continue
 
         tokens = line.split()
-        chrom, pos, ref, alt, gene_id, tx_id = tokens[:6]
+        chrom, pos, id, ref, alt, gene_id, tx_id = tokens[:7]
         pos = int(pos)
         tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
         if not tx:
@@ -526,11 +539,11 @@ def random_controls(genes, filename, match_cpg=False, avoid_splice=False):
             new_ref = COMPLEMENT[new_ref]
             new_alt = COMPLEMENT[new_alt]
 
-        print '\t'.join([chrom, str(new_pos), new_ref, new_alt, 
-                         gene_id, tx.tx()] + tokens[6:])
+        print '\t'.join([chrom, str(new_pos), id, new_ref, new_alt, 
+                         gene_id, tx.tx()] + tokens[7:])
 
 def print_all_synonymous(genes):
-    fields = ['chrom', 'pos', 'ref', 'alt', 'gene', 'tx']
+    fields = ['chrom', 'pos', 'id', 'ref', 'alt', 'gene', 'tx']
     print '#%s' % '\t'.join(fields)
     
     for gene, txs in genes.iteritems():
@@ -544,32 +557,71 @@ def print_all_synonymous(genes):
                     alt = COMPLEMENT[alt]
 
                 pos = tx.project_from_cds(offset+frame)
-                print '\t'.join([tx.chrom(), str(pos), ref, alt, 
+                print '\t'.join([tx.chrom(), str(pos), '.', ref, alt, 
                                  gene, tx.tx()])
 
 def filter_variants(genes, filename, protein_coords=False):
-    fields = ['chrom', 'pos', 'ref', 'alt', 'gene', 'tx']
+    # Do chromosomal binning to efficiently lookup overlapping transcripts
+    n_bins = 2048
+    tx_locations = defaultdict(lambda: defaultdict(list))
+    for gene, txs in genes.iteritems():
+        for tx in txs:
+            assert tx.gene() == gene
+            start = tx._cds_start + 1
+            end = tx._cds_end
+            i = int(start / n_bins)
+            j = int(end / n_bins)
+            for bin in xrange(i, j+1):
+                tx_locations[tx.chrom()][bin].append((start, end, tx))
+
+    def find_overlapping_transcripts(chrom, pos):
+        bin = int(pos / n_bins)
+        txs = tx_locations[chrom][bin]
+        return [tx for (start, end, tx) in txs if start <= pos <= end]
+            
+    fields = ['chrom', 'pos', 'id', 'ref', 'alt', 'gene', 'tx']
     print '#%s' % '\t'.join(fields)
+    n_total = 0
+    n_kept = 0
     for line in maybe_gzip_open(filename):
         line = line.rstrip()
         if not line or line.startswith('#'): continue
-
+        n_total += 1
+        
         tokens = line.split()
         if protein_coords:
             match = get_transcript_from_protein(genes, *tokens)
             (tx, chrom, pos, ref, alt) = match
+            id = '.'
         else:
-            chrom, pos, ref, alt, gene_id, tx_id = tokens[:6]
+            chrom, pos, id, ref, alts = tokens[:5]
+            alt = alts.split(',')[0]
+            # Only process SNVs
+            if len(ref) != 1 or len(alt) != 1:
+                continue
+            
             pos = int(pos)
-            tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
+            txs = []
+            for tx in find_overlapping_transcripts(chrom, pos):
+                try:
+                    if tx.is_synonymous(pos, ref, alt):
+                        txs.append(tx)
+                except AssertionError:
+                    continue
+                    
+            tx = max(txs) if txs else None  # Take longest valid transcript
 
         if not tx:
             continue
 
-        print '\t'.join([chrom, str(pos), ref, alt, tx.gene(), tx.tx()] + tokens[6:])
+        n_kept += 1
+        print '\t'.join([chrom, str(pos), id, ref, alt, tx.gene(), tx.tx()] + tokens[5:])
+
+    print >>sys.stderr, "Found %d synonymous variants (%d dropped)" % \
+          (n_kept, n_total - n_kept)
 
 def annotate_variants(genes, filename):
-    fields = ['chrom', 'pos', 'ref', 'alt', 'gene', 'tx', 'strand',
+    fields = ['chrom', 'pos', 'id', 'ref', 'alt', 'gene', 'tx', 'strand',
               'codon', 'frame', 'premrna']
     print '#%s' % '\t'.join(fields)
     for line in maybe_gzip_open(filename):
@@ -577,7 +629,7 @@ def annotate_variants(genes, filename):
         if not line or line.startswith('#'): continue
 
         tokens = line.split()
-        chrom, pos, ref, alt, gene_id, tx_id = tokens[:6]
+        chrom, pos, id, ref, alt, gene_id, tx_id = tokens[:7]
         pos = int(pos)
 
         tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
@@ -591,8 +643,8 @@ def annotate_variants(genes, filename):
         frame = cds_offset % 3
 
         mut_str = tx.mutation_str(pos, ref, alt)
-        print '\t'.join([chrom, str(pos), ref, alt, tx.gene(), tx.tx(),
-                          tx.strand(), codon, frame, mut_str] + tokens[6:])
+        print '\t'.join([chrom, str(pos), id, ref, alt, tx.gene(), tx.tx(),
+                          tx.strand(), codon, str(frame), mut_str] + tokens[7:])
 
 
 

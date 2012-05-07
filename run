@@ -64,6 +64,7 @@ for mat in $outdir/*$ext; do
 	if [[ ! -e $outdir/$scorefile ]]; then
 	    ./test $modelfile $mat | cut -f 1 > $outdir/.$scorefile \
 		&& mv $outdir/.$scorefile $outdir/$scorefile
+	    test -e $outdir/$scorefile
 	fi
 	popd > /dev/null
     done

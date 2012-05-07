@@ -15,12 +15,13 @@ EOF
 if [[ $# -ne 4 ]]; then
     usage
 fi
-class=$2
-mat=$3
-outbase=$4
+relation="$1"
+class="$2"
+mat="$3"
+outbase="$4"
 
 (
-    echo -e "@RELATION $1\n"
+    echo -e "@RELATION $relation\n"
 
     head -n 1 "$mat" \
 	| tr -d "#" \
@@ -33,7 +34,7 @@ outbase=$4
     
     tail -n +2 "$mat" \
 	| tr "\t" "," \
-	| sed -e 's/$/,'"$3"'/'
-) > $outbase.arff.temp
+	| sed -e 's/$/,'"$class"'/'
+) > $outbase.arff.temp || exit 1
 
 mv $outbase.arff.temp $outbase.arff

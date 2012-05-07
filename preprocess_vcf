@@ -11,6 +11,7 @@ SYNONYMOUS="$SYNORDER_PATH/src/input/synonymous.py -O $SYNORDER_PATH/data/refGen
 controldir=$SYNORDER_PATH/control
 control=$controldir/NA10851.merged.arff
 src=$SYNORDER_PATH/src
+data=$SYNORDER_PATH/data
 
 function usage {
     cat <<EOF
@@ -46,14 +47,14 @@ base=$(basename "$vcf" .vcf)
 
 function skip_if_exists {
     local f="$1"
-    if [[ -e $f ]]; then
+    if [[ -e "$f" ]]; then
 	echo "Found existing: $f..." >&2
-	return 1
-    else
-	return 0
     fi
+    test ! -e "$f"
 }
 
+
+mkdir -pv $outdir
 # Filter to just synonymous variants
 # Adds gene and transcript information
 out=$base.syn
@@ -61,16 +62,18 @@ skip_if_exists $outdir/$out \
     && echo "Filtering for synonymous exonic variants..." >&2 \
     && $SYNONYMOUS filter $vcf > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
+test -e $outdir/$out
 
-# Annotate with 1000 Genomes Project AF
+# Filtering by 1000 Genomes Project AF
 out=$base.rare
 skip_if_exists $outdir/$out \
-    && echo "Annotating with 1000 Genomes Project allele frequency..." >&2 \
-    && cut -f 1,2,4 $outdir/$base.syn \
-       | $src/input/1000gp.py dummy $datadir/1000gp.refGene.pkl \
+    && echo "Filtering by 1000 Genomes Project allele frequency..." >&2 \
+    && cut -f 1,2,5 $outdir/$base.syn \
+       | $src/input/1000gp.py dummy $data/1000gp.refGene.pkl \
        | paste - $outdir/$base.syn \
        | awk -F"\t" '$1 == "." || $1 < 0.05;' | cut -f 2- > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
+test -e $outdir/$out
 
 # Annotate with mrna sequence
 out=$base.mrna
@@ -78,18 +81,21 @@ skip_if_exists $outdir/$out \
     && echo "Annotating with mRNA sequence..." >&2 \
     && $SYNONYMOUS annotate $outdir/$base.rare > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
+test -e $outdir/$out
 
 # Annotate with features
 out=$outdir/$base.raw.mat
 skip_if_exists $out \
     && echo "Annotating features from MRNA file..." >&2 \
-    && $src/convert/mrna2mat.sh $outdir/$base{.mrna,}
+    && $src/convert/mrna2mat.sh $outdir/$base.mrna $outdir/$base.raw
+test -e $out
 
 # Reformat matrix for WEKA
 out=$outdir/$base.raw.arff
 skip_if_exists $out \
     && echo "Creating ARFF file (for WEKA)..." >&2 \
-    && $src/convert/mat2arff.sh "$id" 0 $outdir/$base{.raw.mat,}
+    && $src/convert/mat2arff.sh "$base" 0 $outdir/$base.raw{.mat,}
+test -e $out
 
 # Standardize according to training dataset
 out=$base.std.arff
@@ -98,6 +104,7 @@ skip_if_exists $outdir/$out \
     && java -Xmx1800m weka.filters.unsupervised.attribute.Standardize \
        -b -i $control -o /dev/null -r $outdir/$base.raw.arff -s $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
+test -e $outdir/$out
 
 # Convert back into mat for analysis
 out=$base.std.mat
@@ -105,5 +112,6 @@ skip_if_exists $outdir/$out \
     && echo "Creating MAT file to provide to model..." >&2 \
     && $src/convert/arff2mat.sh $outdir/$base.std.arff > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
+test -e $outdir/$out
 
 echo "$0: SUCCESS" >&2

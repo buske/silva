@@ -5,8 +5,8 @@ set -o pipefail
 
 tooldir=$SYNORDER_PATH/tools
 datadir=$SYNORDER_PATH/data
-MRNA_COL=10
-CODON_COLS="3-4,7-9"
+MRNA_COL=11
+CODON_COLS="4-5,8-10"
 
 function usage {
     cat >&2 <<EOF
@@ -42,7 +42,7 @@ trap die INT TERM EXIT
 in=$temp.mrna-col
 grep -v "^#" $mrna \
     | cut -f $MRNA_COL \
-    > $in
+    > $in || exit 1
 
 function run {
     local name=$1.col
@@ -52,10 +52,10 @@ function run {
 	if [[ $dir != "." ]]; then
 	    pushd $dir > /dev/null
 	fi
-	echo "Running $name" >&2
-	"$@" > $temp.$name 2> ${out}.$name.log \
+	echo "Running: $name" >&2
+	"$@" > $temp.$name \
 	    && mv $temp.$name $out.$name \
-	    && echo "Completed $name" >&2
+	    && echo "Completed: $name" >&2
 	if [[ $dir != "." ]]; then
 	    popd > /dev/null
 	fi
