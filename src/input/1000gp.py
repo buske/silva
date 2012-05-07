@@ -21,6 +21,11 @@ import cPickle
 
 from collections import defaultdict
 
+assert os.getenv('SYNORDER_PATH') is not None, \
+       "Error: SYNORDER_PATH is unset."
+sys.path.insert(0, os.path.expandvars('$SYNORDER_PATH/src/share'))
+from synorder import maybe_gzip_open
+
 args = sys.argv[1:]
 
 if sys.stdin.isatty():
@@ -39,11 +44,11 @@ tablefile = args[0]
 
 def read_table(filename, optfile=None):
     data = defaultdict(dict)
-    with open(filename) as ifp:
+    with maybe_gzip_open(filename) as ifp:
         for line in ifp:
             line = line.strip()
             if not line or line.startswith('#'): continue
-            tokens = line.split()
+            tokens = line.split('\t')
             chrom, pos = tokens[:2]
             alt = tokens[4].split(',')[0]
             info = tokens[7]
@@ -68,7 +73,7 @@ def read_table(filename, optfile=None):
 
     if optfile and not os.path.isfile(optfile):
         print >>sys.stderr, "Saving optimized table to:", optfile
-        with open(optfile, 'wb') as ofp:
+        with maybe_gzip_open(optfile, 'wb') as ofp:
             cPickle.dump(data, ofp, cPickle.HIGHEST_PROTOCOL)
 
     return data
@@ -76,7 +81,7 @@ def read_table(filename, optfile=None):
 
 if optfile and os.path.isfile(optfile):
     print >>sys.stderr, "Loading optimized table from:", optfile
-    with open(optfile, 'rb') as ifp:
+    with maybe_gzip_open(optfile, 'rb') as ifp:
         table = cPickle.load(ifp)
 else:
     print >>sys.stderr, "Loading table from:", tablefile

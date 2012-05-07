@@ -21,7 +21,7 @@ def read_data(file):
             data.append(values)
             solutions.append(soln)
             
-        print >>sys.stderr, "Loaded %s into dataset with %d points" % (file, len(data))
+        print >>sys.stderr, "Loaded %s (%d rows)" % (file, len(data))
         return array(solutions, dtype=int), array(data, dtype=float)
             
             

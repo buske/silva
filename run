@@ -41,15 +41,15 @@ for mat in $outdir/*$ext; do
     if [[ ! -e $mat ]]; then
 	echo "Error: expected $ext file in OUTDIR." >&2
 	echo "Was preprocess_vcf successful?" >&2
-	continue
+	exit 1
     fi
 
     base=$(basename $mat $ext)
     synfile="$base.rare"
-    if [[ ! -e $synfile ]]; then
+    if [[ ! -e $outdir/$synfile ]]; then
 	echo "Error: expected $synfile file in OUTDIR." >&2
 	echo "Was preprocess_vcf successful?" >&2
-	continue
+	exit 1
     fi
     for modelfile in $traineddir/*.model; do
 	pushd $modeldir > /dev/null
@@ -60,14 +60,21 @@ for mat in $outdir/*$ext; do
 	fi
 
 	# Run saved model on MAT file and created score file
-	scorefile=$(basename $modelfile .model).scored
+	model=$(basename $modelfile .model)
+	scorefile=$model.scored
 	if [[ ! -e $outdir/$scorefile ]]; then
+	    echo "Running model $model..." >&2
 	    ./test $modelfile $mat | cut -f 1 > $outdir/.$scorefile \
 		&& mv $outdir/.$scorefile $outdir/$scorefile
 	    test -e $outdir/$scorefile
 	fi
 	popd > /dev/null
     done
+
+    # Print scored examples to stdout
+    $SYNORDER_PATH/src/util/summarize_scores.py $outdir/$synfile $outdir/*.scored
+
+    break  # Only process first MAT file
 done
 
 

@@ -60,7 +60,8 @@ mkdir -pv $outdir
 out=$base.syn
 skip_if_exists $outdir/$out \
     && echo "Filtering for synonymous exonic variants..." >&2 \
-    && $SYNONYMOUS filter $vcf > $TMPDIR/$out \
+    && $SYNONYMOUS filter $vcf | egrep -v "^Y\b" > $TMPDIR/$out \
+    && echo "Removing variants on chromosome Y..." >&2 \
     && mv $TMPDIR/$out $outdir/$out
 test -e $outdir/$out
 
