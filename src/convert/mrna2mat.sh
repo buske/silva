@@ -94,5 +94,3 @@ paste $out.*.col \
     && mv $temp.mat ${out}.mat
 
 trap - INT TERM EXIT
-
-echo "$0: SUCCESS" >&2

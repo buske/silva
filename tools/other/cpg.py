@@ -47,7 +47,11 @@ def calc_cpg(seq):
     CpG islands in vertebrate genomes.
     J. Mol. Biol. 1987 Jul 20;196(2):261-82.
     """
-    return seq.count('CG') * len(seq) / float(seq.count('C') * seq.count('G'))
+    denom = seq.count('C') * seq.count('G')
+    if denom > 0:
+        return seq.count('CG') * len(seq) / float(denom)
+    else:
+        return 0
                     
 def script(filename, quiet=False, **kwargs):
     fields = ['mut_CpG?', 'CpG_exon']

@@ -3,8 +3,10 @@
 set -eu
 set -o pipefail
 
-export SYNORDER_PATH=${SYNORDER_PATH:-$(dirname $0)}
-export TMPDIR=${TMPDIR:-.}
+export SYNORDER_PATH="${SYNORDER_PATH:-$(dirname $0)}"
+export TMPDIR="${TMPDIR:-.}"
+export CLASSPATH="${SYNORDER_PATH}/tools/weka-3-6-6/weka.jar:${CLASSPATH:-}"
+export PYTHONPATH="${SYNORDER_PATH}/lib/python2.6:${PYTHONPATH:-}"
 
 modeldir=$SYNORDER_PATH/src/models/forest
 traineddir=$SYNORDER_PATH/control/models
@@ -72,6 +74,7 @@ for mat in $outdir/*$ext; do
     done
 
     # Print scored examples to stdout
+    echo "Printing scored variants to stdout..." >&2
     $SYNORDER_PATH/src/util/summarize_scores.py $outdir/$synfile $outdir/*.scored
 
     break  # Only process first MAT file

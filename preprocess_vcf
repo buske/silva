@@ -6,7 +6,10 @@ set -o pipefail
 
 export SYNORDER_PATH=${SYNORDER_PATH:-$(dirname $0)}
 export TMPDIR=${TMPDIR:-.}
-SYNONYMOUS="$SYNORDER_PATH/src/input/synonymous.py -O $SYNORDER_PATH/data/refGene.pkl"
+export CLASSPATH="${SYNORDER_PATH}/tools/weka-3-6-6/weka.jar:${CLASSPATH:-}"
+export PYTHONPATH="${SYNORDER_PATH}/lib/python2.6:${PYTHONPATH:-}"
+
+synonymous="${SYNORDER_PATH}/src/input/synonymous.py -O ${SYNORDER_PATH}/data/refGene.pkl"
 
 controldir=$SYNORDER_PATH/control
 control=$controldir/NA10851.merged.arff
@@ -60,7 +63,7 @@ mkdir -pv $outdir
 out=$base.syn
 skip_if_exists $outdir/$out \
     && echo "Filtering for synonymous exonic variants..." >&2 \
-    && $SYNONYMOUS filter $vcf | egrep -v "^Y\b" > $TMPDIR/$out \
+    && $synonymous filter $vcf | egrep -v "^Y\b" > $TMPDIR/$out \
     && echo "Removing variants on chromosome Y..." >&2 \
     && mv $TMPDIR/$out $outdir/$out
 test -e $outdir/$out
@@ -80,7 +83,7 @@ test -e $outdir/$out
 out=$base.mrna
 skip_if_exists $outdir/$out \
     && echo "Annotating with mRNA sequence..." >&2 \
-    && $SYNONYMOUS annotate $outdir/$base.rare > $TMPDIR/$out \
+    && $synonymous annotate $outdir/$base.rare > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
 test -e $outdir/$out
 
