@@ -9,12 +9,19 @@ Requirements
 
 1. Linux x86_64 
 
-2. Python 2.6.X
+2. Python 2.6 or 2.7
+
+
 
 Includes
 ========
 milk 0.4.2, with slight modification
 weka 3.6.6
+maxendscan
+
+Downloads
+=========
+Unafold
 
 Running Synorder
 ================

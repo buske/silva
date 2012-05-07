@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.expandvars("$SYNORDER_PATH/src/share"))
 from synorder import maybe_gzip_open, print_args
 
 
-HYBRID_SS_MIN = os.path.expandvars("$SYNORDER_PATH/tools/unafold/unafold-3.8/src/hybrid-ss-min")
-UNAFOLDDAT = os.path.expandvars("$SYNORDER_PATH/tools/unafold/unafold-3.8/data/unafold")
+HYBRID_SS_MIN = os.path.expandvars("$UNAFOLD_PATH/src/hybrid-ss-min")
+UNAFOLDDAT = os.path.expandvars("$UNAFOLD_PATH/data")
 
 def score_sequence(*seqs):
     """Scores one or more sequences"""

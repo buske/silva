@@ -6,7 +6,7 @@ set -o pipefail
 
 export SYNORDER_PATH=${SYNORDER_PATH:-$(dirname $0)}
 export TMPDIR=${TMPDIR:-.}
-export CLASSPATH="${SYNORDER_PATH}/tools/weka-3-6-6/weka.jar:${CLASSPATH:-}"
+export CLASSPATH="${SYNORDER_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"
 export PYTHONPATH="${SYNORDER_PATH}/lib/python2.6:${PYTHONPATH:-}"
 
 synonymous="${SYNORDER_PATH}/src/input/synonymous.py -O ${SYNORDER_PATH}/data/refGene.pkl"
