@@ -22,7 +22,7 @@ from subprocess import Popen, PIPE
 sys.path.insert(0, os.path.expandvars("$SYNORDER_PATH/src/share"))
 from synorder import maybe_gzip_open, print_args
 
-MAXENT_PATH = os.path.expandvars('$SYNORDER_PATH/tools/maxent/latest')
+MAXENT_PATH = os.path.expandvars('$SYNORDER_PATH/tools/maxent')
 GOOD_SCORE = 2
 
 class Seq(object):
