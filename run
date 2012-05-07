@@ -6,7 +6,8 @@ set -o pipefail
 export SYNORDER_PATH="${SYNORDER_PATH:-$(dirname $0)}"
 export TMPDIR="${TMPDIR:-.}"
 export CLASSPATH="${SYNORDER_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"
-export PYTHONPATH="${SYNORDER_PATH}/lib/python2.6:${PYTHONPATH:-}"
+python_version="$(python -c "import sys; print sys.version[:3]")"
+export PYTHONPATH="${SYNORDER_PATH}/lib/python${python_version}:${PYTHONPATH:-}"
 
 modeldir=$SYNORDER_PATH/src/models/forest
 traineddir=$SYNORDER_PATH/data/control/models
