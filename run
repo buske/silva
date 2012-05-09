@@ -3,11 +3,7 @@
 set -eu
 set -o pipefail
 
-export SYNORDER_PATH="${SYNORDER_PATH:-$(dirname $0)}"
-export TMPDIR="${TMPDIR:-.}"
-export CLASSPATH="${SYNORDER_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"
-python_version="$(python -c "import sys; print sys.version[:3]")"
-export PYTHONPATH="${SYNORDER_PATH}/lib/python${python_version}:${PYTHONPATH:-}"
+source $(dirname $0)/init.sh
 
 modeldir=$SYNORDER_PATH/src/models/forest
 traineddir=$SYNORDER_PATH/data/control/models

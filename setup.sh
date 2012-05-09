@@ -36,17 +36,20 @@ if [[ ! -e data/refGene.pkl.gz ]]; then
 	wget http://compbio.cs.toronto.edu/synorder/synorder_${version}_data.tar.gz
     fi
     if [[ ! -d data ]]; then
-	tar -czf synorder_${version}_data.tar.gz
+	tar -xzf synorder_${version}_data.tar.gz
     fi
 fi
 
 # Install modified version of milk
-prefix="$(pwd)/lib/python${python_version}"
-if [[ ! -d $prefix/milk-*.egg ]]; then
+prefix="$(pwd)"
+libdir="$prefix/lib/python${python_version}"
+eggdir="$(ls -1d "$libdir/"milk-*.egg)"
+if [[ ! -d $eggdir ]]; then
     echo "Configuring modified milk Python package..." >&2
     prompt
+    mkdir -pv "$libdir"
     pushd tools/milk
-    export PYTHONPATH="$prefix:$PYTHONPATH"
+    export PYTHONPATH="$libdir:$PYTHONPATH"
     python setup.py install --prefix="$prefix"
     popd
 fi
