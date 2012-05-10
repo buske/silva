@@ -7,6 +7,7 @@ source $(dirname $0)/init.sh
 
 modeldir=$SYNORDER_PATH/src/models/forest
 traineddir=$SYNORDER_PATH/data/control/models
+controlstats=$SYNORDER_PATH/data/control/NA10851.stats
 
 function usage {
     cat <<EOF
@@ -45,8 +46,14 @@ for mat in $outdir/*$ext; do
 
     base=$(basename $mat $ext)
     synfile="$base.rare"
+    matfile="$base.std.mat"
     if [[ ! -e $outdir/$synfile ]]; then
 	echo "Error: expected $synfile file in OUTDIR." >&2
+	echo "Was preprocess_vcf successful?" >&2
+	exit 1
+    fi
+    if [[ ! -e $outdir/$matfile ]]; then
+	echo "Error: expected $matfile file in OUTDIR." >&2
 	echo "Was preprocess_vcf successful?" >&2
 	exit 1
     fi
@@ -72,7 +79,7 @@ for mat in $outdir/*$ext; do
 
     # Print scored examples to stdout
     echo "Printing scored variants to stdout..." >&2
-    $SYNORDER_PATH/src/util/summarize_scores.py $outdir/$synfile $outdir/*.scored
+    $SYNORDER_PATH/src/util/summarize_scores.py $controlstats $outdir/$matfile $outdir/$synfile $outdir/*.scored
 
     break  # Only process first MAT file
 done

@@ -3,7 +3,7 @@
 """
 Usage: $0 < CONTROL.ARFF > CONTROL.STATS
 
-Reports mean and standard deviation of each features.
+Report stats for each feature.
 """
 from __future__ import with_statement, division
 

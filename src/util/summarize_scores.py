@@ -30,7 +30,7 @@ def read_stats(filename):
             line = line.strip()
             if not line or line.startswith('#'): continue
             attr, mean, stdev = line.split()
-            attrs[attr] = (mean, stdev)
+            attrs[attr] = (float(mean), float(stdev))
             
     return attrs
 
@@ -96,8 +96,10 @@ for i in order:
     assert len(mat_row) == len(features)
     extreme_features = []
     for feature, value in zip(features, mat_row):
+        # Ignore class values
+        if feature == 'class': continue
         mean, stdev = stats[feature]
-        if value > mean + 1.5 * stdev:
+        if value > mean + 3 * stdev:
             extreme_features.append(feature)
 
     extreme_features = ','.join(extreme_features) if extreme_features else '.'
