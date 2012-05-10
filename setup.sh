@@ -84,6 +84,7 @@ if [[ $(python -c "import milk; print milk.__version__" 2> /dev/null) != sympri-
 	export PYTHONPATH="$libdir:${PYTHONPATH:-}"
 	trap milkfail TERM EXIT
 	python setup.py install --install-lib="$libdir"
+	
 	trap - TERM EXIT
     fi
     popd
