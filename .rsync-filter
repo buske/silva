@@ -7,3 +7,6 @@
 - tools/milk/build
 - tools/milk/dist
 - data/
+- bin/
+- build/
+- release/

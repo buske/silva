@@ -1,6 +1,6 @@
-=====================
-SYMPRI 1.0.0 README
-=====================
+===================
+SYMPRI <VERSION> README
+===================
 
 Sympri is a tool for the automated harmfulness prediction of SYNONYMOUS single-nucleotide variants. Given variants in a VCF file, Sympri will order the rare synonymous variants according to their predicted harmfulness.
 
@@ -35,7 +35,7 @@ Sympri requires several tools and databases to run. Most of these were included 
 - setup.sh: Sympri databases, available from:
   http://compbio.cs.toronto.edu/sympri/sympri_<VERSION>_data.tar.gz
 
-* Note: if you have UNAfold or the Sympri databases already installed, you can point Sympri to them by changing the appropriate lines in the 'init.sh' file.
+* Note: if you have UNAfold or the Sympri databases already installed, you can point Sympri to them by changing the appropriate lines in the 'config.sh' file.
 
 Input File Format
 -----------------
@@ -61,7 +61,7 @@ Sympri will print the synonymous variants to stdout, ordered by score, with the 
 Installation
 ============
 
-Sympri is packaged with most of its dependencies. The remaining few can be downloaded and configured by running the 'setup.sh' script from the root directory of this package (with <VERSION> replaced by the appropriate version number):
+Sympri is packaged with most of its dependencies. The remaining few can be downloaded and configured by running the 'setup.sh' script from the root directory of this package:
 
 1. Untar and unzip the package tarball:
 
@@ -72,11 +72,11 @@ Sympri is packaged with most of its dependencies. The remaining few can be downl
     $ cd sympri_<VERSION>
     $ bash setup.sh
 
-* Sympri uses a number of environment variables to communcate important paths and parameters, such as what directory to use for temporary files, what allele frequency threshold to use, and where UNAfold is installed. Sympri has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'init.sh' script.
+* Sympri uses a number of environment variables to communcate important paths and parameters, such as what directory to use for temporary files, what allele frequency threshold to use, and where UNAfold is installed. Sympri has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'config.sh' script.
 
 
 Running Sympri
-================
+==============
 
 Sympri should be run from the root directory of the package. If you insist on running it from elsewhere, you must set SYMPRI_PATH appropriately in your environment. 
 

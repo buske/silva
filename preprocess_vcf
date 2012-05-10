@@ -3,7 +3,7 @@
 set -eu
 set -o pipefail
 
-source $(dirname $0)/init.sh
+source $(dirname $0)/config.sh
 
 export SYMPRI_PATH
 synonymous="${SYMPRI_PATH}/src/input/synonymous.py -O ${SYMPRI_PATH}/data/refGene.pkl*"
