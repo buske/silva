@@ -60,7 +60,7 @@ popd
 src=${distbase}.tar.gz
 if [[ ! -e $src ]]; then
     prompt "\nTarballing dist files: $builddir to $src"
-    tar -hczf $src $builddir
+    tar -hczf -C build $src $builddir
 fi
 
 

@@ -8,7 +8,7 @@ set -o pipefail
 # Feel free to modify them if you know what you are doing.
 
 # Path to the root of the Synorder directory.
-export SYNORDER_PATH="${SYNORDER_PATH:-$(readlink -e $(dirname $0))}"
+export SYNORDER_PATH="${SYNORDER_PATH:-$(cd -P $(dirname $0); pwd)}"
 
 # Directory to use for any temporary files. It's recommended that this point
 # to somewhere on the local machine (such as /tmp).

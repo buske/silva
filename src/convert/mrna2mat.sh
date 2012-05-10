@@ -20,8 +20,8 @@ if [[ $# -ne 2 ]]; then
     usage
 fi
 mrna="$1"
-out="$(readlink -f $2)"
-outdir="$(dirname "$out")"
+outdir="$(cd -P $(dirname "$2"); pwd)"
+outbase="$outdir/$(basename "$2")"
 
 temp="$TMPDIR/$(uuidgen)"
 
@@ -48,19 +48,19 @@ function run {
     local name=$1.col
     local dir=$2
     shift 2
-    if [[ ! -e $out.$name ]]; then
+    if [[ ! -e $outbase.$name ]]; then
 	if [[ $dir != "." ]]; then
 	    pushd $dir > /dev/null
 	fi
 	echo "Running: $name" >&2
 	"$@" > $temp.$name \
-	    && mv $temp.$name $out.$name \
+	    && mv $temp.$name $outbase.$name \
 	    && echo "Completed: $name" >&2
 	if [[ $dir != "." ]]; then
 	    popd > /dev/null
 	fi
     else
-	echo "Output file already exists: $out.$name" >&2
+	echo "Output file already exists: $outbase.$name" >&2
     fi
 }
 
@@ -82,13 +82,13 @@ n_cols=$(expr $n_cols + 1); grep -v "^#" $mrna | cut -f $CODON_COLS \
     | run codon $featuredir/other ./codon_usage.py -q - &
 wait
 
-found_n_cols=$(ls -1 $out.*.col | wc -l)
+found_n_cols=$(ls -1 $outbase.*.col | wc -l)
 if [[ $found_n_cols -ne $n_cols ]]; then
     echo "Error: found only $found_n_cols / $n_cols column annotations." >&2
     exit 1
 fi
 
-paste $out.*.col \
+paste $outbase.*.col \
     | perl -pe 's/\bna\b/0/g' \
     > $temp.mat \
     && mv $temp.mat ${out}.mat
