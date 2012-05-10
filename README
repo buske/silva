@@ -33,7 +33,7 @@ Sympri requires several tools and databases to run. Most of these were included 
 - setup.sh: UNAfold, available from:
   http://mfold.rna.albany.edu/?q=DINAMelt/software
 - setup.sh: Sympri databases, available from:
-  http://compbio.cs.toronto.edu/sympri/sympri_<VERSION>_data.tar.gz
+  http://compbio.cs.toronto.edu/sympri/sympri-<VERSION>_data.tar.gz
 
 * Note: if you have UNAfold or the Sympri databases already installed, you can point Sympri to them by changing the appropriate lines in the 'config.sh' file.
 
@@ -65,11 +65,11 @@ Sympri is packaged with most of its dependencies. The remaining few can be downl
 
 1. Untar and unzip the package tarball:
 
-    $ tar -xzf sympri_<VERSION>.tar.gz
+    $ tar -xzf sympri-<VERSION>.tar.gz
 
 2. Move into the package's root directory and run the setup script:
 
-    $ cd sympri_<VERSION>
+    $ cd sympri-<VERSION>
     $ bash setup.sh
 
 * Sympri uses a number of environment variables to communcate important paths and parameters, such as what directory to use for temporary files, what allele frequency threshold to use, and where UNAfold is installed. Sympri has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'config.sh' script.

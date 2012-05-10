@@ -7,8 +7,13 @@ name="sympri"
 old_version=$(cat VERSION)
 echo "Found version: $old_version" >&2
 read -p "Enter the release version number (X.Y.Z)... " new_version
+if [[ $new_version != *.*.* ]]; then
+    echo "Error: invalid version number" >&2
+    exit 1
+fi
 
-prefix=${name}_${new_version}
+
+prefix=${name}-${new_version}
 builddir=build/$prefix
 distbase=dist/$prefix
 

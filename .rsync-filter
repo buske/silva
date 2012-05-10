@@ -2,10 +2,11 @@
 - *~
 - src/bench/
 - src/control/
-- tools/svmmap/
 - lib/
+- tools/svmmap/
 - tools/milk/build
 - tools/milk/dist
+- tools/unafold
 - data/
 - bin/
 - build/
