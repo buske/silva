@@ -97,9 +97,9 @@ To run Sympri on your local machine, you should have already downloaded dependen
 
     $ ./preprocess_vcf <VCF> <OUTDIR>
 
-2. Run the trained models on the annotated variants and print them in order of decreasing predicted harmfulness:
+2. Run the trained models on the annotated variants and print the top variants in order of decreasing predicted harmfulness:
 
-    $ ./run <OUTDIR>
+    $ ./run <OUTDIR> | head
 
 Sympri should handle errors and early termination gracefully, so if something goes wrong, you can re-run the same command and it will pick up where it left off.
 

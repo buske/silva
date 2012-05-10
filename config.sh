@@ -36,10 +36,9 @@ function config_message {
     cat >&2 <<EOF
 SYMPRI $version
 ------------
-
 TMPDIR:           '$TMPDIR'
-SYMPRI_AF_THRESH: '$SYMPRI_AF_THRESH'
 SYMPRI_CONTROL:   '$SYMPRI_CONTROL'
+SYMPRI_AF_THRESH: '$SYMPRI_AF_THRESH'
 EOF
 }
 

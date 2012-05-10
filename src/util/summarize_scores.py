@@ -13,6 +13,7 @@ Reports rank mean and range for each line in FILE.
 
 
 import sys
+import signal
 
 from collections import defaultdict
 from numpy import array, column_stack, median, argsort
@@ -117,6 +118,8 @@ with open(file) as ifp:
 
 assert len(lines) == len(order)
 
+# Treat SIGPIPE as Unix would expect
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 for i in order:
     score, low, mid, high, line = scores[i], range_lows[i], range_mids[i], range_highs[i], lines[i]
     mat_row = mat[i]
