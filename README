@@ -12,6 +12,25 @@ If you use this tool, please cite:
     Identification of deleterious synonymous variants in human genomes.
     Submitted.
 
+Send questions, comments, and difficulties to: sympri@cs.toronto.edu
+
+
+Quickstart
+==========
+
+1. Install dependencies:
+
+    $ ./setup.sh
+
+2. Preprocess VCF file:
+
+    $ ./preprocess_vcf VCF OUTDIR
+
+3. Run models and print highest-scoring synonymous variants:
+
+    $ ./run OUTDIR | head
+
+
 Overview
 ========
 
@@ -77,7 +96,7 @@ Sympri is packaged with most of its dependencies. The remaining few can be downl
 2. Move into the package's root directory and run the setup script:
 
     $ cd sympri-<VERSION>
-    $ bash setup.sh
+    $ setup.sh
 
 * Sympri uses a number of environment variables to communcate important paths and parameters, such as what directory to use for temporary files, what allele frequency threshold to use, and where UNAfold is installed. Sympri has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'config.sh' script.
 
