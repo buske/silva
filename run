@@ -3,7 +3,7 @@
 set -eu
 set -o pipefail
 
-source $(dirname $0)/config.sh
+source $(dirname $0)/init.sh
 
 modeldir=$SYMPRI_PATH/src/models/forest
 traineddir=$SYMPRI_PATH/data/control/models
@@ -27,7 +27,7 @@ if [[ $# -ne 1 ]]; then
     usage
 fi
 
-config_message
+init_message
 
 outdir="$(cd -P "$1"; pwd)"
 

@@ -4,6 +4,20 @@ set -eu
 set -o pipefail
 
 version="$(cat VERSION)"
+UNAFOLD_URL="http://mfold.rna.albany.edu/cgi-bin/UNAFold-download.cgi?unafold-3.8.tar.gz"
+SYMPRI_DATA_URL="http://compbio.cs.toronto.edu/sympri/sympri-${version}_data.tar.gz"
+
+# Check python verison
+pyversion=$(python -c "import sys; print sys.version[:3]")
+if [[ $pyversion != 2.6 && $pyversion != 2.7 ]]; then
+    cat >&2 <<EOF
+Found Python $pyversion, but requires Python 2.6 or 2.7.
+
+Please install Python 2.6/2.7, or set your PATH such that the 'python'
+command loads Python 2.6 or 2.7.
+EOF
+    exit 1
+fi
 
 function prompt {
     echo -e "$@" >&2
@@ -17,10 +31,10 @@ if [[ ! -e tools/unafold/src/hybrid-ss-min ]]; then
     prompt "\nDownloading UNAFold 3.8..."
     pushd tools
     if [[ ! -e unafold-3.8.tar.gz ]]; then
-	wget http://mfold.rna.albany.edu/cgi-bin/UNAFold-download.cgi?unafold-3.8.tar.gz
+	wget "$UNAFOLD_URL"
     fi
     if [[ ! -d unafold ]]; then
-	tar -xzf unafold-3.8.tar.gz
+	tar -xzvf unafold-3.8.tar.gz
 	mv unafold-3.8 unafold
     fi
     pushd unafold
@@ -33,38 +47,45 @@ fi
 # Download data
 if [[ ! -e data/refGene.pkl ]]; then
     prompt "\nDownloading sympri $version databases..."
-    if [[ ! -e sympri_${version}_data.tar.gz ]]; then
-	wget http://compbio.cs.toronto.edu/sympri/sympri_${version}_data.tar.gz
+    datafile=sympri-${version}_data.tar.gz
+    if [[ ! -e $datafile ]]; then
+	#wget --progress "$SYMPRI_DATA_URL"
+	ln -s /tmp/buske/sympri/dist/$datafile
     fi
     if [[ ! -d data ]]; then
-	tar -xzf sympri_${version}_data.tar.gz
+	tar -xzvf $datafile
     fi
 fi
 
 
-function milfail {
+function milkfail {
     cat <<EOF
 There seems to have been a problem installing the custom version of the 
-Python package milk. If you have a .pydistutils.cfg file, this could be
-the cause. Try moving that file out of the way, rerunning this script,
-and then moving it back.
+Python package milk. If you have a custom distutils configuration, this
+could be the cause. Try moving that file out of the way, rerunning this 
+script, and then moving it back.
 
 Sympri $version installation failed.
 EOF
     exit 1
 }
 
+
 # Install modified version of milk
 prefix="$(pwd)"
-libdir="$prefix/lib/python"
-if [[ $(python -c "import milk; print milk.__version__") != sympri-$version ]]; then
+if [[ $(python -c "import milk; print milk.__version__" 2> /dev/null) != sympri-$version ]]; then
     prompt "\nConfiguring modified milk Python package..."
-    mkdir -pv "$libdir"
     pushd tools/milk
-    export PYTHONPATH="$libdir:$PYTHONPATH"
-    trap milkfail TERM EXIT
-    python setup.py install --home="$prefix"
-    trap - TERM EXIT
+    if [[ -e "$HOME/.pydistutils.cfg" ]]; then
+	python setup.py install
+    else
+	libdir="$prefix/lib/python$pyversion"
+	mkdir -pv "$libdir"
+	export PYTHONPATH="$libdir:${PYTHONPATH:-}"
+	trap milkfail TERM EXIT
+	python setup.py install --install-lib="$libdir"
+	trap - TERM EXIT
+    fi
     popd
 fi
 

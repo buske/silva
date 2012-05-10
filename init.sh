@@ -20,7 +20,8 @@ export SYMPRI_AF_THRESH=0.05
 
 # Python and Java library paths
 export CLASSPATH="${SYMPRI_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"
-export PYTHONPATH="${SYMPRI_PATH}/lib/python:${PYTHONPATH:-}"
+pyversion=$(python -c "import sys; print sys.version[:3]")
+export PYTHONPATH="${SYMPRI_PATH}/lib/python$pyversion:${PYTHONPATH:-}"
 
 # UNAfold paths
 export UNAFOLD_BIN="${UNAFOLD_BIN:-${SYMPRI_PATH}/tools/unafold/src/hybrid-ss-min}"
@@ -32,7 +33,7 @@ export SYMPRI_CONTROL=$SYMPRI_PATH/data/control/NA10851
 
 version="$(cat VERSION)"
 
-function config_message {
+function init_message {
     cat >&2 <<EOF
 SYMPRI $version
 ------------

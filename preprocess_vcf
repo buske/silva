@@ -3,7 +3,7 @@
 set -eu
 set -o pipefail
 
-source $(dirname $0)/config.sh
+source $(dirname $0)/init.sh
 
 synonymous="${SYMPRI_PATH}/src/input/synonymous.py -O ${SYMPRI_PATH}/data/refGene.pkl*"
 
@@ -50,7 +50,7 @@ function skip_if_exists {
     test ! -e "$f"
 }
 
-config_message
+init_message
 
 mkdir -pv $outdir
 # Filter to just synonymous variants
