@@ -9,5 +9,5 @@
 - tools/unafold
 - data/
 - bin/
-- build/
-- dist/
+- build
+- dist
