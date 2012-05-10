@@ -3,15 +3,18 @@
 set -eu
 set -o pipefail
 
+version="$(cat VERSION)"
 python_version=$(python -c "import sys; print sys.version[:3]")
 
 function prompt {
     read -p "(Press ENTER to continue, Ctrl-C to exit) "
 }
 
+echo "Installing Synorder $version dependencies..." >&2
+
 # Download unafold
 if [[ ! -e tools/unafold/src/hybrid-ss-min ]]; then
-    echo "Downloading UNAFold 3.8..." >&2
+    echo -e "\nDownloading UNAFold 3.8..." >&2
     prompt
     pushd tools
     if [[ ! -e unafold-3.8.tar.gz ]]; then
@@ -29,8 +32,8 @@ fi
 
 
 # Download data
-if [[ ! -e data/refGene.pkl.gz ]]; then
-    echo "Downloading synorder $version databases..." >&2
+if [[ ! -e data/refGene.pkl ]]; then
+    echo -e "\nDownloading synorder $version databases..." >&2
     prompt
     if [[ ! -e synorder_${version}_data.tar.gz ]]; then
 	wget http://compbio.cs.toronto.edu/synorder/synorder_${version}_data.tar.gz
@@ -45,7 +48,7 @@ prefix="$(pwd)"
 libdir="$prefix/lib/python${python_version}"
 eggdir="$(ls -1d "$libdir/"milk-*.egg)"
 if [[ ! -d $eggdir ]]; then
-    echo "Configuring modified milk Python package..." >&2
+    echo -e "\nConfiguring modified milk Python package..." >&2
     prompt
     mkdir -pv "$libdir"
     pushd tools/milk
@@ -53,3 +56,5 @@ if [[ ! -d $eggdir ]]; then
     python setup.py install --prefix="$prefix"
     popd
 fi
+
+echo -e "\nSynorder $version successfully installed." >&2

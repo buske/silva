@@ -54,6 +54,6 @@ else
 fi
 
 in=$out
-$SYNORDER_PATH/control/split_data.py $in $outbase
+$SYNORDER_PATH/src/control/split_data.py $in $outbase
 
 echo "$0: SUCCESS" >&2

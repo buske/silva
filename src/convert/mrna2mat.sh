@@ -74,7 +74,7 @@ n_cols=$(expr $n_cols + 1); cut -f 1,2 $mrna \
     | run 0_gerp $featuredir/other ./gerp.py dummy $datadir/gerp.refGene.pkl* &
 wait
 
-n_cols=$(expr $n_cols + 1); run maxent  $featuredir/maxent  ./maxent.py    -q $in &
+n_cols=$(expr $n_cols + 1); run maxent  $featuredir/maxent  ./maxent.py  -q $in &
 n_cols=$(expr $n_cols + 1); run unafold-50 $featuredir/unafold ./unafold.py -d 50 -q $in &
 n_cols=$(expr $n_cols + 1); run unafold-100 $featuredir/unafold ./unafold.py -d 100 -q $in &
 
@@ -89,7 +89,7 @@ if [[ $found_n_cols -ne $n_cols ]]; then
 fi
 
 paste $out.*.col \
-    | sed -e 's/na/0/g' \
+    | perl -pe 's/\bna\b/0/g' \
     > $temp.mat \
     && mv $temp.mat ${out}.mat
 

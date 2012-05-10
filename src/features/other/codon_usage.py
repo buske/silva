@@ -17,6 +17,8 @@ from __future__ import division, with_statement
 import os
 import sys
 
+assert os.getenv('SYNORDER_PATH') is not None, \
+       "Error: SYNORDER_PATH is unset."
 sys.path.insert(0, os.path.expandvars('$SYNORDER_PATH/src/share'))
 from synorder import maybe_gzip_open, print_args
 

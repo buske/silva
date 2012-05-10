@@ -15,12 +15,17 @@ import re
 
 from subprocess import Popen, PIPE
 
+assert os.getenv('SYNORDER_PATH') is not None, \
+       "Error: SYNORDER_PATH is unset."
 sys.path.insert(0, os.path.expandvars("$SYNORDER_PATH/src/share"))
 from synorder import maybe_gzip_open, print_args
 
-
-HYBRID_SS_MIN = os.path.expandvars("$SYNORDER_PATH/tools/unafold/src/hybrid-ss-min")
-UNAFOLDDAT = os.path.expandvars("$SYNORDER_PATH/tools/unafold/data")
+assert os.getenv('UNAFOLD_BIN') is not None, \
+       "Error: UNAFOLD_BIN environment variable must be set"
+assert os.getenv('UNAFOLDDAT') is not None, \
+       "Error: UNAFOLDDAT environment variable must be set"
+HYBRID_SS_MIN = os.path.expandvars("$UNAFOLD_BIN")
+UNAFOLDDAT = os.path.expandvars("$UNAFOLDDAT")
 
 def score_sequence(*seqs):
     """Scores one or more sequences"""

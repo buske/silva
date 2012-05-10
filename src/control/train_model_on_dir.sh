@@ -5,8 +5,8 @@ set -o pipefail
 
 
 # ========= CUSTOMIZABLE PARAMETERS ========= #
-ARFF2MAT=$SYNORDER_PATH/convert/arff2mat.sh
-MODELROOT=$SYNORDER_PATH/models
+ARFF2MAT=$SYNORDER_PATH/src/convert/arff2mat.sh
+MODELROOT=$SYNORDER_PATH/src/models
 n_threads=8
 # =========================================== #
 

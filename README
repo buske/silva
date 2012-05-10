@@ -1,36 +1,109 @@
-========
-SYNORDER
+=====================
+SYNORDER 1.0.0 README
+=====================
+
+Synorder is a tool for the automated harmfulness prediction of SYNONYMOUS single-nucleotide variants. Given variants in a VCF file, Synorder will order the rare synonymous variants according to their predicted harmfulness.
+
+If you use this tool, please cite:
+
+    Buske OJ, Manickaraj A, Mital S, Brudno M. (2012)
+    Identification of deleterious synonymous variants in human genomes.
+    Submitted.
+
+Overview
 ========
 
-XXX: Add citation
+System Requirements
+-------------------
+- Linux x86
+- Python 2.6 or 2.7 in your PATH
+- Perl in your PATH (for maxentscan)
+- Java in your PATH (for weka)
 
-Requirements
+Dependencies
+------------
+Synorder requires several tools and databases to run. Most of these were included with this release, but the 'setup.sh' script will download and configure the rest. If you have 
+
+- included: milk 0.4.2 Python package, with slight modification, available from:
+  http://pypi.python.org/pypi/milk/
+- included: weka 3.6.6 machine learning toolkit, available from:
+  http://www.cs.waikato.ac.nz/ml/weka/
+- included: maxentscan, available from:
+  http://genes.mit.edu/burgelab/maxent/download/
+- setup.sh: UNAfold, available from:
+  http://mfold.rna.albany.edu/?q=DINAMelt/software
+- setup.sh: Synorder databases, available from:
+  http://compbio.cs.toronto.edu/synorder/synorder_<VERSION>_data.tar.gz
+
+* Note: if you have UNAfold or the Synorder databases already installed, you can point Synorder to them by changing the appropriate lines in the 'init.sh' file.
+
+Input File Format
+-----------------
+Single-nucleotide variants should be given to Synorder in VCF or a VCF-like file format. There should be one line per variant, with tab-delimited fields:
+
+1. chrom - chromosome (any 'chr' prefix will be trimmed)
+2. pos - the position of the variant, 1-indexed
+3. id - the id field is ignored, but is here to provide compatibility with the VCF format.
+4. ref - the reference nucleotide
+5. alt - the alternate nucleotide (if multiple are present, comma-separated, only the first will be used)
+... Additional columns can be present and are ignored
+
+Output Format
+-------------
+Synorder will print the synonymous variants to stdout, ordered by score, with the variants most likely to be harmful listed first. Variants are first filtered down to just rare and novel synonymous variants. The variants are then annotated with a number of features and several pre-trained models are used to rank the variants.
+
+1. Score (the mean rank)
+2. Range of ranks assigned from the various models (min, median, max)
+3. Potentially-important features. More specifically, these are features for which this variants had a value at least 1.5 standard deviations away from the mean in the control data. (TODO: implement and describe this)
+... Fields from the input file
+
+
+Installation
 ============
 
-1. Linux x86_64 
+Synorder is packaged with most of its dependencies. The remaining few can be downloaded and configured by running the 'setup.sh' script from the root directory of this package (with <VERSION> replaced by the appropriate version number):
 
-2. Python 2.6 or 2.7
+1. Untar and unzip the package tarball:
 
-3. Perl for maxentscan
+    $ tar -xzf synorder_<VERSION>.tar.gz
 
-4. Java for Weka
+2. Move into the package's root directory and run the setup script:
 
-Includes
-========
-milk 0.4.2, with slight modification
-weka 3.6.6
-maxendscan
+    $ cd synorder_<VERSION>
+    $ bash setup.sh
 
-Downloads
-=========
-Unafold
+* Synorder uses a number of environment variables to communcate important paths and parameters, such as what directory to use for temporary files, what allele frequency threshold to use, and where UNAfold is installed. Synorder has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'init.sh' script.
+
 
 Running Synorder
 ================
 
+Synorder should be run from the root directory of the package. If you insist on running it from elsewhere, you must set SYNORDER_PATH appropriately in your environment. 
+
+In addition to running Synorder on your local machine, we provide a convenience script to dispatch multiple Synorder runs across an SGE cluster. Synorder uses TMPDIR for all temporary files. If TMPDIR is not set, it will use the current directory. 
+
 Local machine
 -------------
+To run Synorder on your local machine, you should have already downloaded dependencies with the 'setup.sh' script. You can then run Synorder on your file of variants, <VCF>, (see Input Format) from the root directory of this package:
+
+1. Filter an annotate the variants in the VCF file:
+
+    $ ./preprocess_vcf <VCF> <OUTDIR>
+
+2. Run the trained models on the annotated variants and print them in order of decreasing predicted harmfulness:
+
+    $ ./run <OUTDIR>
+
+Synorder should handle errors and early termination gracefully, so if something goes wrong, you can re-run the same command and it will pick up where it left off.
 
 SGE Cluster
 -----------
+In case you have a large number of VCF files and an SGE cluster, we have provided a dispatch script for your convenience, 'sge/dispatch.sh'. Because SGE configurations vary widely, you should first open the file and take a look at the three SGE configuration variables at the top of the script. Edit them as you see fit. You can then dispatch SGE jobs for a number of VCF files from the root directory of the package with:
 
+    $ ./sge/dispatch.sh <OUTDIR> <VCF1> <VCF2> ...
+
+
+Support
+=======
+
+Send questions, comments, and difficulties to: synorder@cs.toronto.edu

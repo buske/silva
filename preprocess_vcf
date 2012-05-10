@@ -5,6 +5,7 @@ set -o pipefail
 
 source $(dirname $0)/init.sh
 
+export SYNORDER_PATH
 synonymous="${SYNORDER_PATH}/src/input/synonymous.py -O ${SYNORDER_PATH}/data/refGene.pkl*"
 
 controldir=$SYNORDER_PATH/data/control
@@ -71,7 +72,7 @@ skip_if_exists $outdir/$out \
     && cut -f 1,2,5 $outdir/$base.syn \
        | $src/input/1000gp.py dummy $data/1000gp.refGene.pkl* \
        | paste - $outdir/$base.syn \
-       | awk -F"\t" '$1 == "." || $1 < 0.05;' | cut -f 2- > $TMPDIR/$out \
+       | awk -F"\t" '$1 == "." || $1 < '"$SYNORDER_AF_THRESH"';' | cut -f 2- > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
 test -e $outdir/$out
 
