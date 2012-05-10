@@ -53,14 +53,14 @@ if [[ $new_version != $(cat VERSION) ]]; then
     echo "Error: version mismatch" >&2
     exit 1
 fi
-sed -e "s/<VERSION>/$new_version/g" -i"" README
+sed -e "s/<VERSION>/$new_version/g" -i"" README tools/milk/milk/milk_version.py
 popd
 
 
 src=${distbase}.tar.gz
 if [[ ! -e $src ]]; then
     prompt "\nTarballing dist files: $builddir to $src"
-    tar -hczf -C build $src $builddir
+    tar -C build -hczf $src $prefix
 fi
 
 

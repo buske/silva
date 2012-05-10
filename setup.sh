@@ -4,14 +4,13 @@ set -eu
 set -o pipefail
 
 version="$(cat VERSION)"
-python_version=$(python -c "import sys; print sys.version[:3]")
 
 function prompt {
     echo -e "$@" >&2
     read -p "(Press ENTER to continue, Ctrl-C to exit) "
 }
 
-echo "Installing Synorder $version dependencies..." >&2
+echo "Installing Sympri $version dependencies..." >&2
 
 # Download unafold
 if [[ ! -e tools/unafold/src/hybrid-ss-min ]]; then
@@ -33,26 +32,40 @@ fi
 
 # Download data
 if [[ ! -e data/refGene.pkl ]]; then
-    prompt "\nDownloading synorder $version databases..."
-    if [[ ! -e synorder_${version}_data.tar.gz ]]; then
-	wget http://compbio.cs.toronto.edu/synorder/synorder_${version}_data.tar.gz
+    prompt "\nDownloading sympri $version databases..."
+    if [[ ! -e sympri_${version}_data.tar.gz ]]; then
+	wget http://compbio.cs.toronto.edu/sympri/sympri_${version}_data.tar.gz
     fi
     if [[ ! -d data ]]; then
-	tar -xzf synorder_${version}_data.tar.gz
+	tar -xzf sympri_${version}_data.tar.gz
     fi
 fi
 
+
+function milfail {
+    cat <<EOF
+There seems to have been a problem installing the custom version of the 
+Python package milk. If you have a .pydistutils.cfg file, this could be
+the cause. Try moving that file out of the way, rerunning this script,
+and then moving it back.
+
+Sympri $version installation failed.
+EOF
+    exit 1
+}
+
 # Install modified version of milk
 prefix="$(pwd)"
-libdir="$prefix/lib/python${python_version}"
-eggdir="$(ls -1d "$libdir/"milk-*.egg 2> /dev/null || true)"
-if [[ ! -d $eggdir ]]; then
+libdir="$prefix/lib/python"
+if [[ $(python -c "import milk; print milk.__version__") != sympri-$version ]]; then
     prompt "\nConfiguring modified milk Python package..."
     mkdir -pv "$libdir"
     pushd tools/milk
     export PYTHONPATH="$libdir:$PYTHONPATH"
-    python setup.py install --prefix="$prefix"
+    trap milkfail TERM EXIT
+    python setup.py install --home="$prefix"
+    trap - TERM EXIT
     popd
 fi
 
-echo -e "\nSynorder $version successfully installed." >&2
+echo -e "\nSympri $version successfully installed." >&2
