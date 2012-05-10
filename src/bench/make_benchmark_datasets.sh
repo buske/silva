@@ -33,14 +33,14 @@ if [[ -e $datasetdir/$sample.merged.arff ]]; then
     echo "Found: $datasetdir/$sample.merged.arff" >&2
 else
     echo "Creating merged, standardized data file: $datasetdir/$sample.merged.arff..." >&2
-    $SYNORDER_PATH/util/standardize.sh true.arff $samplefile > $datasetdir/$sample.merged.arff
+    $SYMPRI_PATH/util/standardize.sh true.arff $samplefile > $datasetdir/$sample.merged.arff
 fi
 
 echo "Creating 50/50 stratified train/test datasets: $datasetdir/${sample}_5050/ALL..." >&2
-$SYNORDER_PATH/bench/split_data.py -N 25 $datasetdir/$sample.merged.arff $datasetdir/${sample}_5050/ALL
+$SYMPRI_PATH/bench/split_data.py -N 25 $datasetdir/$sample.merged.arff $datasetdir/${sample}_5050/ALL
 
 echo "Creating pseudo-LOO train/test datasets: $datasetdir/${sample}_LOO/ALL..." >&2
-$SYNORDER_PATH/bench/split_data.py --infection --true-groups=true.groups \
+$SYMPRI_PATH/bench/split_data.py --infection --true-groups=true.groups \
     $datasetdir/$sample.merged.arff $datasetdir/${sample}_LOO/ALL
 
 function make_subsets {
@@ -53,8 +53,8 @@ function make_subsets {
     for train in $indir/*.train.arff; do 
 	train=$(basename $train)
 	test=$(basename $train .train.arff).test.arff
-	$SYNORDER_PATH/util/subset_attributes.sh $indir/$train $indir/$test $outdir/$train $outdir/$test
-	#$SYNORDER_PATH/util/subset_attributes2.sh $indir/$train $indir/$test $outdir2/$train $outdir2/$test
+	$SYMPRI_PATH/util/subset_attributes.sh $indir/$train $indir/$test $outdir/$train $outdir/$test
+	#$SYMPRI_PATH/util/subset_attributes2.sh $indir/$train $indir/$test $outdir2/$train $outdir2/$test
     done
 }
 
@@ -66,5 +66,5 @@ make_subsets $datasetdir/${sample}_LOO/ALL
 for dir in $datasetdir/${sample}_LOO/ALL $datasetdir/${sample}_5050/ALL; do
     rankdir=$dir/scored
     echo "Running models to prioritize variants: $rankdir..." >&2
-    $SYNORDER_PATH/models/run.sh $dir $rankdir
+    $SYMPRI_PATH/models/run.sh $dir $rankdir
 done

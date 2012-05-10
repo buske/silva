@@ -1,8 +1,8 @@
 =====================
-SYNORDER 1.0.0 README
+SYMPRI 1.0.0 README
 =====================
 
-Synorder is a tool for the automated harmfulness prediction of SYNONYMOUS single-nucleotide variants. Given variants in a VCF file, Synorder will order the rare synonymous variants according to their predicted harmfulness.
+Sympri is a tool for the automated harmfulness prediction of SYNONYMOUS single-nucleotide variants. Given variants in a VCF file, Sympri will order the rare synonymous variants according to their predicted harmfulness.
 
 If you use this tool, please cite:
 
@@ -22,7 +22,7 @@ System Requirements
 
 Dependencies
 ------------
-Synorder requires several tools and databases to run. Most of these were included with this release, but the 'setup.sh' script will download and configure the rest. If you have 
+Sympri requires several tools and databases to run. Most of these were included with this release, but the 'setup.sh' script will download and configure the rest. If you have 
 
 - included: milk 0.4.2 Python package, with slight modification, available from:
   http://pypi.python.org/pypi/milk/
@@ -32,14 +32,14 @@ Synorder requires several tools and databases to run. Most of these were include
   http://genes.mit.edu/burgelab/maxent/download/
 - setup.sh: UNAfold, available from:
   http://mfold.rna.albany.edu/?q=DINAMelt/software
-- setup.sh: Synorder databases, available from:
-  http://compbio.cs.toronto.edu/synorder/synorder_<VERSION>_data.tar.gz
+- setup.sh: Sympri databases, available from:
+  http://compbio.cs.toronto.edu/sympri/sympri_<VERSION>_data.tar.gz
 
-* Note: if you have UNAfold or the Synorder databases already installed, you can point Synorder to them by changing the appropriate lines in the 'init.sh' file.
+* Note: if you have UNAfold or the Sympri databases already installed, you can point Sympri to them by changing the appropriate lines in the 'init.sh' file.
 
 Input File Format
 -----------------
-Single-nucleotide variants should be given to Synorder in VCF or a VCF-like file format. There should be one line per variant, with tab-delimited fields:
+Single-nucleotide variants should be given to Sympri in VCF or a VCF-like file format. There should be one line per variant, with tab-delimited fields:
 
 1. chrom - chromosome (any 'chr' prefix will be trimmed)
 2. pos - the position of the variant, 1-indexed
@@ -50,7 +50,7 @@ Single-nucleotide variants should be given to Synorder in VCF or a VCF-like file
 
 Output Format
 -------------
-Synorder will print the synonymous variants to stdout, ordered by score, with the variants most likely to be harmful listed first. Variants are first filtered down to just rare and novel synonymous variants. The variants are then annotated with a number of features and several pre-trained models are used to rank the variants.
+Sympri will print the synonymous variants to stdout, ordered by score, with the variants most likely to be harmful listed first. Variants are first filtered down to just rare and novel synonymous variants. The variants are then annotated with a number of features and several pre-trained models are used to rank the variants.
 
 1. Score (the mean rank)
 2. Range of ranks assigned from the various models (min, median, max)
@@ -61,30 +61,30 @@ Synorder will print the synonymous variants to stdout, ordered by score, with th
 Installation
 ============
 
-Synorder is packaged with most of its dependencies. The remaining few can be downloaded and configured by running the 'setup.sh' script from the root directory of this package (with <VERSION> replaced by the appropriate version number):
+Sympri is packaged with most of its dependencies. The remaining few can be downloaded and configured by running the 'setup.sh' script from the root directory of this package (with <VERSION> replaced by the appropriate version number):
 
 1. Untar and unzip the package tarball:
 
-    $ tar -xzf synorder_<VERSION>.tar.gz
+    $ tar -xzf sympri_<VERSION>.tar.gz
 
 2. Move into the package's root directory and run the setup script:
 
-    $ cd synorder_<VERSION>
+    $ cd sympri_<VERSION>
     $ bash setup.sh
 
-* Synorder uses a number of environment variables to communcate important paths and parameters, such as what directory to use for temporary files, what allele frequency threshold to use, and where UNAfold is installed. Synorder has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'init.sh' script.
+* Sympri uses a number of environment variables to communcate important paths and parameters, such as what directory to use for temporary files, what allele frequency threshold to use, and where UNAfold is installed. Sympri has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'init.sh' script.
 
 
-Running Synorder
+Running Sympri
 ================
 
-Synorder should be run from the root directory of the package. If you insist on running it from elsewhere, you must set SYNORDER_PATH appropriately in your environment. 
+Sympri should be run from the root directory of the package. If you insist on running it from elsewhere, you must set SYMPRI_PATH appropriately in your environment. 
 
-In addition to running Synorder on your local machine, we provide a convenience script to dispatch multiple Synorder runs across an SGE cluster. Synorder uses TMPDIR for all temporary files. If TMPDIR is not set, it will use the current directory. 
+In addition to running Sympri on your local machine, we provide a convenience script to dispatch multiple Sympri runs across an SGE cluster. Sympri uses TMPDIR for all temporary files. If TMPDIR is not set, it will use the current directory. 
 
 Local machine
 -------------
-To run Synorder on your local machine, you should have already downloaded dependencies with the 'setup.sh' script. You can then run Synorder on your file of variants, <VCF>, (see Input Format) from the root directory of this package:
+To run Sympri on your local machine, you should have already downloaded dependencies with the 'setup.sh' script. You can then run Sympri on your file of variants, <VCF>, (see Input Format) from the root directory of this package:
 
 1. Filter an annotate the variants in the VCF file:
 
@@ -94,7 +94,7 @@ To run Synorder on your local machine, you should have already downloaded depend
 
     $ ./run <OUTDIR>
 
-Synorder should handle errors and early termination gracefully, so if something goes wrong, you can re-run the same command and it will pick up where it left off.
+Sympri should handle errors and early termination gracefully, so if something goes wrong, you can re-run the same command and it will pick up where it left off.
 
 SGE Cluster
 -----------
@@ -106,4 +106,4 @@ In case you have a large number of VCF files and an SGE cluster, we have provide
 Support
 =======
 
-Send questions, comments, and difficulties to: synorder@cs.toronto.edu
+Send questions, comments, and difficulties to: sympri@cs.toronto.edu

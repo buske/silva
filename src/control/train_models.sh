@@ -34,10 +34,10 @@ logdir=$outdir/log
 mkdir -pv $logdir
 for model in "${models[@]}"; do 
     if [[ $model == "nnet" || $model == forest* ]]; then
-	$SYNORDER_PATH/src/control/train_model_on_dir.sh $model $datadir $outdir/$model $logdir
+	$SYMPRI_PATH/src/control/train_model_on_dir.sh $model $datadir $outdir/$model $logdir
     else
 	qsub -cwd -b y -V -e $logdir -o $logdir \
 	    -l h_vmem=14G -N $model -q lunchQ \
-	    "bash -x $SYNORDER_PATH/src/control/train_model_on_dir.sh $model $datadir $outdir/$model"
+	    "bash -x $SYMPRI_PATH/src/control/train_model_on_dir.sh $model $datadir $outdir/$model"
     fi
 done

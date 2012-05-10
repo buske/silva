@@ -20,8 +20,8 @@ import cPickle
 from numpy import loadtxt, cov, dot
 from numpy.linalg import inv
 
-sys.path.insert(0, os.path.expandvars("$SYNORDER_PATH/src/share"))
-from synorder import maybe_gzip_open
+sys.path.insert(0, os.path.expandvars("$SYMPRI_PATH/src/share"))
+from sympri import maybe_gzip_open
 
 
 __version__ = 4

@@ -17,10 +17,10 @@ from __future__ import division, with_statement
 import os
 import sys
 
-assert os.getenv('SYNORDER_PATH') is not None, \
-       "Error: SYNORDER_PATH is unset."
-sys.path.insert(0, os.path.expandvars('$SYNORDER_PATH/src/share'))
-from synorder import maybe_gzip_open, print_args
+assert os.getenv('SYMPRI_PATH') is not None, \
+       "Error: SYMPRI_PATH is unset."
+sys.path.insert(0, os.path.expandvars('$SYMPRI_PATH/src/share'))
+from sympri import maybe_gzip_open, print_args
 
 COMPLEMENT = dict(zip('ACGT', 'TGCA'))
 CODON_FREQ = {

@@ -3,8 +3,8 @@
 set -eu
 set -o pipefail
 
-featuredir=$SYNORDER_PATH/src/features
-datadir=$SYNORDER_PATH/data
+featuredir=$SYMPRI_PATH/src/features
+datadir=$SYMPRI_PATH/data
 MRNA_COL=11
 CODON_COLS="4-5,8-10"
 

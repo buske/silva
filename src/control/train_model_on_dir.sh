@@ -5,8 +5,8 @@ set -o pipefail
 
 
 # ========= CUSTOMIZABLE PARAMETERS ========= #
-ARFF2MAT=$SYNORDER_PATH/src/convert/arff2mat.sh
-MODELROOT=$SYNORDER_PATH/src/models
+ARFF2MAT=$SYMPRI_PATH/src/convert/arff2mat.sh
+MODELROOT=$SYMPRI_PATH/src/models
 n_threads=8
 # =========================================== #
 
@@ -62,7 +62,7 @@ function train_one {
 	    "./train $modelfile $trainfile"
     else
 	echo "$id" >&2
-	$SYNORDER_PATH/train $modelfile $trainfile
+	$SYMPRI_PATH/train $modelfile $trainfile
 	i=$(expr $i + 1)
     fi
     popd > /dev/null
