@@ -2,6 +2,8 @@
 SYMPRI <VERSION> README
 ===================
 
+Sympri: Synonymous mutation prioritization by predicted harmfulness.
+
 Sympri is a tool for the automated harmfulness prediction of SYNONYMOUS single-nucleotide variants. Given variants in a VCF file, Sympri will order the rare synonymous variants according to their predicted harmfulness.
 
 If you use this tool, please cite:
@@ -16,6 +18,7 @@ Overview
 System Requirements
 -------------------
 - Linux x86
+- 6GB of RAM
 - Python 2.6 or 2.7 in your PATH
 - Perl in your PATH (for maxentscan)
 - Java in your PATH (for weka)
