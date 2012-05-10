@@ -15,17 +15,18 @@ If you use this tool, please cite:
 Overview
 ========
 
-System Requirements
--------------------
+Prerequisites
+-------------
 - Linux x86
 - 6GB of RAM
 - Python 2.6 or 2.7 in your PATH
+-- The 'numpy' Python package
 - Perl in your PATH (for maxentscan)
 - Java in your PATH (for weka)
 
 Dependencies
 ------------
-Sympri requires several tools and databases to run. Most of these were included with this release, but the 'setup.sh' script will download and configure the rest. If you have 
+Sympri requires several tools and databases to run. Most of these were included with this release, but the 'setup.sh' script will download and configure the rest.
 
 - included: milk 0.4.2 Python package, with slight modification, available from:
   http://pypi.python.org/pypi/milk/
@@ -57,8 +58,10 @@ Sympri will print the synonymous variants to stdout, ordered by score, with the 
 
 1. Score (the mean rank)
 2. Range of ranks assigned from the various models (min, median, max)
-3. Potentially-important features. More specifically, these are features for which this variants had a value at least 1.5 standard deviations away from the mean in the control data. (TODO: implement and describe this)
+3. Potentially-important features.*
 ... Fields from the input file
+
+* More specifically, these are features for which this variants had a value at least 3 standard deviations away from the mean in the control data. This field is intended as a helpful guess at the features that might have been important in classifying that variant as harmful. In reality, it may be nonlinear interactions between variables that result in a high score, but this is not captured in this field. A list of all the features and their descriptions is available in the paper.
 
 
 Installation
