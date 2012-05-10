@@ -7,8 +7,7 @@ source $(dirname $0)/config.sh
 
 synonymous="${SYMPRI_PATH}/src/input/synonymous.py -O ${SYMPRI_PATH}/data/refGene.pkl*"
 
-controldir=$SYMPRI_PATH/data/control
-control=$controldir/NA10851.merged.arff
+control=$SYMPRI_CONTROL.merged.arff
 src=$SYMPRI_PATH/src
 data=$SYMPRI_PATH/data
 
@@ -25,7 +24,6 @@ script can be stopped and resumed.
 
 Creates OUTDIR if it does not exit.
 Will use TMPDIR='$TMPDIR' as needed.
-Control data found in: $controldir
 EOF
     exit 1
 }
@@ -52,6 +50,7 @@ function skip_if_exists {
     test ! -e "$f"
 }
 
+config_message
 
 mkdir -pv $outdir
 # Filter to just synonymous variants

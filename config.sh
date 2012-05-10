@@ -25,9 +25,23 @@ export PYTHONPATH="${SYMPRI_PATH}/lib/python:${PYTHONPATH:-}"
 # UNAfold paths
 export UNAFOLD_BIN="${UNAFOLD_BIN:-${SYMPRI_PATH}/tools/unafold/src/hybrid-ss-min}"
 export UNAFOLDDAT="${UNAFOLDDAT:-${SYMPRI_PATH}/tools/unafold/data}"
+
+# Control dataset to use
+export SYMPRI_CONTROL=$SYMPRI_PATH/data/control/NA10851
 #==================================
 
 version="$(cat VERSION)"
+
+function config_message {
+    cat >&2 <<EOF
+SYMPRI $version
+------------
+
+TMPDIR:           '$TMPDIR'
+SYMPRI_AF_THRESH: '$SYMPRI_AF_THRESH'
+SYMPRI_CONTROL:   '$SYMPRI_CONTROL'
+EOF
+}
 
 if [[ ! -e $UNAFOLD_BIN ]]; then
     echo >&2 <<EOF 

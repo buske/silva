@@ -91,6 +91,6 @@ fi
 paste $outbase.*.col \
     | perl -pe 's/\bna\b/0/g' \
     > $temp.mat \
-    && mv $temp.mat ${out}.mat
+    && mv $temp.mat ${outbase}.mat
 
 trap - INT TERM EXIT

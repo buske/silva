@@ -7,7 +7,7 @@ source $(dirname $0)/config.sh
 
 modeldir=$SYMPRI_PATH/src/models/forest
 traineddir=$SYMPRI_PATH/data/control/models
-controlstats=$SYMPRI_PATH/data/control/NA10851.stats
+controlstats=$SYMPRI_CONTROL.stats
 
 function usage {
     cat <<EOF
@@ -27,9 +27,9 @@ if [[ $# -ne 1 ]]; then
     usage
 fi
 
-echo "Command: $0 $@" >&2
+config_message
 
-outdir=$(readlink -e $1)
+outdir="$(cd -P "$1"; pwd)"
 
 if [[ ! -e $modeldir/test ]]; then
     echo "Could not find test script: $modeldir/test" >&2
