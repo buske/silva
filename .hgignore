@@ -6,3 +6,5 @@
 ^data/
 ^lib/
 ^control/
+^build/
+^dist/
