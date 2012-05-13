@@ -3,7 +3,7 @@
 set -eu
 set -o pipefail
 
-src=$SYMPRI_PATH/tools/svmmap
+src=$SILVA_PATH/tools/svmmap
 
 model=$1
 test=$2

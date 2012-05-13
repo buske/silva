@@ -19,12 +19,12 @@ from datetime import datetime
 from itertools import chain, imap
 from subprocess import Popen, PIPE
 
-assert os.getenv('SYMPRI_PATH') is not None, \
-           "Error: SYMPRI_PATH is unset."
-sys.path.insert(0, os.path.expandvars("$SYMPRI_PATH/src/share"))
-from sympri import maybe_gzip_open, print_args
+assert os.getenv('SILVA_PATH') is not None, \
+           "Error: SILVA_PATH is unset."
+sys.path.insert(0, os.path.expandvars("$SILVA_PATH/src/share"))
+from silva import maybe_gzip_open, print_args
 
-MAXENT_PATH = os.path.expandvars('$SYMPRI_PATH/tools/maxent')
+MAXENT_PATH = os.path.expandvars('$SILVA_PATH/tools/maxent')
 GOOD_SCORE = 2
 
 class Seq(object):

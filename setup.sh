@@ -5,7 +5,7 @@ set -o pipefail
 
 version="$(cat VERSION)"
 UNAFOLD_URL="http://mfold.rna.albany.edu/cgi-bin/UNAFold-download.cgi?unafold-3.8.tar.gz"
-SYMPRI_DATA_URL="http://compbio.cs.toronto.edu/sympri/sympri-${version}_data.tar.gz"
+SILVA_DATA_URL="http://compbio.cs.toronto.edu/silva/release/silva-${version}_data.tar.gz"
 
 # Check python verison
 pyversion=$(python -c "import sys; print sys.version[:3]")
@@ -24,7 +24,7 @@ function prompt {
     read -p "(Press ENTER to continue, Ctrl-C to exit) "
 }
 
-echo "Installing Sympri $version dependencies..." >&2
+echo "Installing Silva $version dependencies..." >&2
 
 # Download unafold
 if [[ ! -e tools/unafold/src/hybrid-ss-min ]]; then
@@ -46,14 +46,20 @@ fi
 
 # Download data
 if [[ ! -e data/refGene.pkl ]]; then
-    prompt "\nDownloading sympri $version databases..."
-    datafile=sympri-${version}_data.tar.gz
-    if [[ ! -e $datafile ]]; then
-	#wget --progress "$SYMPRI_DATA_URL"
-	ln -s /tmp/buske/sympri/dist/$datafile
+    prompt "\nDownloading required Silva $version databases...\nWARNING: these databases are rather large (~700MB), so this might take a while..."
+    datafile=silva-${version}_data.tar.gz
+
+    if [[ ! -e $datafile && ! -e ../$datafile]]; then
+	wget --progress "$SILVA_DATA_URL"
     fi
     if [[ ! -d data ]]; then
-	tar -xzvf $datafile
+	if [[ -e $datafile ]]; then
+	    tar -xzvf $datafile
+	elif [[ -e ../$datafile ]]; then
+	    tar -xzvf ../$datafile
+	else
+	    exit 1
+	fi
     fi
 fi
 
@@ -65,7 +71,7 @@ Python package milk. If you have a custom distutils configuration, this
 could be the cause. Try moving that file out of the way, rerunning this 
 script, and then moving it back.
 
-Sympri $version installation failed.
+Silva $version installation failed.
 EOF
     exit 1
 }
@@ -73,7 +79,7 @@ EOF
 
 # Install modified version of milk
 prefix="$(pwd)"
-if [[ $(python -c "import milk; print milk.__version__" 2> /dev/null) != sympri-$version ]]; then
+if [[ $(python -c "import milk; print milk.__version__" 2> /dev/null) != silva-$version ]]; then
     prompt "\nConfiguring modified milk Python package..."
     pushd tools/milk
     if [[ -e "$HOME/.pydistutils.cfg" ]]; then
@@ -90,4 +96,4 @@ if [[ $(python -c "import milk; print milk.__version__" 2> /dev/null) != sympri-
     popd
 fi
 
-echo -e "\nSympri $version successfully installed." >&2
+echo -e "\nSilva $version successfully installed." >&2

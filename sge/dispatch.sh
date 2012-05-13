@@ -59,5 +59,5 @@ for vcf in "$@"; do
 	$run_args \
 	$custom_args \
 	-S /bin/bash -v "PATH=$PATH" \
-	"$(pwd)/run $outdir > $TMPDIR/RESULTS && mv -v $TMPDIR/RESULTS $outdir/RESULTS"
+	"$(pwd)/run $outdir > \$TMPDIR/RESULTS && mv -v \$TMPDIR/RESULTS $outdir/RESULTS"
 done

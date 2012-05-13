@@ -1,10 +1,12 @@
 ===================
-SYMPRI <VERSION> README
+SILVA <VERSION> README
 ===================
 
-Sympri: Synonymous mutation prioritization by predicted harmfulness.
+Silva: Silent variant analysis using random forests.
+"When a synonymous mutation falls in the exome, does it make a sound?"
 
-Sympri is a tool for the automated harmfulness prediction of SYNONYMOUS single-nucleotide variants. Given variants in a VCF file, Sympri will order the rare synonymous variants according to their predicted harmfulness.
+
+Silva is a tool for the automated harmfulness prediction of SYNONYMOUS single-nucleotide variants. Given variants in a VCF file, Silva will rank the rare synonymous variants according to their predicted harmfulness. Silva predicts the harmfulness of mutations using features that include CpG, codon usage, splice sites, splicing enhancers and suppressors, and mRNA folding free energy.
 
 If you use this tool, please cite:
 
@@ -12,21 +14,27 @@ If you use this tool, please cite:
     Identification of deleterious synonymous variants in human genomes.
     Submitted.
 
-Send questions, comments, and difficulties to: sympri@cs.toronto.edu
+Send questions, comments, and difficulties to: silva@cs.toronto.edu
 
 
 Quickstart
 ==========
 
-1. Install dependencies:
+1. Download Silva:
+
+    $ wget http://compbio.cs.toronto.edu/silva/releases/sympri-<VERSION>.tar.gz
+    $ tar -xzf sympri-<VERSION>.tar.gz
+    $ cd sympri-<VERSION>
+
+2. Install dependencies:
 
     $ ./setup.sh
 
-2. Preprocess VCF file:
+3. Preprocess VCF file:
 
     $ ./preprocess_vcf VCF OUTDIR
 
-3. Run models and print highest-scoring synonymous variants:
+4. Run models and print highest-scoring synonymous variants:
 
     $ ./run OUTDIR | head
 
@@ -45,7 +53,7 @@ Prerequisites
 
 Dependencies
 ------------
-Sympri requires several tools and databases to run. Most of these were included with this release, but the 'setup.sh' script will download and configure the rest.
+Silva requires several tools and databases to run. Most of these were included with this release, but the 'setup.sh' script will download and configure the rest.
 
 - included: milk 0.4.2 Python package, with slight modification, available from:
   http://pypi.python.org/pypi/milk/
@@ -55,14 +63,14 @@ Sympri requires several tools and databases to run. Most of these were included 
   http://genes.mit.edu/burgelab/maxent/download/
 - setup.sh: UNAfold, available from:
   http://mfold.rna.albany.edu/?q=DINAMelt/software
-- setup.sh: Sympri databases, available from:
-  http://compbio.cs.toronto.edu/sympri/sympri-<VERSION>_data.tar.gz
+- setup.sh: Silva databases, available from:
+  http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>_data.tar.gz
 
-* Note: if you have UNAfold or the Sympri databases already installed, you can point Sympri to them by changing the appropriate lines in the 'config.sh' file.
+* Note: if you have UNAfold or the Silva databases already installed, you can point Silva to them by changing the appropriate lines in the 'config.sh' file.
 
 Input File Format
 -----------------
-Single-nucleotide variants should be given to Sympri in VCF or a VCF-like file format. There should be one line per variant, with tab-delimited fields:
+Single-nucleotide variants should be given to Silva in VCF or a VCF-like file format. There should be one line per variant, with tab-delimited fields:
 
 1. chrom - chromosome (any 'chr' prefix will be trimmed)
 2. pos - the position of the variant, 1-indexed
@@ -73,7 +81,7 @@ Single-nucleotide variants should be given to Sympri in VCF or a VCF-like file f
 
 Output Format
 -------------
-Sympri will print the synonymous variants to stdout, ordered by score, with the variants most likely to be harmful listed first. Variants are first filtered down to just rare and novel synonymous variants. The variants are then annotated with a number of features and several pre-trained models are used to rank the variants.
+Silva will print the synonymous variants to stdout, ordered by score, with the variants most likely to be harmful listed first. Variants are first filtered down to just rare and novel synonymous variants. The variants are then annotated with a number of features and several pre-trained models are used to rank the variants.
 
 1. Score (the mean rank)
 2. Range of ranks assigned from the various models (min, median, max)
@@ -86,31 +94,31 @@ Sympri will print the synonymous variants to stdout, ordered by score, with the 
 Installation
 ============
 
-Sympri is packaged with most of its dependencies. The remaining few can be downloaded and configured by running the 'setup.sh' script from the root directory of this package:
+Silva is packaged with most of its dependencies. The remaining few can be downloaded and configured by running the 'setup.sh' script from the root directory of this package:
 
 1. Download, untar, and unzip the package tarball:
 
-    $ wget http://compbio.cs.toronto.edu/sympri/sympri-<VERSION>.tar.gz
-    $ tar -xzf sympri-<VERSION>.tar.gz
+    $ wget http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>.tar.gz
+    $ tar -xzf silva-<VERSION>.tar.gz
+    $ cd silva-<VERSION>
 
-2. Move into the package's root directory and run the setup script:
+2. Run the setup script in the package's root directory:
 
-    $ cd sympri-<VERSION>
-    $ setup.sh
+    $ ./setup.sh
 
-* Sympri uses a number of environment variables to communcate important paths and parameters, such as what directory to use for temporary files, what allele frequency threshold to use, and where UNAfold is installed. Sympri has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'config.sh' script.
+* Silva uses a number of environment variables to communcate important paths and parameters, such as what directory to use for temporary files, what allele frequency threshold to use, and where UNAfold is installed. Silva has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'config.sh' script.
 
 
-Running Sympri
+Running Silva
 ==============
 
-Sympri should be run from the root directory of the package. If you insist on running it from elsewhere, you must set SYMPRI_PATH appropriately in your environment. 
+Silva should be run from the root directory of the package. If you insist on running it from elsewhere, you must set SILVA_PATH appropriately in your environment. 
 
-In addition to running Sympri on your local machine, we provide a convenience script to dispatch multiple Sympri runs across an SGE cluster. Sympri uses TMPDIR for all temporary files. If TMPDIR is not set, it will use the current directory. 
+In addition to running Silva on your local machine, we provide a convenience script to dispatch multiple Silva runs across an SGE cluster. Silva uses TMPDIR for all temporary files. If TMPDIR is not set, it will use the current directory. 
 
 Local machine
 -------------
-To run Sympri on your local machine, you should have already downloaded dependencies with the 'setup.sh' script. You can then run Sympri on your file of variants, <VCF>, (see Input Format) from the root directory of this package:
+To run Silva on your local machine, you should have already downloaded dependencies with the 'setup.sh' script. You can then run Silva on your file of variants, <VCF>, (see Input Format) from the root directory of this package:
 
 1. Filter an annotate the variants in the VCF file:
 
@@ -120,7 +128,7 @@ To run Sympri on your local machine, you should have already downloaded dependen
 
     $ ./run <OUTDIR> | head
 
-Sympri should handle errors and early termination gracefully, so if something goes wrong, you can re-run the same command and it will pick up where it left off.
+Silva should handle errors and early termination gracefully, so if something goes wrong, you can re-run the same command and it will pick up where it left off.
 
 SGE Cluster
 -----------
@@ -132,4 +140,4 @@ In case you have a large number of VCF files and an SGE cluster, we have provide
 Support
 =======
 
-Send questions, comments, and difficulties to: sympri@cs.toronto.edu
+Send questions, comments, and difficulties to: silva@cs.toronto.edu

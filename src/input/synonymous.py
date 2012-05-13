@@ -27,10 +27,10 @@ from collections import defaultdict
 from string import maketrans
 from random import sample
 
-assert os.getenv('SYMPRI_PATH') is not None, \
-    "Error: SYMPRI_PATH is unset."
-sys.path.insert(0, os.path.expandvars('$SYMPRI_PATH/src/share'))
-from sympri import maybe_gzip_open
+assert os.getenv('SILVA_PATH') is not None, \
+    "Error: SILVA_PATH is unset."
+sys.path.insert(0, os.path.expandvars('$SILVA_PATH/src/share'))
+from silva import maybe_gzip_open
 
 STOP = '*'
 AA_CODE = {

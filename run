@@ -5,9 +5,9 @@ set -o pipefail
 
 source $(dirname $0)/init.sh
 
-modeldir=$SYMPRI_PATH/src/models/forest
-traineddir=$SYMPRI_PATH/data/control/models
-controlstats=$SYMPRI_CONTROL.stats
+modeldir=$SILVA_PATH/src/models/forest
+traineddir=$SILVA_PATH/data/control/models
+controlstats=$SILVA_CONTROL.stats
 
 function usage {
     cat <<EOF
@@ -79,7 +79,7 @@ for mat in $outdir/*$ext; do
 
     # Print scored examples to stdout
     echo "Printing scored variants to stdout..." >&2
-    $SYMPRI_PATH/src/util/summarize_scores.py $controlstats $outdir/$matfile $outdir/$synfile $outdir/*.scored
+    $SILVA_PATH/src/util/summarize_scores.py $controlstats $outdir/$matfile $outdir/$synfile $outdir/*.scored
 
     break  # Only process first MAT file
 done

@@ -3,7 +3,7 @@
 set -eu
 set -o pipefail
 
-export SYMPRI_PATH=${SYMPRI_PATH:-$(cd $(dirname $0)/..; pwd;)}
+export SILVA_PATH=${SILVA_PATH:-$(cd $(dirname $0)/..; pwd;)}
 
 function usage {
     cat <<EOF
@@ -54,6 +54,6 @@ else
 fi
 
 in=$out
-$SYMPRI_PATH/src/control/split_data.py $in $outbase
+$SILVA_PATH/src/control/split_data.py $in $outbase
 
 echo "$0: SUCCESS" >&2

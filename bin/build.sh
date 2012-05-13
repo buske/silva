@@ -8,7 +8,7 @@ function prompt {
     read -p "(ENTER to continue)... "
 }
 
-name="sympri"
+name="silva"
 old_version=$(cat VERSION)
 echo "Found version: $old_version" >&2
 read -p "Enter the release version number (X.Y.Z)... " new_version

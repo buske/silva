@@ -7,39 +7,39 @@ set -o pipefail
 # Necessary environment variables.
 # Feel free to modify them if you know what you are doing.
 
-# Path to the root of the Sympri directory.
-export SYMPRI_PATH="${SYMPRI_PATH:-$(cd -P $(dirname $0); pwd)}"
+# Path to the root of the Silva directory.
+export SILVA_PATH="${SILVA_PATH:-$(cd -P $(dirname $0); pwd)}"
 
 # Directory to use for any temporary files. It's recommended that this point
 # to somewhere on the local machine (such as /tmp).
 export TMPDIR="${TMPDIR:-$(pwd)}"
 
-# Sympri ignores variants with a 1000 Genomes Project allele frequency
+# Silva ignores variants with a 1000 Genomes Project allele frequency
 # greater than of equal to this number ([0--1], suggested: 0.05)
-export SYMPRI_AF_THRESH=0.05
+export SILVA_AF_THRESH=0.05
 
 # Python and Java library paths
-export CLASSPATH="${SYMPRI_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"
+export CLASSPATH="${SILVA_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"
 pyversion=$(python -c "import sys; print sys.version[:3]")
-export PYTHONPATH="${SYMPRI_PATH}/lib/python$pyversion:${PYTHONPATH:-}"
+export PYTHONPATH="${SILVA_PATH}/lib/python$pyversion:${PYTHONPATH:-}"
 
 # UNAfold paths
-export UNAFOLD_BIN="${UNAFOLD_BIN:-${SYMPRI_PATH}/tools/unafold/src/hybrid-ss-min}"
-export UNAFOLDDAT="${UNAFOLDDAT:-${SYMPRI_PATH}/tools/unafold/data}"
+export UNAFOLD_BIN="${UNAFOLD_BIN:-${SILVA_PATH}/tools/unafold/src/hybrid-ss-min}"
+export UNAFOLDDAT="${UNAFOLDDAT:-${SILVA_PATH}/tools/unafold/data}"
 
 # Control dataset to use
-export SYMPRI_CONTROL=$SYMPRI_PATH/data/control/NA10851
+export SILVA_CONTROL=$SILVA_PATH/data/control/NA10851
 #==================================
 
 version="$(cat VERSION)"
 
 function init_message {
     cat >&2 <<EOF
-SYMPRI $version
+SILVA $version
 ------------
 TMPDIR:           '$TMPDIR'
-SYMPRI_CONTROL:   '$SYMPRI_CONTROL'
-SYMPRI_AF_THRESH: '$SYMPRI_AF_THRESH'
+SILVA_CONTROL:   '$SILVA_CONTROL'
+SILVA_AF_THRESH: '$SILVA_AF_THRESH'
 EOF
 }
 
@@ -59,10 +59,10 @@ Directory does note exist: $UNAFOLDDAT
 Please run the setup.sh script in this tool's root directory.
 EOF
     exit 1
-elif [[ ! -e $SYMPRI_PATH/data/refGene.pkl ]]; then
+elif [[ ! -e $SILVA_PATH/data/refGene.pkl ]]; then
     echo >&2 <<EOF 
 Annotation databases seem to be missing.
-File does note exist: $SYMPRI_PATH/data/refGene.pkl
+File does note exist: $SILVA_PATH/data/refGene.pkl
 
 Please run the setup.sh script in this tool's root directory.
 EOF
@@ -77,7 +77,7 @@ Please run the setup.sh script in this tool's root directory.
 EOF
 	exit 1
     fi
-    if [[ $milk_version != sympri-$version ]]; then
+    if [[ $milk_version != silva-$version ]]; then
 	echo >&2 <<EOF 
 Found existing milk version: $milk_version.
 This other version appears to take precedence over the custom version
@@ -85,7 +85,7 @@ included in this package.
 
 Please resolve this, such that:
 $ python -c 'import milk; print milk.__version__' 
-prints out sympri-$version
+prints out silva-$version
 
 The following may be sufficient:
 $ cd tools/milk
