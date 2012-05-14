@@ -24,7 +24,7 @@ function prompt {
     read -p "(Press ENTER to continue, Ctrl-C to exit) "
 }
 
-echo -e "\nInstalling Silva $version dependencies..." >&2
+echo -e "\nInstalling SilVA $version dependencies..." >&2
 
 # Download unafold
 if [[ ! -e tools/unafold/src/hybrid-ss-min ]]; then
@@ -49,11 +49,11 @@ if [[ ! -e data/refGene.pkl ]]; then
     datafile=silva-${version}_data.tar.gz
 
     if [[ ! -e $datafile && ! -e ../$datafile ]]; then
-	prompt "\n\nDownloading required Silva $version databases...\nWARNING: these databases are rather large (~700MB), so this might take a while..."
+	prompt "\n\nDownloading required SilVA $version databases...\nWARNING: these databases are rather large (~700MB), so this might take a while..."
 	wget -v "$SILVA_DATA_URL"
     fi
     if [[ ! -e data/refGene.pkl ]]; then
-	echo -e "\n\nUnpacking required Silva $version databases..." >&2
+	echo -e "\n\nUnpacking required SilVA $version databases..." >&2
 	if [[ -e $datafile ]]; then
 	    tar -xzvf $datafile
 	elif [[ -e ../$datafile ]]; then
@@ -72,7 +72,7 @@ Python package milk. If you have a custom distutils configuration, this
 could be the cause. Try moving that file out of the way, rerunning this 
 script, and then moving it back.
 
-Silva $version installation failed.
+SilVA $version installation failed.
 EOF
     exit 1
 }
@@ -100,9 +100,9 @@ fi
 cat >&2 <<EOF
 
 
-Silva $version successfully installed.
+SilVA $version successfully installed.
 
-To run Silva on a VCF file, first preprocess the file with './preprocess_vcf',
+To run SilVA on a VCF file, first preprocess the file with './preprocess_vcf',
 and then generate results from the output directory with './run'
 EOF
 

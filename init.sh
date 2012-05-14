@@ -7,14 +7,14 @@ set -o pipefail
 # Necessary environment variables.
 # Feel free to modify them if you know what you are doing.
 
-# Path to the root of the Silva directory.
+# Path to the root of the SilVA directory.
 export SILVA_PATH="${SILVA_PATH:-$(cd -P $(dirname $0); pwd)}"
 
 # Directory to use for any temporary files. It's recommended that this point
 # to somewhere on the local machine (such as /tmp).
 export TMPDIR="${TMPDIR:-$(pwd)}"
 
-# Silva ignores variants with a 1000 Genomes Project allele frequency
+# SilVA ignores variants with a 1000 Genomes Project allele frequency
 # greater than of equal to this number ([0--1], suggested: 0.05)
 export SILVA_AF_THRESH=0.05
 
