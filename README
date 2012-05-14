@@ -1,6 +1,6 @@
-===================
+==================
 SILVA <VERSION> README
-===================
+==================
 
 SilVA: Silent variant analysis using random forests.
 "When a synonymous mutation falls in the exome, does it make a sound?"
@@ -110,7 +110,7 @@ SilVA is packaged with most of its dependencies. The remaining few can be downlo
 
 
 Running SilVA
-==============
+=============
 
 SilVA should be run from the root directory of the package. If you insist on running it from elsewhere, you must set SILVA_PATH appropriately in your environment. 
 
