@@ -22,21 +22,21 @@ Quickstart
 
 1. Download Silva:
 
-    $ wget http://compbio.cs.toronto.edu/silva/releases/sympri-<VERSION>.tar.gz
-    $ tar -xzf sympri-<VERSION>.tar.gz
-    $ cd sympri-<VERSION>
+    wget http://compbio.cs.toronto.edu/silva/releases/silva-<VERSION>.tar.gz
+    tar -xzf silva-<VERSION>.tar.gz
+    cd silva-<VERSION>
 
 2. Install dependencies:
 
-    $ ./setup.sh
+    ./setup.sh
 
 3. Preprocess VCF file:
 
-    $ ./preprocess_vcf VCF OUTDIR
+    ./preprocess_vcf VCF OUTDIR
 
 4. Run models and print highest-scoring synonymous variants:
 
-    $ ./run OUTDIR | head
+    ./run OUTDIR | head
 
 
 Overview
@@ -98,13 +98,13 @@ Silva is packaged with most of its dependencies. The remaining few can be downlo
 
 1. Download, untar, and unzip the package tarball:
 
-    $ wget http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>.tar.gz
-    $ tar -xzf silva-<VERSION>.tar.gz
-    $ cd silva-<VERSION>
+    wget http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>.tar.gz
+    tar -xzf silva-<VERSION>.tar.gz
+    cd silva-<VERSION>
 
 2. Run the setup script in the package's root directory:
 
-    $ ./setup.sh
+    ./setup.sh
 
 * Silva uses a number of environment variables to communcate important paths and parameters, such as what directory to use for temporary files, what allele frequency threshold to use, and where UNAfold is installed. Silva has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'config.sh' script.
 
@@ -122,11 +122,11 @@ To run Silva on your local machine, you should have already downloaded dependenc
 
 1. Filter an annotate the variants in the VCF file:
 
-    $ ./preprocess_vcf <VCF> <OUTDIR>
+    ./preprocess_vcf <VCF> <OUTDIR>
 
 2. Run the trained models on the annotated variants and print the top variants in order of decreasing predicted harmfulness:
 
-    $ ./run <OUTDIR> | head
+    ./run <OUTDIR> | head
 
 Silva should handle errors and early termination gracefully, so if something goes wrong, you can re-run the same command and it will pick up where it left off.
 
@@ -134,7 +134,7 @@ SGE Cluster
 -----------
 In case you have a large number of VCF files and an SGE cluster, we have provided a dispatch script for your convenience, 'sge/dispatch.sh'. Because SGE configurations vary widely, you should first open the file and take a look at the three SGE configuration variables at the top of the script. Edit them as you see fit. You can then dispatch SGE jobs for a number of VCF files from the root directory of the package with:
 
-    $ ./sge/dispatch.sh <OUTDIR> <VCF1> <VCF2> ...
+    ./sge/dispatch.sh <OUTDIR> <VCF1> <VCF2> ...
 
 
 Support

@@ -58,14 +58,24 @@ popd
 
 
 src=${distbase}.tar.gz
-if [[ ! -e $src ]]; then
+cont=y
+if [[ -e $src ]]; then
+    read -p "Overwrite $src (y/n)? " cont
+fi
+if [[ $cont == y* ]]; then
     prompt "\nTarballing dist files: $builddir to $src"
     tar -C build -hczf $src $prefix
 fi
 
-
 data=${distbase}_data.tar.gz
-if [[ ! -e $data ]]; then
+cont=y
+if [[ -e $data ]]; then
+    read -p "Overwrite $data (y/n)? " cont
+    if [[ $cont == y* ]]; then
+	read -p "Are you absolutely positive (y/n)? " cont
+    fi
+fi
+if [[ $cont == y* ]]; then
     prompt "\nTarballing data files to: $data"
     if [[ ! -d data ]]; then
 	echo "Error: expected data/ directory" >&2
