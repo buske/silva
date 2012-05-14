@@ -24,11 +24,11 @@ function prompt {
     read -p "(Press ENTER to continue, Ctrl-C to exit) "
 }
 
-echo "Installing Silva $version dependencies..." >&2
+echo -e "\nInstalling Silva $version dependencies..." >&2
 
 # Download unafold
 if [[ ! -e tools/unafold/src/hybrid-ss-min ]]; then
-    prompt "\nDownloading UNAFold 3.8..."
+    prompt "\n\nDownloading UNAFold 3.8..."
     pushd tools
     if [[ ! -e unafold-3.8.tar.gz ]]; then
 	wget "$UNAFOLD_URL"
@@ -46,13 +46,14 @@ fi
 
 # Download data
 if [[ ! -e data/refGene.pkl ]]; then
-    prompt "\nDownloading required Silva $version databases...\nWARNING: these databases are rather large (~700MB), so this might take a while..."
     datafile=silva-${version}_data.tar.gz
 
-    if [[ ! -e $datafile && ! -e ../$datafile]]; then
-	wget --progress "$SILVA_DATA_URL"
+    if [[ ! -e $datafile && ! -e ../$datafile ]]; then
+	prompt "\n\nDownloading required Silva $version databases...\nWARNING: these databases are rather large (~700MB), so this might take a while..."
+	wget -v "$SILVA_DATA_URL"
     fi
-    if [[ ! -d data ]]; then
+    if [[ ! -e data/refGene.pkl ]]; then
+	echo -e "\n\nUnpacking required Silva $version databases..." >&2
 	if [[ -e $datafile ]]; then
 	    tar -xzvf $datafile
 	elif [[ -e ../$datafile ]]; then
@@ -80,7 +81,7 @@ EOF
 # Install modified version of milk
 prefix="$(pwd)"
 if [[ $(python -c "import milk; print milk.__version__" 2> /dev/null) != silva-$version ]]; then
-    prompt "\nConfiguring modified milk Python package..."
+    prompt "\n\nConfiguring modified milk Python package..."
     pushd tools/milk
     if [[ -e "$HOME/.pydistutils.cfg" ]]; then
 	python setup.py install
@@ -96,4 +97,12 @@ if [[ $(python -c "import milk; print milk.__version__" 2> /dev/null) != silva-$
     popd
 fi
 
-echo -e "\nSilva $version successfully installed." >&2
+cat >&2 <<EOF
+
+
+Silva $version successfully installed.
+
+To run Silva on a VCF file, first preprocess the file with './preprocess_vcf',
+and then generate results from the output directory with './run'
+EOF
+

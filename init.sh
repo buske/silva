@@ -35,9 +35,10 @@ version="$(cat VERSION)"
 
 function init_message {
     cat >&2 <<EOF
+
 SILVA $version
-------------
-TMPDIR:           '$TMPDIR'
+-----------
+TMPDIR:          '$TMPDIR'
 SILVA_CONTROL:   '$SILVA_CONTROL'
 SILVA_AF_THRESH: '$SILVA_AF_THRESH'
 EOF
