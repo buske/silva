@@ -31,7 +31,7 @@ export UNAFOLDDAT="${UNAFOLDDAT:-${SILVA_PATH}/tools/unafold/data}"
 export SILVA_CONTROL=$SILVA_PATH/data/control/NA10851
 #==================================
 
-version="$(cat VERSION)"
+version="$(cat ${SILVA_PATH}/VERSION)"
 
 function init_message {
     cat >&2 <<EOF
