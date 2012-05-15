@@ -38,6 +38,7 @@ function init_message {
 
 SILVA $version
 -----------
+COMMAND:         '$0 $@'
 TMPDIR:          '$TMPDIR'
 SILVA_CONTROL:   '$SILVA_CONTROL'
 SILVA_AF_THRESH: '$SILVA_AF_THRESH'
