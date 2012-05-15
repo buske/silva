@@ -5,11 +5,11 @@ set -o pipefail
 
 source $(dirname $0)/init.sh
 
-synonymous="${SILVA_PATH}/src/input/synonymous.py -O ${SILVA_PATH}/data/refGene.pkl*"
-
 control=$SILVA_CONTROL.merged.arff
 src=$SILVA_PATH/src
-data=$SILVA_PATH/data
+
+synonymous="$src/input/synonymous.py -O ${SILVA_DATA}/refGene.pkl*"
+gp1k="$src/input/1000gp.py dummy ${SILVA_DATA}/1000gp.refGene.pkl*"
 
 function usage {
     cat <<EOF
@@ -51,6 +51,7 @@ function skip_if_exists {
 }
 
 init_message
+echo -e "SILVA_AF_THRESH: '$SILVA_AF_THRESH'\n" >&2
 
 mkdir -pv $outdir
 # Filter to just synonymous variants
@@ -68,9 +69,11 @@ out=$base.rare
 skip_if_exists $outdir/$out \
     && echo "Filtering by 1000 Genomes Project allele frequency..." >&2 \
     && cut -f 1,2,5 $outdir/$base.syn \
-       | $src/input/1000gp.py dummy $data/1000gp.refGene.pkl* \
+       | $gp1k \
        | paste - $outdir/$base.syn \
-       | awk -F"\t" '$1 == "." || $1 < '"$SILVA_AF_THRESH"';' | cut -f 2- > $TMPDIR/$out \
+       | awk -F"\t" '$1 == "." || $1 < '"$SILVA_AF_THRESH"';' \
+       | cut -f 2- \
+       > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
 test -e $outdir/$out
 

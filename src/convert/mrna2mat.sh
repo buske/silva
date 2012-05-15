@@ -4,7 +4,7 @@ set -eu
 set -o pipefail
 
 featuredir=$SILVA_PATH/src/features
-datadir=$SILVA_PATH/data
+datadir=$SILVA_DATA
 MRNA_COL=11
 CODON_COLS="4-5,8-10"
 
@@ -93,4 +93,5 @@ paste $outbase.*.col \
     > $temp.mat \
     && mv $temp.mat ${outbase}.mat
 
+cleanup
 trap - INT TERM EXIT

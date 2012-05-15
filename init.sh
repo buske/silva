@@ -9,6 +9,8 @@ set -o pipefail
 
 # Path to the root of the SilVA directory.
 export SILVA_PATH="${SILVA_PATH:-$(cd -P $(dirname $0); pwd)}"
+# Path of the untar'd SilVA data directory
+export SILVA_DATA="${SILVA_DATA:-$SILVA_PATH/data}"
 
 # Directory to use for any temporary files. It's recommended that this point
 # to somewhere on the local machine (such as /tmp).
@@ -28,7 +30,7 @@ export UNAFOLD_BIN="${UNAFOLD_BIN:-${SILVA_PATH}/tools/unafold/src/hybrid-ss-min
 export UNAFOLDDAT="${UNAFOLDDAT:-${SILVA_PATH}/tools/unafold/data}"
 
 # Control dataset to use
-export SILVA_CONTROL=$SILVA_PATH/data/control/NA10851
+export SILVA_CONTROL=$SILVA_PATH/control/NA10851
 #==================================
 
 version="$(cat ${SILVA_PATH}/VERSION)"
@@ -39,9 +41,9 @@ function init_message {
 SILVA $version
 -----------
 COMMAND:         '$0 $@'
+DATA:            '$SILVA_DATA'
 TMPDIR:          '$TMPDIR'
 SILVA_CONTROL:   '$SILVA_CONTROL'
-SILVA_AF_THRESH: '$SILVA_AF_THRESH'
 EOF
 }
 
@@ -50,7 +52,8 @@ if [[ ! -e $UNAFOLD_BIN ]]; then
 UNAfold does not appear to be installed.
 File does note exist: $UNAFOLD_BIN
 
-Please run the setup.sh script in this tool's root directory.
+Please run the setup.sh script in this tool's root directory
+or set the UNAFOLD_BIN environment variable appropriately.
 EOF
     exit 1
 elif [[ ! -d $UNAFOLDDAT ]]; then
@@ -58,15 +61,17 @@ elif [[ ! -d $UNAFOLDDAT ]]; then
 UNAfold does not appear to be installed.
 Directory does note exist: $UNAFOLDDAT
 
-Please run the setup.sh script in this tool's root directory.
+Please run the setup.sh script in this tool's root directory
+or set the UNAFOLDDAT environment variable appropriately.
 EOF
     exit 1
-elif [[ ! -e $SILVA_PATH/data/refGene.pkl ]]; then
+elif [[ ! -e $SILVA_DATA/refGene.pkl ]]; then
     echo >&2 <<EOF 
 Annotation databases seem to be missing.
-File does note exist: $SILVA_PATH/data/refGene.pkl
+File does note exist: $SILVA_DATA/refGene.pkl
 
-Please run the setup.sh script in this tool's root directory.
+Please run the setup.sh script in this tool's root directory
+or set the SILVA_DATA environment variable appropriately.
 EOF
     exit 1
 else
@@ -75,7 +80,8 @@ else
 	echo >&2 <<EOF 
 Custom version of Python package, milk, does not appear to be properly installed.
 
-Please run the setup.sh script in this tool's root directory.
+Please run the setup.sh script in this tool's root directory
+or set the PYTHON_PATH environment variable appropriately.
 EOF
 	exit 1
     fi
@@ -87,7 +93,7 @@ included in this package.
 
 Please resolve this, such that:
 $ python -c 'import milk; print milk.__version__' 
-prints out silva-$version
+prints "silva-$version"
 
 The following may be sufficient:
 $ cd tools/milk

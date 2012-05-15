@@ -6,14 +6,14 @@ set -o pipefail
 source $(dirname $0)/init.sh
 
 modeldir=$SILVA_PATH/src/models/forest
-traineddir=$SILVA_PATH/data/control/models
+traineddir=$SILVA_PATH/control/models
 controlstats=$SILVA_CONTROL.stats
 
 function usage {
     cat <<EOF
 Usage: $0 OUTDIR
 
-Runs pre-trained model on OUTDIR (created with preprocess_vcf)
+Runs pre-trained model on OUTDIR (created with silva-preprocess)
 
 Pretrained models found in: $traineddir
 As necessary, uses TMPDIR='$TMPDIR'
@@ -40,7 +40,7 @@ ext=.std.mat
 for mat in $outdir/*$ext; do
     if [[ ! -e $mat ]]; then
 	echo "Error: expected $ext file in OUTDIR." >&2
-	echo "Was preprocess_vcf successful?" >&2
+	echo "Was silva-preprocess successful?" >&2
 	exit 1
     fi
 
@@ -49,19 +49,19 @@ for mat in $outdir/*$ext; do
     matfile="$base.std.mat"
     if [[ ! -e $outdir/$synfile ]]; then
 	echo "Error: expected $synfile file in OUTDIR." >&2
-	echo "Was preprocess_vcf successful?" >&2
+	echo "Was silva-preprocess successful?" >&2
 	exit 1
     fi
     if [[ ! -e $outdir/$matfile ]]; then
 	echo "Error: expected $matfile file in OUTDIR." >&2
-	echo "Was preprocess_vcf successful?" >&2
+	echo "Was silva-preprocess successful?" >&2
 	exit 1
     fi
     for modelfile in $traineddir/*.model; do
 	pushd $modeldir > /dev/null
 	if [[ ! -e $modelfile ]]; then
 	    echo "Error: could not find saved model: $modelfile" >&2
-	    echo "Was preprocess_vcf successful?" >&2
+	    echo "Was silva-preprocess successful?" >&2
 	    exit 1
 	fi
 

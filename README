@@ -32,11 +32,11 @@ Quickstart
 
 3. Preprocess VCF file:
 
-    ./preprocess_vcf VCF OUTDIR
+    ./silva-preprocess VCF OUTDIR
 
 4. Run models and print highest-scoring synonymous variants:
 
-    ./run OUTDIR | head
+    ./silva-run OUTDIR | head
 
 
 Overview
@@ -44,7 +44,7 @@ Overview
 
 Prerequisites
 -------------
-- Linux x86
+- Linux or Mac OS, x86
 - 6GB of RAM
 - Python 2.6 or 2.7 in your PATH
 -- The 'numpy' Python package
@@ -112,21 +112,19 @@ SilVA is packaged with most of its dependencies. The remaining few can be downlo
 Running SilVA
 =============
 
-SilVA should be run from the root directory of the package. If you insist on running it from elsewhere, you must set SILVA_PATH appropriately in your environment. 
-
 In addition to running SilVA on your local machine, we provide a convenience script to dispatch multiple SilVA runs across an SGE cluster. SilVA uses TMPDIR for all temporary files. If TMPDIR is not set, it will use the current directory. 
 
 Local machine
 -------------
-To run SilVA on your local machine, you should have already downloaded dependencies with the 'setup.sh' script. You can then run SilVA on your file of variants, <VCF>, (see Input Format) from the root directory of this package:
+To run SilVA on your local machine, you should have already downloaded dependencies with the 'setup.sh' script. You can then run SilVA on your file of variants, <VCF>, (see Input Format) from the root directory of this package (or add this directory to your PATH):
 
 1. Filter an annotate the variants in the VCF file:
 
-    ./preprocess_vcf <VCF> <OUTDIR>
+    ./silva-preprocess <VCF> <OUTDIR>
 
 2. Run the trained models on the annotated variants and print the top variants in order of decreasing predicted harmfulness:
 
-    ./run <OUTDIR> | head
+    ./silva-run <OUTDIR> | head
 
 SilVA should handle errors and early termination gracefully, so if something goes wrong, you can re-run the same command and it will pick up where it left off.
 
