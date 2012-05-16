@@ -14,7 +14,7 @@ If you use this tool, please cite:
     Identification of deleterious synonymous variants in human genomes.
     In preparation.
 
-Send questions, comments, and difficulties to: silva@cs.toronto.edu
+Send questions, comments, and difficulties to: forest@cs.toronto.edu
 
 
 Quickstart
@@ -138,4 +138,4 @@ In case you have a large number of VCF files and an SGE cluster, we have provide
 Support
 =======
 
-Send questions, comments, and difficulties to: silva@cs.toronto.edu
+Send questions, comments, and difficulties to: forest@cs.toronto.edu
