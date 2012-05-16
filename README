@@ -70,7 +70,7 @@ SilVA requires several tools and databases to run. Most of these were included w
 
 Input File Format
 -----------------
-Single-nucleotide variants should be given to SilVA in VCF or a VCF-like file format. There should be one line per variant, with tab-delimited fields:
+Single-nucleotide variants should be given to SilVA in VCF or a VCF-like file format. This file may be gzip'd, but then must have a '.gz' extension. There should be one line per variant, with tab-delimited fields:
 
 1. chrom - chromosome (any 'chr' prefix will be trimmed)
 2. pos - the position of the variant, 1-indexed
