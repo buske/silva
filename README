@@ -83,7 +83,7 @@ Output Format
 -------------
 SilVA will print the synonymous variants to stdout, ordered by score, with the variants most likely to be harmful listed first. Variants are first filtered down to just rare and novel synonymous variants. The variants are then annotated with a number of features and several pre-trained models are used to rank the variants.
 
-1. Score (the mean rank)
+1. Score (the mean reciprocal rank)
 2. Range of ranks assigned from the various models (min, median, max)
 3. Potentially-important features.*
 ... Fields from the input file
