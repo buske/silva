@@ -511,37 +511,38 @@ def random_synonymous_site(tx, cpg=None, avoid_splice=False):
 def random_controls(genes, filename, match_cpg=False, avoid_splice=False):
     fields = ['chrom', 'pos', 'id', 'ref', 'alt', 'gene', 'tx']
     print '#%s' % '\t'.join(fields)
-    for line in maybe_gzip_open(filename):
-        line = line.rstrip()
-        if not line or line.startswith('#'): continue
+    with maybe_gzip_open(filename) as ifp:
+        for line in ifp:
+            line = line.rstrip()
+            if not line or line.startswith('#'): continue
 
-        tokens = line.split()
-        chrom, pos, id, ref, alt, gene_id, tx_id = tokens[:7]
-        chrom = chrom[3:] if chrom.startswith('chr') else chrom
-        pos = int(pos)
-        tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
-        if not tx:
-            continue
+            tokens = line.split()
+            chrom, pos, id, ref, alt, gene_id, tx_id = tokens[:7]
+            chrom = chrom[3:] if chrom.startswith('chr') else chrom
+            pos = int(pos)
+            tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
+            if not tx:
+                continue
 
-        if match_cpg:
-            offset = tx.project_to_premrna(pos)
-            cpg_seq = tx.premrna()[offset-1:offset+2]
+            if match_cpg:
+                offset = tx.project_to_premrna(pos)
+                cpg_seq = tx.premrna()[offset-1:offset+2]
+                if tx.strand() == '-':
+                    cpg_seq = cpg_seq.translate(COMPLEMENT_TAB)
+
+                cpg = 'CG' in cpg_seq
+            else:
+                cpg=None
+
+            cds_offset, new_ref, new_alt = \
+                random_synonymous_site(tx, cpg=cpg, avoid_splice=avoid_splice)
+            new_pos = tx.project_from_cds(cds_offset)
             if tx.strand() == '-':
-                cpg_seq = cpg_seq.translate(COMPLEMENT_TAB)
+                new_ref = COMPLEMENT[new_ref]
+                new_alt = COMPLEMENT[new_alt]
 
-            cpg = 'CG' in cpg_seq
-        else:
-            cpg=None
-
-        cds_offset, new_ref, new_alt = \
-            random_synonymous_site(tx, cpg=cpg, avoid_splice=avoid_splice)
-        new_pos = tx.project_from_cds(cds_offset)
-        if tx.strand() == '-':
-            new_ref = COMPLEMENT[new_ref]
-            new_alt = COMPLEMENT[new_alt]
-
-        print '\t'.join([chrom, str(new_pos), id, new_ref, new_alt, 
-                         gene_id, tx.tx()] + tokens[7:])
+            print '\t'.join([chrom, str(new_pos), id, new_ref, new_alt, 
+                             gene_id, tx.tx()] + tokens[7:])
 
 def print_all_synonymous(genes):
     fields = ['chrom', 'pos', 'id', 'ref', 'alt', 'gene', 'tx']
@@ -584,70 +585,72 @@ def filter_variants(genes, filename, protein_coords=False):
     print '#%s' % '\t'.join(fields)
     n_total = 0
     n_kept = 0
-    for line in maybe_gzip_open(filename):
-        line = line.rstrip()
-        if not line or line.startswith('#'): continue
-        n_total += 1
-        
-        tokens = line.split()
-        if protein_coords:
-            match = get_transcript_from_protein(genes, *tokens)
-            (tx, chrom, pos, ref, alt) = match
-            id = '.'
-        else:
-            chrom, pos, id, ref, alts = tokens[:5]
-            chrom = chrom[3:] if chrom.startswith('chr') else chrom
-            alt = alts.split(',')[0]
-            # Only process SNVs
-            if len(ref) != 1 or len(alt) != 1:
-                continue
-            
-            pos = int(pos)
-            txs = []
-            for tx in find_overlapping_transcripts(chrom, pos):
-                try:
-                    if tx.is_synonymous(pos, ref, alt):
-                        txs.append(tx)
-                except AssertionError:
+    with maybe_gzip_open(filename) as ifp:
+        for line in ifp:
+            line = line.rstrip()
+            if not line or line.startswith('#'): continue
+            n_total += 1
+
+            tokens = line.split()
+            if protein_coords:
+                match = get_transcript_from_protein(genes, *tokens)
+                (tx, chrom, pos, ref, alt) = match
+                id = '.'
+            else:
+                chrom, pos, id, ref, alts = tokens[:5]
+                chrom = chrom[3:] if chrom.startswith('chr') else chrom
+                alt = alts.split(',')[0]
+                # Only process SNVs
+                if len(ref) != 1 or len(alt) != 1:
                     continue
-                    
-            tx = max(txs) if txs else None  # Take longest valid transcript
 
-        if not tx:
-            continue
+                pos = int(pos)
+                txs = []
+                for tx in find_overlapping_transcripts(chrom, pos):
+                    try:
+                        if tx.is_synonymous(pos, ref, alt):
+                            txs.append(tx)
+                    except AssertionError:
+                        continue
 
-        n_kept += 1
-        print '\t'.join([chrom, str(pos), id, ref, alt, tx.gene(), tx.tx()] + tokens[5:])
+                tx = max(txs) if txs else None  # Take longest valid transcript
 
-    print >>sys.stderr, "Found %d synonymous variants (%d dropped)" % \
-          (n_kept, n_total - n_kept)
+            if not tx:
+                continue
+
+            n_kept += 1
+            print '\t'.join([chrom, str(pos), id, ref, alt, tx.gene(), tx.tx()] + tokens[5:])
+
+        print >>sys.stderr, "Found %d synonymous variants (%d dropped)" % \
+              (n_kept, n_total - n_kept)
 
 def annotate_variants(genes, filename):
     fields = ['chrom', 'pos', 'id', 'ref', 'alt', 'gene', 'tx', 'strand',
               'codon', 'frame', 'premrna']
     print '#%s' % '\t'.join(fields)
-    for line in maybe_gzip_open(filename):
-        line = line.rstrip()
-        if not line or line.startswith('#'): continue
+    with maybe_gzip_open(filename) as ifp:
+        for line in ifp:
+            line = line.rstrip()
+            if not line or line.startswith('#'): continue
 
-        tokens = line.split()
-        chrom, pos, id, ref, alt, gene_id, tx_id = tokens[:7]
-        chrom = chrom[3:] if chrom.startswith('chr') else chrom
-        pos = int(pos)
+            tokens = line.split()
+            chrom, pos, id, ref, alt, gene_id, tx_id = tokens[:7]
+            chrom = chrom[3:] if chrom.startswith('chr') else chrom
+            pos = int(pos)
 
-        tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
-        if not tx:
-            continue
+            tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
+            if not tx:
+                continue
 
-        # Get codon, frame, and mrna
-        cds_offset = tx.project_to_cds(pos)
-        aa_pos = int(cds_offset / 3) + 1
-        codon = tx.get_codon(aa_pos)
-        frame = cds_offset % 3
+            # Get codon, frame, and mrna
+            cds_offset = tx.project_to_cds(pos)
+            aa_pos = int(cds_offset / 3) + 1
+            codon = tx.get_codon(aa_pos)
+            frame = cds_offset % 3
 
-        mut_str = tx.mutation_str(pos, ref, alt)
-        print '\t'.join([chrom, str(pos), id, ref, alt, tx.gene(), tx.tx(),
-                          tx.strand(), codon, str(frame), mut_str] + tokens[7:])
+            mut_str = tx.mutation_str(pos, ref, alt)
+            print '\t'.join([chrom, str(pos), id, ref, alt, tx.gene(), tx.tx(),
+                              tx.strand(), codon, str(frame), mut_str] + tokens[7:])
 
 
 

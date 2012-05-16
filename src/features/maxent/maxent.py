@@ -251,10 +251,11 @@ def script(filename, quiet=False, verbose=False, **kwargs):
     NULL = [None] * len(fields)
 
     seqs = []
-    for line in maybe_gzip_open(filename):
-        line = line.strip()
-        if line:
-            seqs.append(Seq(line))
+    with maybe_gzip_open(filename) as ifp:
+        for line in ifp:
+            line = line.strip()
+            if line:
+                seqs.append(Seq(line))
                 
     sites = {}
     scores = {}

@@ -22,28 +22,29 @@ from silva import maybe_gzip_open, print_args
 def script(filename, quiet=False, verbose=False, **kwargs):
     fields = ['premrna_f', 'mrna_f', 'splice_dist']
     print '#%s' % '\t'.join(fields)
-    for line in maybe_gzip_open(filename):
-        line = line.strip().upper()
-        assert line.count('/') == 1
+    with maybe_gzip_open(filename) as ifp:
+        for line in ifp:
+            line = line.strip().upper()
+            assert line.count('/') == 1
 
-        pre, post = line.split('/')
-        # Trim off mutation nucs and brackets
-        pre = pre[:-2]  # e,g, '[A'
-        post = post[2:]  # e.g. 'C]'
+            pre, post = line.split('/')
+            # Trim off mutation nucs and brackets
+            pre = pre[:-2]  # e,g, '[A'
+            post = post[2:]  # e.g. 'C]'
 
-        pre_chunks = pre.split('|')
-        post_chunks = post.split('|')
-        # Assume mutation is in exon
-        
-        premrna_f = min(len(pre), len(post)) \
-                       / (len(pre) + len(post) + 1)
-        pre_cds = ''.join(pre_chunks[::2])
-        post_cds = ''.join(post_chunks[::2])
-        mrna_f = min(len(pre_cds), len(post_cds)) \
-                    / (len(pre_cds) + len(post_cds) + 1)
-        splice_dist = min(len(pre_chunks[-1]), len(post_chunks[0]))
-        
-        print '%.4f\t%.4f\t%d' % (premrna_f, mrna_f, splice_dist)
+            pre_chunks = pre.split('|')
+            post_chunks = post.split('|')
+            # Assume mutation is in exon
+
+            premrna_f = min(len(pre), len(post)) \
+                           / (len(pre) + len(post) + 1)
+            pre_cds = ''.join(pre_chunks[::2])
+            post_cds = ''.join(post_chunks[::2])
+            mrna_f = min(len(pre_cds), len(post_cds)) \
+                        / (len(pre_cds) + len(post_cds) + 1)
+            splice_dist = min(len(pre_chunks[-1]), len(post_chunks[0]))
+
+            print '%.4f\t%.4f\t%d' % (premrna_f, mrna_f, splice_dist)
 
 def parse_args(args):
     from optparse import OptionParser
