@@ -6,7 +6,7 @@ SilVA: Silent variant analysis using random forests.
 "When a synonymous mutation falls in the exome, does it make a sound?"
 
 
-SilVA is a tool for the automated harmfulness prediction of SYNONYMOUS single-nucleotide variants. Given variants in a VCF file, SilVA will rank the rare synonymous variants according to their predicted harmfulness. SilVA predicts the harmfulness of mutations using features that include CpG, codon usage, splice sites, splicing enhancers and suppressors, and mRNA folding free energy.
+SilVA is a tool for the automated harmfulness prediction of SYNONYMOUS single-nucleotide variants. Given variants in a VCF file, SilVA will rank the rare synonymous variants according to their predicted harmfulness. SilVA predicts the harmfulness of mutations using features that include conservation, codon usage, splice sites, splicing enhancers and suppressors, and mRNA folding free energy.
 
 If you use this tool, please cite:
 
