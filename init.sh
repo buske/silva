@@ -48,7 +48,7 @@ EOF
 }
 
 if [[ ! -e $UNAFOLD_BIN ]]; then
-    echo >&2 <<EOF 
+    cat >&2 <<EOF 
 UNAfold does not appear to be installed.
 File does note exist: $UNAFOLD_BIN
 
@@ -57,7 +57,7 @@ or set the UNAFOLD_BIN environment variable appropriately.
 EOF
     exit 1
 elif [[ ! -d $UNAFOLDDAT ]]; then
-    echo >&2 <<EOF 
+    cat >&2 <<EOF 
 UNAfold does not appear to be installed.
 Directory does note exist: $UNAFOLDDAT
 
@@ -66,7 +66,7 @@ or set the UNAFOLDDAT environment variable appropriately.
 EOF
     exit 1
 elif [[ ! -e $SILVA_DATA/refGene.pkl ]]; then
-    echo >&2 <<EOF 
+    cat >&2 <<EOF 
 Annotation databases seem to be missing.
 File does note exist: $SILVA_DATA/refGene.pkl
 
@@ -77,7 +77,7 @@ EOF
 else
     milk_version=$(python -c "import milk; print milk.__version__")
     if [[ -z $milk_version ]]; then
-	echo >&2 <<EOF 
+	cat >&2 <<EOF 
 Custom version of Python package, milk, does not appear to be properly installed.
 
 Please run the setup.sh script in this tool's root directory
@@ -86,7 +86,7 @@ EOF
 	exit 1
     fi
     if [[ $milk_version != silva-$version ]]; then
-	echo >&2 <<EOF 
+	cat >&2 <<EOF 
 Found existing milk version: $milk_version.
 This other version appears to take precedence over the custom version
 included in this package.
