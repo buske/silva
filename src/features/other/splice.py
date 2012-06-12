@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.expandvars('$SILVA_PATH/src/share'))
 from silva import maybe_gzip_open, print_args
 
 def script(filename, quiet=False, verbose=False, **kwargs):
-    fields = ['premrna_f', 'mrna_f', 'splice_dist']
+    fields = ['premrna_f', 'mrna_f']  #, 'splice_dist']
     print '#%s' % '\t'.join(fields)
     with maybe_gzip_open(filename) as ifp:
         for line in ifp:
@@ -42,9 +42,9 @@ def script(filename, quiet=False, verbose=False, **kwargs):
             post_cds = ''.join(post_chunks[::2])
             mrna_f = min(len(pre_cds), len(post_cds)) \
                         / (len(pre_cds) + len(post_cds) + 1)
-            splice_dist = min(len(pre_chunks[-1]), len(post_chunks[0]))
+            #splice_dist = min(len(pre_chunks[-1]), len(post_chunks[0]))
 
-            print '%.4f\t%.4f\t%d' % (premrna_f, mrna_f, splice_dist)
+            print '%.4f\t%.4f' % (premrna_f, mrna_f) #, splice_dist)
 
 def parse_args(args):
     from optparse import OptionParser

@@ -51,7 +51,8 @@ function skip_if_exists {
 }
 
 init_message
-echo -e "SILVA_AF_THRESH: '$SILVA_AF_THRESH'\n" >&2
+echo -e "SILVA_AF_MIN:    '$SILVA_AF_MIN'\n" >&2
+echo -e "SILVA_AF_MAX:    '$SILVA_AF_MAX'\n" >&2
 
 mkdir -pv $outdir
 # Filter to just synonymous variants
@@ -64,14 +65,21 @@ skip_if_exists $outdir/$out \
     && mv $TMPDIR/$out $outdir/$out
 test -e $outdir/$out
 
-# Filtering by 1000 Genomes Project AF
-out=$base.rare
+# Annotate 1000 Genomes Project AF
+out=$base.af
 skip_if_exists $outdir/$out \
-    && echo "Filtering by 1000 Genomes Project allele frequency..." >&2 \
+    && echo "Annotating with 1000 Genomes Project allele frequency..." >&2 \
     && cut -f 1,2,5 $outdir/$base.syn \
        | $gp1k \
        | paste - $outdir/$base.syn \
-       | awk -F"\t" '$1 == "." || $1 < '"$SILVA_AF_THRESH"';' \
+       > $TMPDIR/$out \
+    && mv $TMPDIR/$out $outdir/$out
+test -e $outdir/$out
+
+out=$base.af-filt
+skip_if_exists $outdir/$out \
+    && echo "Filtering by allele frequency..." >&2 \
+    awk -F"\t" '{if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' $outdir/$base.af \
        | cut -f 2- \
        > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
@@ -81,7 +89,7 @@ test -e $outdir/$out
 out=$base.mrna
 skip_if_exists $outdir/$out \
     && echo "Annotating with mRNA sequence..." >&2 \
-    && $synonymous annotate $outdir/$base.rare > $TMPDIR/$out \
+    && $synonymous annotate $outdir/$base.af-filt > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
 test -e $outdir/$out
 

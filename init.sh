@@ -11,14 +11,20 @@ set -o pipefail
 export SILVA_PATH="${SILVA_PATH:-$(cd -P $(dirname $0); pwd)}"
 # Path of the untar'd SilVA data directory
 export SILVA_DATA="${SILVA_DATA:-$SILVA_PATH/data}"
+# Control dataset to use
+export SILVA_CONTROL="${SILVA_CONTROL:-$SILVA_PATH/control/NA10851}"
+# Directory of pre-trained models
+export SILVA_TRAINED="${SILVA_TRAINED:-$SILVA_PATH/control/models}"
 
 # Directory to use for any temporary files. It's recommended that this point
 # to somewhere on the local machine (such as /tmp).
 export TMPDIR="${TMPDIR:-$(pwd)}"
 
-# SilVA ignores variants with a 1000 Genomes Project allele frequency
-# greater than of equal to this number ([0--1], suggested: 0.05)
-export SILVA_AF_THRESH=0.05
+# SilVA ignores variants with 1000 Genomes Project allele frequencies
+# less than SILVA_AF_MIN or greater than SILVA_AF_MAX.
+# Both should be in [0--1], suggested: MIN: 0 and MAX: 0.05, respectively
+export SILVA_AF_MIN="${SILVA_AF_THRESH:-0}"
+export SILVA_AF_MAX="${SILVA_AF_THRESH:-0.05}"
 
 # Python and Java library paths
 export CLASSPATH="${SILVA_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"
@@ -29,8 +35,6 @@ export PYTHONPATH="${SILVA_PATH}/lib/python$pyversion:${PYTHONPATH:-}"
 export UNAFOLD_BIN="${UNAFOLD_BIN:-${SILVA_PATH}/tools/unafold/src/hybrid-ss-min}"
 export UNAFOLDDAT="${UNAFOLDDAT:-${SILVA_PATH}/tools/unafold/data}"
 
-# Control dataset to use
-export SILVA_CONTROL=$SILVA_PATH/control/NA10851
 #==================================
 
 version="$(cat ${SILVA_PATH}/VERSION)"

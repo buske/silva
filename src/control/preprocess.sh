@@ -3,8 +3,6 @@
 set -eu
 set -o pipefail
 
-export SILVA_PATH=${SILVA_PATH:-$(cd $(dirname $0)/..; pwd;)}
-
 function usage {
     cat <<EOF
 Usage: $0 TRUE.arff CONTROL.arff OUTBASE

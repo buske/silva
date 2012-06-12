@@ -62,7 +62,7 @@ function train_one {
 	    "./train $modelfile $trainfile"
     else
 	echo "$id" >&2
-	$SILVA_PATH/train $modelfile $trainfile
+	./train $modelfile $trainfile
 	i=$(expr $i + 1)
     fi
     popd > /dev/null

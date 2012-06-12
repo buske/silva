@@ -6,7 +6,7 @@ set -o pipefail
 source $(dirname $0)/init.sh
 
 modeldir=$SILVA_PATH/src/models/forest
-traineddir=$SILVA_PATH/control/models
+traineddir=$SILVA_TRAINED
 controlstats=$SILVA_CONTROL.stats
 
 function usage {
