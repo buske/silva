@@ -23,8 +23,8 @@ export TMPDIR="${TMPDIR:-$(pwd)}"
 # SilVA ignores variants with 1000 Genomes Project allele frequencies
 # less than SILVA_AF_MIN or greater than SILVA_AF_MAX.
 # Both should be in [0--1], suggested: MIN: 0 and MAX: 0.05, respectively
-export SILVA_AF_MIN="${SILVA_AF_THRESH:-0}"
-export SILVA_AF_MAX="${SILVA_AF_THRESH:-0.05}"
+export SILVA_AF_MIN="${SILVA_AF_MIN:-0}"
+export SILVA_AF_MAX="${SILVA_AF_MAX:-0.05}"
 
 # Python and Java library paths
 export CLASSPATH="${SILVA_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"

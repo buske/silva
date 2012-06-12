@@ -79,7 +79,7 @@ test -e $outdir/$out
 out=$base.af-filt
 skip_if_exists $outdir/$out \
     && echo "Filtering by allele frequency..." >&2 \
-    awk -F"\t" '{if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' $outdir/$base.af \
+    && awk -F"\t" '{if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' $outdir/$base.af \
        | cut -f 2- \
        > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out

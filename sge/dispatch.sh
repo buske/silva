@@ -7,7 +7,7 @@ set -o pipefail
 # Set the values below as needed, according to your SGE configuration. 
 # For example:
 #
-#   custom_args="-q lunchQ -e ~/logs/ -o ~/logs/"
+#   custom_args="-q lunchQ -e $HOME/logs/ -o $HOME/logs/"
 #
 
 # Used to run the 'silva-preprocess' script, which uses 4 threads and about 6GB of memory
