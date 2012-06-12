@@ -51,7 +51,7 @@ function skip_if_exists {
 }
 
 init_message
-echo -e "SILVA_AF_MIN:    '$SILVA_AF_MIN'\n" >&2
+echo "SILVA_AF_MIN:    '$SILVA_AF_MIN'" >&2
 echo -e "SILVA_AF_MAX:    '$SILVA_AF_MAX'\n" >&2
 
 mkdir -pv $outdir
@@ -76,7 +76,7 @@ skip_if_exists $outdir/$out \
     && mv $TMPDIR/$out $outdir/$out
 test -e $outdir/$out
 
-out=$base.af-filt
+out=$base.af-flt
 skip_if_exists $outdir/$out \
     && echo "Filtering by allele frequency..." >&2 \
     && awk -F"\t" '{if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' $outdir/$base.af \
@@ -89,7 +89,7 @@ test -e $outdir/$out
 out=$base.mrna
 skip_if_exists $outdir/$out \
     && echo "Annotating with mRNA sequence..." >&2 \
-    && $synonymous annotate $outdir/$base.af-filt > $TMPDIR/$out \
+    && $synonymous annotate $outdir/$base.af-flt > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
 test -e $outdir/$out
 

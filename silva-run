@@ -45,7 +45,7 @@ for mat in $outdir/*$ext; do
     fi
 
     base=$(basename $mat $ext)
-    synfile="$base.rare"
+    synfile="$base.af-flt"
     matfile="$base.std.mat"
     if [[ ! -e $outdir/$synfile ]]; then
 	echo "Error: expected $synfile file in OUTDIR." >&2
