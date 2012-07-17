@@ -70,13 +70,6 @@ class Transcript(object):
                  cds_start, cds_end, exon_starts, exon_ends, seq=None):
         """
         starts and ends: 0-indexed half-open
-
-        Use cases:
-        1) Have gene name and protein coords, need to identify transcript
-        -- Need to verify that mutation matches mRNA
-        -- Need to look up codons
-        2) Have gene and transcript, need to look up mRNA
-        3) Need to represent mRNA
         """
         try:
             self._valid = False
@@ -477,35 +470,43 @@ def get_transcript(genes, pos, ref, alt, gene_id, tx_id):
 
 def random_synonymous_site(tx, cpg=None, avoid_splice=False):
     """Return random synonymous site (cds offset, ref, alt)
-    
     cpg: if True or False, returned site is matched to this
     avoid_splice: if True, no mutations within 3 bp of splice site will be chosen
     """
     splice_sites = []
     cum_sum = 0
-    for start, end in tx._exons:
+    cds_intervals = reversed(tx._cds) if tx._strand == '-' else tx._cds
+    for start, end in cds_intervals:
         splice_sites.append(cum_sum)
         cum_sum += (end - start)
         
+    assert cum_sum == len(tx._mrna)
+
     matched_sites = set()
     syn_sites = set()
-    for offset in xrange(0, len(tx._mrna), 3):
-        codon = tx._mrna[offset:offset + 3]
+    for codon_offset in xrange(0, len(tx._mrna), 3):
+        codon = tx._mrna[codon_offset:codon_offset + 3]
         for frame, alt in SYN_MUTATIONS[codon]:
+            offset = codon_offset + frame
             ref = codon[frame]
-            has_cpg = bool('CG' in tx._mrna[offset+frame-1:offset+frame+2])
-            splice_dist = min([abs(s - offset + frame) for s in splice_sites])
-            syn_sites.add((offset+frame, ref, alt))
+            pre = tx._mrna[max(offset - 1, 0):offset]
+            post = tx._mrna[offset + 1:offset + 2]
+            has_cpg = bool((pre and pre[0] == 'C' and 
+                            (ref == 'G' or alt == 'G')) or 
+                           (post and post[0] == 'G' and 
+                            (ref == 'C' or alt == 'C')))
+            splice_dist = min([abs(s - offset) for s in splice_sites])
+            syn_sites.add((offset, ref, alt))
             if cpg is None or cpg == has_cpg:
                 if not avoid_splice or splice_dist > 3:
-                    matched_sites.add((offset+frame, ref, alt))
+                    matched_sites.add((offset, ref, alt))
 
     if matched_sites:
         sites = matched_sites
     else:
         sites = syn_sites
         print >>sys.stderr, "Warning: no matched synonymous mutation possible"
-        
+
     return sample(sites, 1)[0]
 
 def random_controls(genes, filename, match_cpg=False, avoid_splice=False):
@@ -526,11 +527,18 @@ def random_controls(genes, filename, match_cpg=False, avoid_splice=False):
 
             if match_cpg:
                 offset = tx.project_to_premrna(pos)
-                cpg_seq = tx.premrna()[offset-1:offset+2]
+                pre = tx.premrna()[offset-1:offset]
+                post = tx.premrna()[offset+1:offset+2]
+                tx_ref = ref
+                tx_alt = alt
                 if tx.strand() == '-':
-                    cpg_seq = cpg_seq.translate(COMPLEMENT_TAB)
-
-                cpg = 'CG' in cpg_seq
+                    tx_ref = ref.translate(COMPLEMENT_TAB)
+                    tx_alt = alt.translate(COMPLEMENT_TAB)
+                assert tx_ref == tx.premrna()[offset]
+                cpg = bool((pre and pre[0] == 'C' and
+                            (tx_ref == 'G' or tx_alt == 'G')) or
+                           (post and post[0] == 'G' and
+                            (tx_ref == 'C' or tx_alt == 'C')))
             else:
                 cpg=None
 
@@ -594,8 +602,11 @@ def filter_variants(genes, filename, protein_coords=False):
             tokens = line.split()
             if protein_coords:
                 match = get_transcript_from_protein(genes, *tokens)
-                (tx, chrom, pos, ref, alt) = match
-                id = '.'
+                if match is None:
+                    tx = None
+                else:
+                    (tx, chrom, pos, ref, alt) = match
+                    id = '.'
             else:
                 chrom, pos, id, ref, alts = tokens[:5]
                 chrom = chrom[3:] if chrom.startswith('chr') else chrom
@@ -687,8 +698,8 @@ def run_tests():
     t1 = Transcript('name1', 'tx1', 'chr1', 1, 23, '+', 3, 22,
                     [1, 11], [10, 23], 
                     seq=seq('CAAATGCCCTATTCCCCCCTAATCCCC'))
-    print t1
-    print t1.__dict__
+    #print t1
+    #print t1.__dict__
     assert t1.get_codon(1) == 'ATG'
     assert t1.get_codon(3) == 'TTT'
     assert t1.get_codon(6) == 'TAA'
@@ -724,9 +735,13 @@ def run_tests():
     t1 = Transcript('name1', 'tx1', 'chr1', 1, 23, '-', 3, 22,
                     [1, 15], [14, 23], 
                     seq=seq('AAATTAGGGGGGAATAGGGCATTCCCCCCC'))
-    
+    #                         uueeeeeeeeeeeieeeeeeeu
     print t1
     print t1.__dict__
+    for i in range(20):
+        site = random_synonymous_site(t1, cpg=None, avoid_splice=True)
+        print site
+
     assert t1.get_codon(1) == 'ATG'
     assert t1.get_codon(3) == 'TTT'
     assert t1.get_codon(6) == 'TAA'

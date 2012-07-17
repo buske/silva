@@ -47,13 +47,14 @@ rsync -r \
     $builddir/
 
 
-prompt "\nReplacing <VERSION> tag with: $new_version"
+prompt "\nReplacing <VERSION> tag and coded versions with: $new_version"
 pushd $builddir
 if [[ $new_version != $(cat VERSION) ]]; then
     echo "Error: version mismatch" >&2
     exit 1
 fi
-sed -e "s/<VERSION>/$new_version/g" -i"" README tools/milk/milk/milk_version.py
+replace "<VERSION>" $new_version -- README
+replace $old_version $new_version -- tools/milk/milk/milk_version.py
 popd
 
 
