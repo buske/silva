@@ -5,7 +5,7 @@ set -o pipefail
 
 source $(dirname $0)/init.sh
 
-control=$SILVA_CONTROL.merged.arff
+control=$SILVA_CONTROL.mat
 src=$SILVA_PATH/src
 
 synonymous="$src/input/synonymous.py -O ${SILVA_DATA}/refGene.pkl*"
@@ -35,7 +35,7 @@ fi
 vcf="$1"
 outdir="$2"
 
-if [[ ! -e "$vcf" ]]; then
+if [[ ! -s "$vcf" ]]; then
     echo -e "Error: missing input file: $vcf\n" >&2
     usage
 fi
@@ -44,10 +44,10 @@ base=$(basename "$vcf" .vcf)
 
 function skip_if_exists {
     local f="$1"
-    if [[ -e "$f" ]]; then
+    if [[ -s "$f" ]]; then
 	echo "Found existing: $f..." >&2
     fi
-    test ! -e "$f"
+    test ! -s "$f"
 }
 
 init_message
@@ -62,8 +62,9 @@ skip_if_exists $outdir/$out \
     && echo "Filtering for synonymous exonic variants..." >&2 \
     && $synonymous filter $vcf | egrep -v "^Y\b" > $TMPDIR/$out \
     && echo "Removing variants on chromosome Y..." >&2 \
-    && mv $TMPDIR/$out $outdir/$out
-test -e $outdir/$out
+    && mv $TMPDIR/$out $outdir/$out \
+    && echo "Left with $(grep -v '^#' $outdir/$out | wc -l) variants..." >&2
+test -s $outdir/$out
 
 # Annotate 1000 Genomes Project AF
 out=$base.af
@@ -74,54 +75,40 @@ skip_if_exists $outdir/$out \
        | paste - $outdir/$base.syn \
        > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
-test -e $outdir/$out
+test -s $outdir/$out
 
-out=$base.af-flt
+out=$base.flt
 skip_if_exists $outdir/$out \
     && echo "Filtering by allele frequency..." >&2 \
-    && awk -F"\t" '{if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' $outdir/$base.af \
+    && awk -F"\t" '/^#/; /^[^#]/{OFS="\t"; if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' $outdir/$base.af \
        | cut -f 2- \
        > $TMPDIR/$out \
-    && mv $TMPDIR/$out $outdir/$out
-test -e $outdir/$out
+    && mv $TMPDIR/$out $outdir/$out \
+    && echo "Left with $(grep -v '^#' $outdir/$out | wc -l) variants..." >&2
+test -s $outdir/$out
 
 # Annotate with mrna sequence
 out=$base.mrna
 skip_if_exists $outdir/$out \
     && echo "Annotating with mRNA sequence..." >&2 \
-    && $synonymous annotate $outdir/$base.af-flt > $TMPDIR/$out \
+    && $synonymous annotate $outdir/$base.flt > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
-test -e $outdir/$out
+test -s $outdir/$out
 
 # Annotate with features
-out=$outdir/$base.raw.mat
+out=$outdir/$base.mat
 skip_if_exists $out \
     && echo "Annotating features from MRNA file..." >&2 \
-    && $src/convert/mrna2mat.sh $outdir/$base.mrna $outdir/$base.raw
-test -e $out
+    && $src/convert/mrna2mat.sh $outdir/$base.mrna $outdir/$base
+test -s $out
 
-# Reformat matrix for WEKA
-out=$outdir/$base.raw.arff
-skip_if_exists $out \
-    && echo "Creating ARFF file (for WEKA)..." >&2 \
-    && $src/convert/mat2arff.sh "$base" 0 $outdir/$base.raw{.mat,}
-test -e $out
-
-# Standardize according to training dataset
-out=$base.std.arff
+# Standardize according to control dataset
+out=$base.input
 skip_if_exists $outdir/$out \
-    && echo "Standardizing ARFF file according to control data..." >&2 \
-    && java -Xmx1800m weka.filters.unsupervised.attribute.Standardize \
-       -b -i $control -o /dev/null -r $outdir/$base.raw.arff -s $TMPDIR/$out \
+    && echo "Standardizing MAT file according to control data..." >&2 \
+    && $src/input/standardize.py \
+       --class=0 --control=$control $outdir/$base.mat > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
-test -e $outdir/$out
-
-# Convert back into mat for analysis
-out=$base.std.mat
-skip_if_exists $outdir/$out \
-    && echo "Creating MAT file to provide to model..." >&2 \
-    && $src/convert/arff2mat.sh $outdir/$base.std.arff > $TMPDIR/$out \
-    && mv $TMPDIR/$out $outdir/$out
-test -e $outdir/$out
+test -s $outdir/$out
 
 echo "$0: SUCCESS" >&2

@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 """
-Print whitened (zero-mean, unit-stdev) FILE.mat, 
+Print standardized (zero-mean, unit-stdev) FILE.mat, 
 optionally based upon values in a control MAT file.
+If the header includes a 'class' column, it will be 
+left as is.
 """
 
 # Author: Orion Buske
@@ -26,6 +28,7 @@ def read_examples(filename):
     with maybe_gzip_open(filename) as ifp:
         header = ifp.readline().strip()
         assert header.startswith('#')
+        header = header.replace('#', '')
         for line in ifp:
             line = line.strip()
             if not line: continue
@@ -34,33 +37,59 @@ def read_examples(filename):
             lines.append([float(val) for val in line.split()])
 
     data = array(lines, dtype=float)
-    return header, data
 
-def whiten_data(mat, control=None):
+    # Find class column
+    cols = header.split()
+    if cols[0] == 'class':
+        class_col = 0
+    else:
+        class_col = None
+        
+    return header, class_col, data
+
+def whiten_data(mat, control=None, class_col=None):
     data = mat
     if control is not None:
         data = control
 
     means = data.mean(axis=0)
     stds = data.std(axis=0)
-    # Whiten mat according to mean/std in source array
+    # Standardize mat according to mean/std in source array
     for col in xrange(mat.shape[1]):
+        # Don't standardize the class column
+        if col == class_col:
+            continue
+
         if stds[col] == 0:
             mat[:, col] = 0
         else:
             mat[:, col] = (mat[:, col] - means[col]) / stds[col]
     
-def script(filename, control=None):
-    header, mat = read_examples(filename)
+def script(filename, control=None, add_class=None):
+    header, class_col, mat = read_examples(filename)
     if control is not None:
-        control_header, control = read_examples(control)
+        control_header, control_class_col, control = read_examples(control)
         assert header == control_header
 
-    whiten_data(mat, control=control)
+    whiten_data(mat, control=control, class_col=class_col)
 
-    print header
+    if add_class is not None:
+        print '#class\t%s' % header
+    else:
+        print '#%s' % header
+
     for row in mat:
-        print '\t'.join(['%.4f' % val for val in row])
+        values = []
+        if add_class is not None:
+            values.append('%d' % add_class)
+
+        for i, val in enumerate(row):
+            if i == class_col:
+                values.append('%d' % val)
+            else:
+                values.append('%.4f' % val)
+
+        print '\t'.join(values)
         
 def parse_args(args):
     from optparse import OptionParser
@@ -71,7 +100,12 @@ def parse_args(args):
                           description=description)
     parser.add_option('-c', '--control', metavar='MAT',
                       dest='control', default=None,
-                      help="")
+                      help="Standardize according to data in MAT instead"
+                      " of FILE.mat")
+    parser.add_option('--class', metavar='INT', type='int',
+                      dest='add_class', default=None,
+                      help="If set, prepends a class column with the given"
+                      " value")
     options, args = parser.parse_args()
 
     if len(args) != 1:

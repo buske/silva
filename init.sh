@@ -26,8 +26,7 @@ export TMPDIR="${TMPDIR:-$(pwd)}"
 export SILVA_AF_MIN="${SILVA_AF_MIN:-0}"
 export SILVA_AF_MAX="${SILVA_AF_MAX:-0.05}"
 
-# Python and Java library paths
-export CLASSPATH="${SILVA_PATH}/tools/weka/weka.jar:${CLASSPATH:-}"
+# Python library paths
 pyversion=$(python -c "import sys; print sys.version[:3]")
 export PYTHONPATH="${SILVA_PATH}/lib/python$pyversion:${PYTHONPATH:-}"
 

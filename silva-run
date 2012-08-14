@@ -36,7 +36,7 @@ if [[ ! -e $modeldir/test ]]; then
     exit 1
 fi
 
-ext=.std.mat
+ext=.input
 for mat in $outdir/*$ext; do
     if [[ ! -e $mat ]]; then
 	echo "Error: expected $ext file in OUTDIR." >&2
@@ -45,21 +45,22 @@ for mat in $outdir/*$ext; do
     fi
 
     base=$(basename $mat $ext)
-    synfile="$base.af-flt"
-    matfile="$base.std.mat"
-    if [[ ! -e $outdir/$synfile ]]; then
-	echo "Error: expected $synfile file in OUTDIR." >&2
+    fltfile="$base.flt"
+    if [[ ! -s $outdir/$fltfile ]]; then
+	echo "Error: expected $fltfile file in OUTDIR." >&2
 	echo "Was silva-preprocess successful?" >&2
 	exit 1
     fi
-    if [[ ! -e $outdir/$matfile ]]; then
+	
+    matfile="$base.input"
+    if [[ ! -s $outdir/$matfile ]]; then
 	echo "Error: expected $matfile file in OUTDIR." >&2
 	echo "Was silva-preprocess successful?" >&2
 	exit 1
     fi
     for modelfile in $traineddir/*.model; do
 	pushd $modeldir > /dev/null
-	if [[ ! -e $modelfile ]]; then
+	if [[ ! -s $modelfile ]]; then
 	    echo "Error: could not find saved model: $modelfile" >&2
 	    echo "Was silva-preprocess successful?" >&2
 	    exit 1
@@ -68,7 +69,7 @@ for mat in $outdir/*$ext; do
 	# Run saved model on MAT file and created score file
 	model=$(basename $modelfile .model)
 	scorefile=$model.scored
-	if [[ ! -e $outdir/$scorefile ]]; then
+	if [[ ! -s $outdir/$scorefile ]]; then
 	    echo "Running model $model..." >&2
 	    ./test $modelfile $mat | cut -f 1 > $outdir/.$scorefile \
 		&& mv $outdir/.$scorefile $outdir/$scorefile
@@ -79,7 +80,7 @@ for mat in $outdir/*$ext; do
 
     # Print scored examples to stdout
     echo -e "\nPrinting scored variants to stdout..." >&2
-    $SILVA_PATH/src/util/summarize_scores.py $controlstats $outdir/$matfile $outdir/$synfile $outdir/*.scored
+    $SILVA_PATH/src/util/summarize_scores.py $controlstats $outdir/$matfile $outdir/$fltfile $outdir/*.scored
 
     break  # Only process first MAT file
 done
