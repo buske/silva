@@ -27,8 +27,9 @@ if [[ ! -s $base.input ]]; then
 	--class=1 --control=$control $base.mat > $base.input
 fi
 
-#./src/convert/mat2arff.sh polymorphic 0 /data/buske/synonymous/alamut/polymorphic{.mat,}
+cp $base.input $base.merged.input
+grep -v "^#" $control >> $base.merged.input
 
-#./src/control/preprocess.sh /data/buske/synonymous/2012-06-01_no-splice-dist/{true/true.arff,1000gp/NA10851.merged_beagle_mach.20101123.exonic-snps/NA10851.merged_beagle_mach.20101123.exonic-snps.raw.arff,NA10851}
+
 
 # Update control symlinks
