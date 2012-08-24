@@ -28,8 +28,9 @@ def mkdir(dir):
 def read_mat(filename):
     true_egs = []
     false_egs = []
+    header = ""
     with maybe_gzip_open(filename) as ifp:
-        header = ifp.readline()
+        header = ifp.readline().strip()
         assert header.startswith('#')
         assert header.strip('#').split()[0] == 'class'
 
@@ -43,16 +44,16 @@ def read_mat(filename):
             else:
                 assert False, "Invalid line: " + line
 
-    return true_egs, false_egs
+    return header, true_egs, false_egs
 
-def write_examples(dir, filename, examples_list, header=[]):
+def write_examples(dir, filename, examples_list, header=None):
     out_filename = os.path.join(dir, filename)
     if os.path.exists(out_filename):
         print >>sys.stderr, "Output file already exists: %s" % out_filename
     else:
         with open(out_filename, 'w') as ofp:
             if header:
-                print >>ofp, '\n'.join(header)
+                print >>ofp, header
 
             for examples in examples_list:
                 print >>ofp, '\n'.join(examples)
@@ -73,14 +74,14 @@ def make_datasets(true_control, false_control, outdir,
     for i, (true_train, false_train) in \
             enumerate(overlapping_subsets(n, d, true_control, false_control)):
         print >>sys.stderr, i
-        write_examples(outdir, "%02d.train.mat" % i,
+        write_examples(outdir, "%02d.train.input" % i,
                        [true_train, false_control], header=header)
 
 def script(controlfile, outdir, **kwargs):
     mkdir(outdir)
-    true_control, false_control = read_mat(controlfile)
+    header, true_control, false_control = read_mat(controlfile)
     
-    make_datasets(true_control, false_control, outdir)
+    make_datasets(true_control, false_control, outdir, header=header)
         
 def parse_args(args):
     from optparse import OptionParser

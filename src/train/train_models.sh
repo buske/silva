@@ -8,7 +8,7 @@ function usage {
     cat <<EOF
 Usage: $0 DATADIR MODELDIR [MODEL...]
 
-Expects ID.train.arff files in DATADIR/
+Expects ID.train files in DATADIR/
 Creates ID.model in MODELDIR/MODEL/ for each specified.
 EOF
     exit 1
