@@ -3,7 +3,7 @@
 set -eu
 set -o pipefail
 
-source $(dirname $0)/init.sh
+source ${SILVA_PATH:-$(dirname $0)}/init.sh
 
 control=$SILVA_CONTROL.mat
 src=$SILVA_PATH/src
@@ -40,8 +40,6 @@ if [[ ! -s "$vcf" ]]; then
     usage
 fi
 
-base=$(basename "$vcf" .vcf)
-
 function skip_if_exists {
     local f="$1"
     if [[ -s "$f" ]]; then
@@ -57,35 +55,49 @@ echo -e "SILVA_AF_MAX:    '$SILVA_AF_MAX'\n" >&2
 mkdir -pv $outdir
 # Filter to just synonymous variants
 # Adds gene and transcript information
-out=$base.syn
+
+if [[ "$vcf" == *.pcoord ]]; then
+    base=$(basename "$vcf" .pcoord)
+    pcoord="--protein-coords"
+else
+    base=$(basename "$vcf" .vcf)
+    pcoord=
+fi
+if [[ -n "$pcoord" ]]; then
+    out=$base.flt
+else
+    out=$base.syn
+fi
 skip_if_exists $outdir/$out \
     && echo "Filtering for synonymous exonic variants..." >&2 \
-    && $synonymous filter $vcf | egrep -v "^Y\b" > $TMPDIR/$out \
+    && $synonymous filter $pcoord "$vcf" | egrep -v "^Y\b" > $TMPDIR/$out \
     && echo "Removing variants on chromosome Y..." >&2 \
     && mv $TMPDIR/$out $outdir/$out \
     && echo "Left with $(grep -v '^#' $outdir/$out | wc -l) variants..." >&2
 test -s $outdir/$out
 
 # Annotate 1000 Genomes Project AF
-out=$base.af
-skip_if_exists $outdir/$out \
-    && echo "Annotating with 1000 Genomes Project allele frequency..." >&2 \
-    && cut -f 1,2,5 $outdir/$base.syn \
-       | $gp1k \
-       | paste - $outdir/$base.syn \
-       > $TMPDIR/$out \
-    && mv $TMPDIR/$out $outdir/$out
-test -s $outdir/$out
+if [[ -z "$pcoord" ]]; then
+    out=$base.af
+    skip_if_exists $outdir/$out \
+        && echo "Annotating with 1000 Genomes Project allele frequency..." >&2 \
+        && cut -f 1,2,5 $outdir/$base.syn \
+           | $gp1k \
+           | paste - $outdir/$base.syn \
+           > $TMPDIR/$out \
+        && mv $TMPDIR/$out $outdir/$out
+    test -s $outdir/$out
 
-out=$base.flt
-skip_if_exists $outdir/$out \
-    && echo "Filtering by allele frequency..." >&2 \
-    && awk -F"\t" '/^#/; /^[^#]/{OFS="\t"; if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' $outdir/$base.af \
-       | cut -f 2- \
-       > $TMPDIR/$out \
-    && mv $TMPDIR/$out $outdir/$out \
-    && echo "Left with $(grep -v '^#' $outdir/$out | wc -l) variants..." >&2
-test -s $outdir/$out
+    out=$base.flt
+    skip_if_exists $outdir/$out \
+        && echo "Filtering by allele frequency..." >&2 \
+        && awk -F"\t" '/^#/; /^[^#]/{OFS="\t"; if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' $outdir/$base.af \
+           | cut -f 2- \
+           > $TMPDIR/$out \
+        && mv $TMPDIR/$out $outdir/$out \
+        && echo "Left with $(grep -v '^#' $outdir/$out | wc -l) variants..." >&2
+    test -s $outdir/$out
+fi
 
 # Annotate with mrna sequence
 out=$base.mrna

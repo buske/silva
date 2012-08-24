@@ -34,11 +34,13 @@ def read_data(file):
 train_ds = read_data(trainfile)
 
 # Build simple neural net
-n_hidden = 8
-net = buildNetwork(train_ds.indim, train_ds.outdim, 1)
+n_hidden = 5
+print >>sys.stderr, "Training %dx%dx%d network" % (train_ds.indim, n_hidden, train_ds.outdim)
+net = buildNetwork(train_ds.indim, n_hidden, train_ds.outdim)
 
 # Train the neural net
-trainer = BackpropTrainer(net, train_ds, weightdecay=0.01, momentum=0.1)
+trainer = BackpropTrainer(net, train_ds, learningrate=0.1, lrdecay=(1-1e-4),
+                          momentum=0.1, weightdecay=0.01, verbose=True)
 #trainer.trainEpochs(100)
 trainer.trainUntilConvergence(maxEpochs=500)
 

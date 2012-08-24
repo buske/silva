@@ -91,7 +91,7 @@ class FLD(object):
 
 def parse_args(args):
     from optparse import OptionParser
-    usage = "usage: %prog [options] TRAIN [TEST]"
+    usage = "usage: %prog [options] DATASET"
     description = __doc__.strip()
     version = __version__
     
@@ -99,7 +99,7 @@ def parse_args(args):
                           description=description)
     parser.add_option("--train", dest="train",
                       default=False, action="store_true",
-                      help="Train model on VECTOR file,"
+                      help="Train model on DATASET file,"
                       " overwriting any existing saved model")
     parser.add_option("--model", dest="model", metavar="FILENAME",
                       default=None,
@@ -114,20 +114,18 @@ def parse_args(args):
 def main(args=sys.argv[1:]):
     options, args = parse_args(args)
 
-    trainfile = args[0]
-    testfile = args[1] if len(args) >= 2 else None
-
-    train_solns, train_data = load_data(trainfile)
-
     fld = FLD(train=options.train, filename=options.model)
-    
+
     if options.train or not fld.is_trained():
+        trainfile = args[0]
+        train_solns, train_data = load_data(trainfile)
         fld.train(train_solns, train_data)
         if options.model:
             fld.save()
         
     # Rank test data
-    if testfile:
+    if not options.train:
+        testfile = args[0]
         test_solns, test_data = load_data(testfile)
         fld.rank(test_solns, test_data)
         

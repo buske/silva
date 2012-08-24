@@ -3,7 +3,7 @@
 set -eu
 set -o pipefail
 
-source $(dirname $0)/init.sh
+source ${SILVA_PATH:-$(dirname $0)}/init.sh
 
 modeldir=$SILVA_PATH/src/models/forest
 traineddir=$SILVA_TRAINED

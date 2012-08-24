@@ -5,7 +5,7 @@ set -o pipefail
 
 
 # ========= CUSTOMIZABLE PARAMETERS ========= #
-ARFF2MAT=./convert/arff2mat.sh
+ARFF2MAT=$SILVA_PATH/src/convert/arff2mat.sh
 n_threads=8
 # =========================================== #
 
@@ -15,7 +15,7 @@ Usage: $0 MODELDIR DATADIR OUTDIR [LOGDIR]
 
 All ID.train.arff files in DATADIR are run with their matching test files.
 
-MODELDIR should have a 'run' script in it.
+MODELDIR should have 'train' and 'test' scripts in it.
 If LOGDIR is set, then sub-jobs are submitted to SGE.
 EOF
     exit 1
@@ -46,18 +46,18 @@ function run_one_example {
     local id=$1
     local train=$2
     local test=$3
+    local model=$outdir/$id.model
 
     pushd $modeldir > /dev/null
-    if [[ ! -e $outdir/$id.scored ]]; then
+    if [[ ! -s $outdir/$id.scored ]]; then
 	if [[ -n $logdir ]]; then
 	    mkdir -pv $logdir
 	    qsub -cwd -e $logdir -o $logdir -b y -V -N "$(basename $modeldir).$id" \
 		-l h_vmem=2G -q lunchQ \
-		"./run $train $test > $outdir/.$id.scored && mv $outdir/.$id.scored $outdir/$id.scored"
+		"./train $model $train && ./test $model $test > $outdir/.$id.scored && mv $outdir/.$id.scored $outdir/$id.scored && rm -f $model"
 	else
 	    echo "$id" >&2
-	    ./run $train $test > $outdir/.$id.scored && \
-		mv $outdir/.$id.scored $outdir/$id.scored &
+	    ./train $model $train && ./test $model $test > $outdir/.$id.scored && mv $outdir/.$id.scored $outdir/$id.scored && rm -f $model &
 	    i=$(expr $i + 1)
 	fi
     fi
@@ -71,12 +71,12 @@ for train_file in $datadir/*.train*.arff; do
     id=${train_file##*/}
     id=${id%%.train*}
     
-    if [[ ! -e $test_file ]]; then
+    if [[ ! -s $test_file ]]; then
 	echo "Error: missing expected test file: $test_file" >&2
 	exit 1
     fi
     # Convert to mat
-    if [[ ! -e $train_file.mat || ! -e $test_file.mat ]]; then
+    if [[ ! -s $train_file.mat || ! -s $test_file.mat ]]; then
 	echo "Creating MAT versions of train/test files..." >&2
 	$ARFF2MAT $train_file > $train_file.mat
 	$ARFF2MAT $test_file > $test_file.mat

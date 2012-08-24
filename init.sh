@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-set -eu
-set -o pipefail
-
 #==================================
 # Necessary environment variables.
 # Feel free to modify them if you know what you are doing.

@@ -792,7 +792,7 @@ def parse_args(args):
     parser.add_option("--protein-coords", action="store_true",
                       dest="protein_coords", default=False,
                       help="If ACTION is 'filter', VARIANTS file contains"
-                      "protein coordinates, not chromosomal coordinates")
+                      " protein coordinates, not chromosomal coordinates")
     parser.add_option("--all", action="store_true",
                       dest="all", default=False,
                       help="Print all synonymous variants.")

@@ -4,6 +4,7 @@ set -eu
 set -o pipefail
 
 src=$SILVA_PATH/tools/svmmap
+export PYTHONPATH="$src:$PYTHONPATH"
 
 model=$1
 train=$2

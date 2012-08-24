@@ -5,7 +5,7 @@ set -o pipefail
 
 
 # ========= CUSTOMIZABLE PARAMETERS ========= #
-MODELS_DIR=models
+MODELS_DIR=$SILVA_PATH/src/models
 # =========================================== #
 
 function usage {
@@ -41,10 +41,10 @@ logdir=$outdir/log
 mkdir -pv $logdir
 for model in "${models[@]}"; do 
     if [[ $model == "nnet" || $model == forest* ]]; then
-	./util/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model $logdir
+	$SILVA_PATH/src/bench/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model $logdir
     else
 	qsub -cwd -b y -V -e $logdir -o $logdir \
-	    -l h_vmem=14G -N $model -q coffeeQ \
-	    "bash -x ./util/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model"
+	    -l h_vmem=14G -N $model -q lunchQ \
+	    "bash -x $SILVA_PATH/src/bench/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model"
     fi
 done

@@ -3,7 +3,8 @@
 """
 Usage: $0 SCOREDIR
 
-SCOREDIR/N-REP.scored
+SCOREDIR/N.scored
+Prints summary of rank data to stdout
 """
 
 
@@ -20,10 +21,9 @@ if len(args) != 1:
     print __doc__
     sys.exit(1)
     
-
 def rankfile(file):
     scores = []
-    r = 0  # number of positives
+    n_pos = 0
     with open(file) as ifp:
         for line in ifp:
             line = line.split('#', 1)[0].strip()
@@ -34,35 +34,18 @@ def rankfile(file):
             assert group == 0 or group == 1
             score = float(score)
             scores.append(-score)  # negative, to allow proper ranking
-            r += (group == 1)
+            n_pos += (group == 1)
 
-    assert r == 1
+    assert n_pos == 1
     ranks = rankdata(array(scores))
     return ranks[0]
 
 dir = args[0]
-ranks = defaultdict(list)
+ranks = []
 for filename in glob("%s/*.scored" % dir):
-    group = os.path.basename(filename).split('.')[0].split('-')[0]
-    rank = rankfile(filename)
-    ranks[group].append(rank)
-    #print "%s\t%s" % (rank, filename)
+    ranks.append(rankfile(filename))
 
-groups = list(sorted(ranks))
-#print 'thresh\t', '\t'.join(sorted(ranks))
-
-for thresh in [25]:
-    print '%d' % thresh,
-    for group in groups:
-        vals = ranks[group]
-        count = sum([bool(rank <= thresh) for rank in vals])
-        print "\t%d" % count,
-        
-    print ""
-
-if False:
-    print 'MRR:',
-    for group in groups:
-        vals = ranks[group]
-        print "\t%.3f" % (sum([1/rank for rank in vals])/len(vals)),
-    print ""
+print "#top\tn"
+for thresh in [5, 10, 25]:
+    count = sum([bool(rank <= thresh) for rank in ranks])
+    print '%d\t%d' % (thresh, count)

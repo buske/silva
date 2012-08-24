@@ -3,6 +3,7 @@ set -eu
 set -o pipefail
 
 pcoord=$1
+control=$2
 base=$(dirname $1)/$(basename $1 .pcoord)
 
 flt=$base.flt
@@ -21,12 +22,10 @@ if [[ ! -s $mat ]]; then
     ./src/convert/mrna2mat.sh $mrna $base
 fi
 
-#input=$base.input
-#if [[ ! -s $input ]]; then
-#    ./src/input/standardize.py \
-#	--class=0 --control=$control $outdir/$base.mat > $TMPDIR/$out \
-#	&& mv $TMPDIR/$out $outdir/$out
-#fi
+if [[ ! -s $base.input ]]; then
+    ./src/input/standardize.py \
+	--class=1 --control=$control $base.mat > $base.input
+fi
 
 #./src/convert/mat2arff.sh polymorphic 0 /data/buske/synonymous/alamut/polymorphic{.mat,}
 
