@@ -65,7 +65,7 @@ def overlapping_subsets(n, d, *args):
                for arg in args]
             
 def make_datasets(true_control, false_control, outdir,
-                  header=None, n=2, d=3):
+                  header=None, n=2, d=4):
     """Make overlapping training datasets from n chunks of size N/d examples"""
     
     print >>sys.stderr, "Generating dataset:"

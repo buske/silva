@@ -5,7 +5,6 @@ set -o pipefail
 
 
 # ========= CUSTOMIZABLE PARAMETERS ========= #
-ARFF2MAT=$SILVA_PATH/src/convert/arff2mat.sh
 MODELROOT=$SILVA_PATH/src/models
 n_threads=8
 # =========================================== #
@@ -14,7 +13,7 @@ function usage {
     cat <<EOF
 Usage: $0 MODEL DATADIR MODELDIR [LOGDIR]
 
-Models are trained on all ID.train.arff files in DATADIR
+Models are trained on all ID.train.input files in DATADIR
 Models are written to MODELDIR/ID.model
 
 $MODELROOT/MODEL/train should exist
@@ -37,10 +36,7 @@ model=$1
 datadir=$(readlink -e $2)
 outdir=$(readlink -f $3)
 
-if [[ ! -e $ARFF2MAT ]]; then
-    echo "Could not find: $ARFF2MAT" >&2
-    exit 1
-elif [[ ! -e $MODELROOT/$model/train ]]; then
+if [[ ! -e $MODELROOT/$model/train ]]; then
     echo "Could not find: $MODELROOT/$model/train" >&2
     exit 1
 fi
@@ -53,7 +49,7 @@ function train_one {
     local modelfile=$3
 
     pushd $MODELROOT/$model > /dev/null
-    id=$(basename $trainfile .train.arff.mat)
+    id=$(basename $trainfile .train.input)
     if [[ -n $logdir ]]; then
 	mkdir -pv $logdir
 	qsub -cwd -e $logdir -o $logdir -b y -V \
@@ -69,16 +65,15 @@ function train_one {
 }
 
 i=0
-for trainfile in $datadir/*.train.arff; do
+for trainfile in $datadir/*.train.input; do
     # Convert to mat
-    if [[ ! -e $trainfile.mat ]]; then
-	echo "Creating MAT versions of train file: $trainfile.mat..." >&2
-	$ARFF2MAT $trainfile > $trainfile.mat
+    if [[ ! -s $trainfile ]]; then
+	continue
     fi
-    id=$(basename $trainfile .train.arff)
+    id=$(basename $trainfile .train.input)
     modelfile=$outdir/$id.model
     if [[ ! -e $modelfile ]]; then
-	train_one $model $trainfile.mat $modelfile
+	train_one $model $trainfile $modelfile
     fi
     if [[ $i -ge $n_threads ]]; then
 	wait

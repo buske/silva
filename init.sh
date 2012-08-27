@@ -42,8 +42,9 @@ SILVA $version
 -----------
 COMMAND:         '$0 $@'
 DATA:            '$SILVA_DATA'
-TMPDIR:          '$TMPDIR'
 SILVA_CONTROL:   '$SILVA_CONTROL'
+SILVA_TRAINED:   '$SILVA_TRAINED'
+TMPDIR:          '$TMPDIR'
 EOF
 }
 

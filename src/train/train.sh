@@ -3,8 +3,9 @@ set -eu
 set -o pipefail
 
 pcoord=$1
-control=$2
-base=$(dirname $1)/$(basename $1 .pcoord)
+controlbase=$2
+outdir=$(dirname $1)
+base=$(basename $1 .pcoord)
 
 flt=$base.flt
 mrna=$base.mrna
@@ -19,17 +20,18 @@ if [[ ! -s $mrna ]]; then
 fi
 
 if [[ ! -s $mat ]]; then
-    ./src/convert/mrna2mat.sh $mrna $base
+    ./src/convert/mrna2mat.sh $mrna $outdir/$base
 fi
 
-if [[ ! -s $base.input ]]; then
+if [[ ! -s $outdir/$base.input ]]; then
     ./src/input/standardize.py \
-	--class=1 --control=$control $base.mat > $base.input
+	--class=1 --control=$controlbase.mat $outdir/$base.mat > $outdir/$base.input
 fi
 
-cp $base.input $base.merged.input
-grep -v "^#" $control >> $base.merged.input
+cp $outdir/$base.input $outdir/$base.merged.input
+grep -v "^#" $controlbase.input >> $outdir/$base.merged.input
 
-
+./src/train/split_data.py $outdir/$base.merged.input $outdir/${base}_training
+./src/train/train_models.sh $base.training{,/models} forest
 
 # Update control symlinks

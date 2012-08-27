@@ -8,7 +8,7 @@ function usage {
     cat <<EOF
 Usage: $0 DATADIR MODELDIR [MODEL...]
 
-Expects ID.train files in DATADIR/
+Expects ID.train.input files in DATADIR/
 Creates ID.model in MODELDIR/MODEL/ for each specified.
 EOF
     exit 1
@@ -34,10 +34,10 @@ logdir=$outdir/log
 mkdir -pv $logdir
 for model in "${models[@]}"; do 
     if [[ $model == "nnet" || $model == forest* ]]; then
-	$SILVA_PATH/src/control/train_model_on_dir.sh $model $datadir $outdir/$model $logdir
+	$SILVA_PATH/src/train/train_model_on_dir.sh $model $datadir $outdir/$model $logdir
     else
 	qsub -cwd -b y -V -e $logdir -o $logdir \
 	    -l h_vmem=14G -N $model -q lunchQ \
-	    "bash -x $SILVA_PATH/src/control/train_model_on_dir.sh $model $datadir $outdir/$model"
+	    "bash -x $SILVA_PATH/src/train/train_model_on_dir.sh $model $datadir $outdir/$model"
     fi
 done

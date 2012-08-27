@@ -601,7 +601,10 @@ def filter_variants(genes, filename, protein_coords=False):
 
             tokens = line.split()
             if protein_coords:
-                match = get_transcript_from_protein(genes, *tokens)
+                gene, codon, aa, mut = tokens[:4]
+                rest = tokens[1:]
+                match = get_transcript_from_protein(genes, gene, codon, 
+                                                    aa, mut)
                 if match is None:
                     tx = None
                 else:
@@ -609,6 +612,7 @@ def filter_variants(genes, filename, protein_coords=False):
                     id = '.'
             else:
                 chrom, pos, id, ref, alts = tokens[:5]
+                rest = tokens[5:]
                 chrom = chrom[3:] if chrom.startswith('chr') else chrom
                 alt = alts.split(',')[0]
                 # Only process SNVs
@@ -630,7 +634,7 @@ def filter_variants(genes, filename, protein_coords=False):
                 continue
 
             n_kept += 1
-            print '\t'.join([chrom, str(pos), id, ref, alt, tx.gene(), tx.tx()] + tokens[5:])
+            print '\t'.join([chrom, str(pos), id, ref, alt, tx.gene(), tx.tx()] + rest)
 
         print >>sys.stderr, "Found %d synonymous variants (%d dropped)" % \
               (n_kept, n_total - n_kept)
