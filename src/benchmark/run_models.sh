@@ -3,16 +3,13 @@
 set -eu
 set -o pipefail
 
-
-# ========= CUSTOMIZABLE PARAMETERS ========= #
 MODELS_DIR=$SILVA_PATH/src/models
-# =========================================== #
 
 function usage {
     cat <<EOF
 Usage: $0 DATADIR OUTDIR [MODEL...]
 
-All ID.train.arff files in same directory are run with their
+All ID.train.input files in DATADIR are run with their
 matching test files.
 
 MODEL should be a subfolder of $MODELS_DIR/ with an appropriate
@@ -34,17 +31,17 @@ echo "Command: $0 $@" >&2
 if [[ $# -gt 0 ]]; then
     models=( "$@" )
 else
-    models=( fld forest gerp nnet svmmap )
+    models=( fld Rforest gerp forest nnet svmmap )
 fi
 
 logdir=$outdir/log
 mkdir -pv $logdir
 for model in "${models[@]}"; do 
     if [[ $model == "nnet" || $model == forest* ]]; then
-	$SILVA_PATH/src/bench/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model $logdir
+	$SILVA_PATH/src/benchmark/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model $logdir
     else
 	qsub -cwd -b y -V -e $logdir -o $logdir \
 	    -l h_vmem=14G -N $model -q lunchQ \
-	    "bash -x $SILVA_PATH/src/bench/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model"
+	    "bash -x $SILVA_PATH/src/benchmark/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model"
     fi
 done

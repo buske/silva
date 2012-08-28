@@ -2,8 +2,9 @@
 
 """
 Generates stratified train/test datasets from the given
-ARFF file, with positive examples in the same group never
-trained and tested together. Class assumed to be last column.
+INPUT file (MAT format), with positive examples in the same 
+group never trained and tested together. 
+Class must be first column.
 """
 
 # Author: Orion Buske
@@ -15,10 +16,7 @@ import sys
 
 from numpy.random import shuffle
 
-assert os.getenv('SILVA_PATH') is not None, \
-    "Error: SILVA_PATH is unset."
-sys.path.insert(0, os.path.expandvars('$SILVA_PATH/src/share'))
-from silva import maybe_gzip_open
+from buske import maybe_gzip_open
 
 def mkdir(dir):
     assert not os.path.isfile(dir)
@@ -28,27 +26,24 @@ def mkdir(dir):
         except OSError:
             pass
 
-def read_arff(filename):
-    header = []
+def read_mat(filename):
     true_egs = []
     false_egs = []
+    header = None
     with maybe_gzip_open(filename) as ifp:
+        header = ifp.readline().strip()
+        assert header.startswith('#')
+        assert header.strip('#').split()[0] == 'class'
+
         for line in ifp:
             line = line.strip()
-            if not line or line.startswith('@'):
-                header.append(line)
+            cls = line.split(None, 1)[0]
+            if cls == '1':
+                true_egs.append(line)
+            elif cls == '0':
+                false_egs.append(line)
             else:
-                if line.endswith(',1'):
-                    true_egs.append(line)
-                elif line.endswith(',0'):
-                    false_egs.append(line)
-                else:
-                    assert False, "Invalid line: " + line
-
-    last_attributes = [line.lower() for line in header if line.startswith('@')][-2:]
-    assert last_attributes[-1] == '@data'
-    assert last_attributes[-2].split()[1] == 'class', \
-        "Class does not appear to be last attribute"
+                raise Exception("Invalid line: " + line)
 
     return header, true_egs, false_egs
 
@@ -57,12 +52,12 @@ def read_groups(filename):
         return [line.strip() for line in ifp
                 if not line.startswith('#')]
 
-def write_examples(dir, filename, examples_list, header=[]):
+def write_examples(dir, filename, examples_list, header=None):
     out_filename = os.path.join(dir, filename)
     if not os.path.exists(out_filename):
         with open(out_filename, 'w') as ofp:
             if header:
-                print >>ofp, '\n'.join(header)
+                print >>ofp, header
 
             for examples in examples_list:
                 print >>ofp, '\n'.join(examples)
@@ -97,9 +92,9 @@ def make_split_datasets(true_egs, false_egs, outdir, true_groups=None,
         else:
             true_train = [true_egs[j] for j in true_is[n_true_test:]]
 
-        write_examples(outdir, "%02d.train.arff" % i,
+        write_examples(outdir, "%02d.train.input" % i,
                        [true_train, false_train], header=header)
-        write_examples(outdir, "%02d.test.arff" % i,
+        write_examples(outdir, "%02d.test.input" % i,
                        [true_test, false_test], header=header)
 
 def make_infection_datasets(true_egs, false_egs, outdir, true_groups=None,
@@ -125,9 +120,9 @@ def make_infection_datasets(true_egs, false_egs, outdir, true_groups=None,
             false_test = false_egs[:n_false_test]
             false_train = false_egs[n_false_test:]
 
-            write_examples(outdir, "%02d-%02d.train.arff" % (i, j),
+            write_examples(outdir, "%02d-%02d.train.input" % (i, j),
                            [true_train, false_train], header=header)
-            write_examples(outdir, "%02d-%02d.test.arff" % (i, j),
+            write_examples(outdir, "%02d-%02d.test.input" % (i, j),
                            [true_test, false_test], header=header)
 
 def script(filename, outdir, group_file=None, infection=False,
@@ -135,7 +130,7 @@ def script(filename, outdir, group_file=None, infection=False,
     assert 0 <= test_frac <= 1
     
     mkdir(outdir)
-    header, true_egs, false_egs = read_arff(filename)
+    header, true_egs, false_egs = read_mat(filename)
 
     true_groups = None
     if group_file:
@@ -155,7 +150,7 @@ def script(filename, outdir, group_file=None, infection=False,
         
 def parse_args(args):
     from optparse import OptionParser
-    usage = "usage: %prog [options] ARFF OUTDIR"
+    usage = "usage: %prog [options] INPUT OUTDIR"
     description = __doc__.strip()
 
     parser = OptionParser(usage=usage,
