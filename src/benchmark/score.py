@@ -65,8 +65,9 @@ if is_loo:
     # Determine how many replicates were involved
     filenames = glob("%s/*.scored" % dir_)
     try:
-        major = int(os.path.basename(filenames[0]).split('-')[0])
-        reps = len(glob("%s/%d-*.scored" % (dir_, major)))
+        major = os.path.basename(filenames[0]).split('-')[0]
+        int(major)  # make sure it could be an int
+        reps = len(glob("%s/%s-*.scored" % (dir_, major)))
     except ValueError:
         reps = 1
 
