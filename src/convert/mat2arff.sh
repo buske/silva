@@ -5,36 +5,40 @@ set -o pipefail
 
 function usage {
     cat <<EOF
-Usage: $0 RELATION CLASS MAT OUTBASE
-
-Saves ARFF to OUTBASE.arff
+Usage: $0 INPUT > ARFF
 EOF
     exit 1
 }
 
-if [[ $# -ne 4 ]]; then
+if [[ $# -ne 1 ]]; then
     usage
 fi
-relation="$1"
-class="$2"
-mat="$3"
-outbase="$4"
 
-(
-    echo -e "@RELATION $relation\n"
+# Put class column last
+function recol {
+    awk -F"\t" '{OFS="\t"; for (i=2; i<=NF; i++) {printf "%s\t", $i} print $1}'
+}
 
-    head -n 1 "$mat" \
-	| tr -d "#" \
-	| tr "\t" "\n" \
-	| awk '{if ($0 ~ /\?$/) {print $0, "{0,1}"} else {print $0, "NUMERIC"}}' \
-	| sed -e 's/^/@ATTRIBUTE /'
-    echo "@ATTRIBUTE class {0,1}"
+input="$1"
+echo -e "@RELATION SILVA\n"
+
+if [[ $(head -n 1 "$input" | cut -f 1 | tr -d "#") != "class" ]]; then
+    echo "Error: expected first column to be class" >&2
+    exit 1
+fi
+
+# Convert header line into header
+#    | awk '{if ($0 ~ /\?$/) {print $0, "{0,1}"} else {print $0, "NUMERIC"}}' \
+head -n 1 "$input" \
+    | cut -f 2- \
+    | tr -d "#" \
+    | tr "\t" "\n" \
+    | awk '{print $0, "NUMERIC"}' \
+    | sed -e 's/^/@ATTRIBUTE /'
+echo "@ATTRIBUTE class {0,1}"
     
-    echo -e "\n@DATA"
-    
-    tail -n +2 "$mat" \
-	| tr "\t" "," \
-	| sed -e 's/$/,'"$class"'/'
-) > $outbase.arff.temp || exit 1
-
-mv $outbase.arff.temp $outbase.arff
+echo -e "\n@DATA"
+# Convert data
+tail -n +2 "$input" \
+    | recol \
+    | tr "\t" ","
