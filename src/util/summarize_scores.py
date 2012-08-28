@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
 """
-Usage: $0 STATS MAT FILE SCORED...
+Usage: $0 INPUT FILE SCORED...
 
-STATS is the control stats file.
 FILE has variants, one per line.
-MAT is the matrix file for FILE.
+INPUT is the standardized input file for FILE.
 Each SCORED file has a score, one per variant in FILE.
 
-Reports rank mean and range for each line in FILE.
+Reports rank range for each line in FILE.
 """
 
 
@@ -47,20 +46,9 @@ def rankdata(a):
 
 
 args = sys.argv[1:]
-if len(args) < 4:
+if len(args) < 3:
     print __doc__
     sys.exit(1)
-
-def read_stats(filename):
-    attrs = {}
-    with open(filename) as ifp:
-        for line in ifp:
-            line = line.strip()
-            if not line or line.startswith('#'): continue
-            attr, mean, stdev = line.split()
-            attrs[attr] = (float(mean), float(stdev))
-            
-    return attrs
 
 def read_mat(filename):
     mat = []
@@ -77,30 +65,30 @@ def read_mat(filename):
             
     return features, mat
     
-def read_ranks(filename):
+def read_scores(filename):
     scores = []
     with open(filename) as ifp:
         scores = [int(line) for line in ifp]
 
     # Rank the negated scores
-    return rankdata(-array(scores))
+    return array(scores)
 
-statsfile, matfile, file = args[:3]
-scored = args[3:]
+matfile, file = args[:2]
+scored = args[2:]
 
-stats = read_stats(statsfile)
 features, mat = read_mat(matfile)
 
 ranks_list = []
 for filename in scored:
-    ranks = read_ranks(filename)
-    ranks_list.append(ranks)
+    scores = read_scores(filename)
+    ranks_list.append(rankdata(-scores))
     
 ranks = column_stack(ranks_list)
 
 #scores = ranks.shape[1]/(1/ranks).sum(axis=1)  # Harmonic mean rank
 #scores = ranks.mean(axis=1)  # Mean rank
-scores = (1/ranks).sum(axis=1)/ranks.shape[1]  # Mean reciprocal rank
+if len(scored) > 1:
+    scores = (1/ranks).sum(axis=1)/ranks.shape[1]  # Mean reciprocal rank
 
 order = argsort(-scores)
 
@@ -128,8 +116,7 @@ for i in order:
     for feature, value in zip(features, mat_row):
         # Ignore class values
         if feature == 'class': continue
-        mean, stdev = stats[feature]
-        if value > mean + 3 * stdev:
+        if value > 3.0:  # 3 sigma
             extreme_features.append(feature)
 
     extreme_features = ','.join(extreme_features) if extreme_features else '.'

@@ -7,7 +7,6 @@ source ${SILVA_PATH:-$(dirname $0)}/init.sh
 
 modeldir=$SILVA_PATH/src/models/forest
 traineddir=$SILVA_TRAINED
-controlstats=$SILVA_CONTROL.stats
 
 function usage {
     cat <<EOF
@@ -80,7 +79,7 @@ for mat in $outdir/*$ext; do
 
     # Print scored examples to stdout
     echo -e "\nPrinting scored variants to stdout..." >&2
-    $SILVA_PATH/src/util/summarize_scores.py $controlstats $outdir/$matfile $outdir/$fltfile $outdir/*.scored
+    $SILVA_PATH/src/util/summarize_scores.py $outdir/$matfile $outdir/$fltfile $outdir/*.scored
 
     break  # Only process first MAT file
 done
