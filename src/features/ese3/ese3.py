@@ -83,13 +83,13 @@ def score_mutation(matrix, old_seq, new_seq, verbose=False):
 def script(filename, weight_filename='weights.txt',
            quiet=False, verbose=False, **kwargs):
     weights = read_weights(weight_filename)
-    fields = ['f_motifs_lost', 'f_motifs_gained']
+    fields = ['SR-', 'SR+']
 
     if quiet:
         print '#%s' % '\t'.join(fields)
         NULL = '\t'.join(['na'] * 2)
     else:
-        print "#PSSM  n_motifs  motifs_lost  motifs_gained"
+        print "#PSSM  n_motifs  motif_loss  motif_gain"
         NULL = '\t'.join(['na'] * 3)
 
     def safe_div(num, denom):

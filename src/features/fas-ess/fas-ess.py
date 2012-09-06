@@ -75,7 +75,7 @@ def iter_sequences(filename):
                     
 def script(filename, hex_filename='fas-hex3.txt', quiet=False, **kwargs):
     hexs = read_hexamers(hex_filename)
-    fields = ['f_ESS_lost', 'f_ESS_gained']
+    fields = ['FAS6-', 'FAS6+']
     if quiet:
         print '#%s' % '\t'.join(fields)
         NULL = '\t'.join(['na'] * len(fields))

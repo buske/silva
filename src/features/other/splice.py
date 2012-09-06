@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.expandvars('$SILVA_PATH/src/share'))
 from silva import maybe_gzip_open, print_args
 
 def script(filename, quiet=False, verbose=False, **kwargs):
-    fields = ['premrna_f', 'mrna_f']  #, 'splice_dist']
+    fields = ['f_premrna', 'f_mrna']  #, 'splice_dist']
     print '#%s' % '\t'.join(fields)
     with maybe_gzip_open(filename) as ifp:
         for line in ifp:

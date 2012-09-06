@@ -71,10 +71,10 @@ def iter_sequences(filename, domain=None, **kwargs):
 
 def script(filename, quiet=False, domain=None, **kwargs):
     if domain is not None:
-        fields = ['f_premrna_delta_G_%d' % domain,
-                 'f_postmrna_delta_G_%d' % domain]
+        fields = ['ddG_pre_%d' % domain,
+                 'ddG_post_%d' % domain]
     else:
-        fields = ['f_premrna_delta_G', 'f_postmrna_delta_G']
+        fields = ['ddG_pre', 'ddG_post']
         
     print "#%s" % '\t'.join(fields)
     seqs = []

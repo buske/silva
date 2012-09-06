@@ -77,7 +77,7 @@ def script(filename, pese_filename='pese262.txt',
            pess_filename='pess262.txt', quiet=False, **kwargs):
     pese_set = read_octamers(pese_filename)
     pess_set = read_octamers(pess_filename)
-    fields = ['f_pESE-', 'f_pESE+', 'f_pESS-', 'f_pESS+']
+    fields = ['PESE-', 'PESE+', 'PESS-', 'PESS+']
     if quiet:
         print '#%s' % '\t'.join(fields)
         NULL = '\t'.join(['na'] * len(fields))

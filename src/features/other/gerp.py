@@ -66,7 +66,7 @@ else:
     print >>sys.stderr, "Loading table from:", tablefile
     table = read_table(tablefile, optfile)
 
-print '#gerp'
+print '#GERP++'
 for line in sys.stdin:
     line = line.strip()
     if not line or line.startswith('#'): continue

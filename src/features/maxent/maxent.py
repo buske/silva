@@ -246,7 +246,7 @@ def print_row(scores):
     print '\t'.join(strs)
 
 def script(filename, quiet=False, verbose=False, **kwargs):
-    fields = ['max', 'max_diff', 'gained', 'lost', 'max_changed?', 'max_is_cryptic?', 'known_changed_most?']
+    fields = ['MES', 'diff_MES', 'MES+', 'MES-', 'MEC-MC?', 'MEC-CS?', 'MES-KM?']
     print '#%s' % '\t'.join(fields)
     NULL = [None] * len(fields)
 

@@ -103,7 +103,7 @@ def calc_delta_rscu(old_codon, new_codon):
     return old_rscu, new_rscu, abs(new_rscu - old_rscu)
                     
 def script(filename, quiet=False, **kwargs):
-    print '#%s' % '\t'.join(['mut_RSCU', 'delta_RSCU'])
+    print '#%s' % '\t'.join(['RSCU', 'dRSCU'])
     for codon, new_codon in iter_lines(filename):
         old, new, delta = calc_delta_rscu(codon, new_codon)
         print '%.4f\t%.4f' % (new, delta)

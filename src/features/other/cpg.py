@@ -56,7 +56,7 @@ def calc_cpg(seq):
         return 0
                     
 def script(filename, quiet=False, **kwargs):
-    fields = ['mut_CpG?', 'CpG_exon']
+    fields = ['CpG?', 'CpG_exon']
     print '#%s' % '\t'.join(fields)
     for entry in iter_sequences(filename):
         if entry is None:
