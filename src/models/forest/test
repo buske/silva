@@ -1,0 +1,26 @@
+#!/usr/bin/Rscript --vanilla
+
+suppressMessages(library(randomForest))
+
+## Parse commandline args
+args <- commandArgs(trailing=TRUE)
+if(length(args) != 2) stop("Usage: train modelfile testfile")
+modelfile <- args[1]
+testfile <- args[2]
+
+## Read data
+data <- read.delim(testfile, check.names=FALSE)
+features <- colnames(data)
+if(features[1] != "#class")  stop("ERROR: expected first column to be class")
+colnames(data) <- make.names(colnames(data), unique=TRUE)
+
+## Load in saved model, variable 'rf'
+load(modelfile)
+
+## Vote!
+pred <- predict(rf, data[,-1], type='vote', norm.votes=TRUE)
+##pred <- predict(rf, data[,-1])
+
+## Output results to stdout
+scores <- cbind(format(pred[,2], digits=3), format(data[,1], digits=1))
+write(t(scores), file="", ncolumns=2, sep="\t")

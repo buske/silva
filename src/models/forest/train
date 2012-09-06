@@ -1,0 +1,26 @@
+#!/usr/bin/Rscript --vanilla
+library(randomForest)
+
+## Parse commandline args
+args <- commandArgs(trailing=TRUE)
+if(length(args) != 2) stop("Usage: train modelfile trainfile")
+modelfile <- args[1]
+trainfile <- args[2]
+
+## Read data
+write(paste("Reading in data from:", trainfile), stderr())
+data <- read.delim(trainfile, check.names=FALSE)
+features <- colnames(data)
+if(features[1] != "#class") stop("ERROR: expected first column to be class")
+colnames(data) <- make.names(colnames(data), unique=TRUE)
+
+## Train, for fun and profit!
+write("Training random forest...", stderr())
+##classes <- as.factor(data[,1])
+classes <- as.factor(data[,1])
+rf <- randomForest(data[,-1], classes,
+  proximity=TRUE, importance=TRUE, ntree=1000, do.trace=100)
+
+## Store trained model
+write(paste("Saving model to:", modelfile), stderr())
+save(rf, file=modelfile)

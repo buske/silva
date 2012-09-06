@@ -23,10 +23,6 @@ export TMPDIR="${TMPDIR:-$(pwd)}"
 export SILVA_AF_MIN="${SILVA_AF_MIN:-0}"
 export SILVA_AF_MAX="${SILVA_AF_MAX:-0.05}"
 
-# Python library paths
-pyversion=$(python -c "import sys; print sys.version[:3]")
-export PYTHONPATH="${SILVA_PATH}/lib/python$pyversion:${PYTHONPATH:-}"
-
 # UNAfold paths
 export UNAFOLD_BIN="${UNAFOLD_BIN:-${SILVA_PATH}/tools/unafold/src/hybrid-ss-min}"
 export UNAFOLDDAT="${UNAFOLDDAT:-${SILVA_PATH}/tools/unafold/data}"
@@ -75,31 +71,4 @@ Please run the setup.sh script in this tool's root directory
 or set the SILVA_DATA environment variable appropriately.
 EOF
     exit 1
-else
-    milk_version=$(python -c "import milk; print milk.__version__")
-    if [[ -z $milk_version ]]; then
-	cat >&2 <<EOF 
-Custom version of Python package, milk, does not appear to be properly installed.
-
-Please run the setup.sh script in this tool's root directory
-or set the PYTHON_PATH environment variable appropriately.
-EOF
-	exit 1
-    fi
-    if [[ $milk_version != silva-$version ]]; then
-	cat >&2 <<EOF 
-Found existing milk version: $milk_version.
-This other version appears to take precedence over the custom version
-included in this package.
-
-Please resolve this, such that:
-$ python -c 'import milk; print milk.__version__' 
-prints "silva-$version"
-
-The following may be sufficient:
-$ cd tools/milk
-$ python setup.py install
-EOF
-	exit 1
-    fi
 fi

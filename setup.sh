@@ -58,7 +58,7 @@ EOF
 }
 
 
-# Install modified version of milk
+# Install randomForest R package
 prefix="$(pwd)"
 export PYTHONPATH="./lib/python$pyversion:${PYTHONPATH:-}"
 if [[ $(python -c "import milk; print milk.__version__" 2> /dev/null) != silva-$version ]]; then

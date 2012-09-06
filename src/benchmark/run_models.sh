@@ -31,7 +31,7 @@ echo "Command: $0 $@" >&2
 if [[ $# -gt 0 ]]; then
     models=( "$@" )
 else
-    models=( fld Rforest gerp forest nnet svmmap )
+    models=( fld forest gerp nnet svmmap )
 fi
 
 logdir=$outdir/log

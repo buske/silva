@@ -7,7 +7,7 @@ FILE has variants, one per line.
 INPUT is the standardized input file for FILE.
 Each SCORED file has a score, one per variant in FILE.
 
-Reports rank range for each line in FILE.
+Reports ranked, annoated lines.
 """
 
 
@@ -68,7 +68,7 @@ def read_mat(filename):
 def read_scores(filename):
     scores = []
     with open(filename) as ifp:
-        scores = [int(line) for line in ifp]
+        scores = [float(line) for line in ifp]
 
     # Rank the negated scores
     return array(scores)
@@ -87,20 +87,20 @@ ranks = column_stack(ranks_list)
 
 #scores = ranks.shape[1]/(1/ranks).sum(axis=1)  # Harmonic mean rank
 #scores = ranks.mean(axis=1)  # Mean rank
+#Use score if there's only one, else use MRR
 if len(scored) > 1:
     scores = (1/ranks).sum(axis=1)/ranks.shape[1]  # Mean reciprocal rank
 
 order = argsort(-scores)
+ranks = rankdata(-scores)
 
-range_lows = ranks.min(axis=1)
-range_highs = ranks.max(axis=1)
-range_mids = median(ranks, axis=1)
 lines = []
 with open(file) as ifp:
     for line in ifp:
         line = line.strip()
         if line.startswith('#'):
-            print "#%s" % '\t'.join(["score", "low,median,high", "features", line.strip('#')])
+            print "#%s" % '\t'.join(["rank", "score", 
+                                     "features", line.strip('#')])
         else:
             lines.append(line)
 
@@ -109,7 +109,7 @@ assert len(lines) == len(order)
 # Treat SIGPIPE as Unix would expect
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 for i in order:
-    score, low, mid, high, line = scores[i], range_lows[i], range_mids[i], range_highs[i], lines[i]
+    score, rank, line = scores[i], ranks[i], lines[i]
     mat_row = mat[i]
     assert len(mat_row) == len(features)
     extreme_features = []
@@ -120,5 +120,7 @@ for i in order:
             extreme_features.append(feature)
 
     extreme_features = ','.join(extreme_features) if extreme_features else '.'
-    print "%.2f\t%d,%d,%d\t%s\t%s" % (score, low, mid, high, extreme_features, line)
+    rank = '%.1f' % rank
+    rank = rank[:-2] if rank.endswith('.0') else rank
+    print "%s\t%.3f\t%s\t%s" % (rank, score, extreme_features, line)
 

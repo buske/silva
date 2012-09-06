@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# Usage: MODELFILE TRAINFILE
+
+# Dummy file to make GERP satisfy model interface
+touch $1
