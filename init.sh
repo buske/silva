@@ -23,10 +23,6 @@ export TMPDIR="${TMPDIR:-$(pwd)}"
 export SILVA_AF_MIN="${SILVA_AF_MIN:-0}"
 export SILVA_AF_MAX="${SILVA_AF_MAX:-0.05}"
 
-# UNAfold paths
-export UNAFOLD_BIN="${UNAFOLD_BIN:-${SILVA_PATH}/tools/unafold/src/hybrid-ss-min}"
-export UNAFOLDDAT="${UNAFOLDDAT:-${SILVA_PATH}/tools/unafold/data}"
-
 #==================================
 
 version="$(cat ${SILVA_PATH}/VERSION)"
@@ -44,25 +40,7 @@ TMPDIR:          '$TMPDIR'
 EOF
 }
 
-if [[ ! -e $UNAFOLD_BIN ]]; then
-    cat >&2 <<EOF 
-UNAfold does not appear to be installed.
-File does note exist: $UNAFOLD_BIN
-
-Please run the setup.sh script in this tool's root directory
-or set the UNAFOLD_BIN environment variable appropriately.
-EOF
-    exit 1
-elif [[ ! -d $UNAFOLDDAT ]]; then
-    cat >&2 <<EOF 
-UNAfold does not appear to be installed.
-Directory does note exist: $UNAFOLDDAT
-
-Please run the setup.sh script in this tool's root directory
-or set the UNAFOLDDAT environment variable appropriately.
-EOF
-    exit 1
-elif [[ ! -e $SILVA_DATA/refGene.pkl ]]; then
+if [[ ! -e $SILVA_DATA/refGene.pkl ]]; then
     cat >&2 <<EOF 
 Annotation databases seem to be missing.
 File does note exist: $SILVA_DATA/refGene.pkl

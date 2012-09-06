@@ -75,9 +75,6 @@ n_cols=$(expr $n_cols + 1); cut -f 1,2 $mrna \
 wait
 
 n_cols=$(expr $n_cols + 1); run maxent  $featuredir/maxent  ./maxent.py  -q $in &
-n_cols=$(expr $n_cols + 1); run unafold-50 $featuredir/unafold ./unafold.py -d 50 -q $in &
-n_cols=$(expr $n_cols + 1); run unafold-100 $featuredir/unafold ./unafold.py -d 100 -q $in &
-
 n_cols=$(expr $n_cols + 1); grep -v "^#" $mrna | cut -f $CODON_COLS \
     | run codon $featuredir/other ./codon_usage.py -q - &
 wait
