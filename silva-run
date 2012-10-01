@@ -79,7 +79,7 @@ for mat in $outdir/*$ext; do
 
     # Print scored examples to stdout
     echo -e "\nPrinting scored variants to stdout..." >&2
-    $SILVA_PATH/src/util/summarize_scores.py $outdir/$matfile $outdir/$fltfile $outdir/*.scored
+    $SILVA_PATH/src/util/summarize_scores.py $outdir/$fltfile $outdir/*.scored
 
     break  # Only process first MAT file
 done

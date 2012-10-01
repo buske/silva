@@ -54,7 +54,6 @@ if [[ $new_version != $(cat VERSION) ]]; then
     exit 1
 fi
 replace "<VERSION>" $new_version -- README
-replace $old_version $new_version -- tools/milk/milk/milk_version.py
 popd
 
 

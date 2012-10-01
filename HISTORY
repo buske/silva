@@ -1,2 +1,8 @@
+1.0.1: 30 September, 2012
+	- Now using R randomForest package instead of Python milk package
+	- Output format changed
+	- Removed WEKA as a requirement/dependency
+	- Added an example to the distribution
+
 1.0.0: 13 May, 2012
 	- First public release.

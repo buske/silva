@@ -30,52 +30,47 @@ echo -e "\nInstalling SilVA $version dependencies..." >&2
 # Download unafold
 if [[ ! -e tools/unafold/src/hybrid-ss-min ]]; then
     prompt "\n\nDownloading UNAFold 3.8..."
-    pushd tools
-    if [[ ! -e unafold-3.8.tar.gz ]]; then
+    pushd tools > /dev/null
+    unafold_version=$(basename "${UNAFOLD_URL##*-}" .tar.gz)
+    if [[ ! -e unafold-${unafold_version}.tar.gz ]]; then
 	wget "$UNAFOLD_URL"
     fi
     if [[ ! -d unafold ]]; then
-	tar -xzvf unafold-3.8.tar.gz
-	mv unafold-3.8 unafold
+	tar -xzvf unafold-${unafold_version}.tar.gz
+	mv unafold-${unafold_version} unafold
     fi
-    pushd unafold
+    pushd unafold > /dev/null
     ./configure && make
-    popd
-    popd
+    popd > /dev/null
+    popd > /dev/null
 fi
 
+function is_rf_missing {
+    echo 'suppressMessages(require("randomForest", quietly=TRUE))' \
+        | R --vanilla --quiet --slave 2>&1
+}
 
-function milkfail {
+function rf_fail {
     cat <<EOF
-There seems to have been a problem installing the custom version of the 
-Python package milk. If you have a custom distutils configuration, this
-could be the cause. Try moving that file out of the way, rerunning this 
-script, and then moving it back.
 
-SilVA $version installation failed.
+Problem encountered trying to automatically install the randomForest module
+for R. Please make sure R is installed, in your path, and you have installed
+the randomForest module before running SilVA. If you start R, randomForest
+can be installed by typing install.packages("randomForest").
+
 EOF
     exit 1
 }
 
 
 # Install randomForest R package
-prefix="$(pwd)"
-export PYTHONPATH="./lib/python$pyversion:${PYTHONPATH:-}"
-if [[ $(python -c "import milk; print milk.__version__" 2> /dev/null) != silva-$version ]]; then
-    prompt "\n\nConfiguring modified milk Python package..."
-    pushd tools/milk
-    if [[ -e "$HOME/.pydistutils.cfg" ]]; then
-	python setup.py install
-    else
-	libdir="$prefix/lib/python$pyversion"
-	mkdir -pv "$libdir"
-	export PYTHONPATH="$libdir:${PYTHONPATH:-}"
-	trap milkfail TERM EXIT
-	python setup.py install --install-lib="$libdir"
-	
-	trap - TERM EXIT
-    fi
-    popd
+if [[ "$(is_rf_missing)" ]]; then
+    prompt "Installing randomForest package for R..."
+    echo 'install.packages("randomForest", repos="http://probability.ca/cran/")' \
+	| R --vanilla --quiet || rf_fail
+fi
+if [[ "$(is_rf_missing)" ]]; then
+    rf_fail
 fi
 
 
@@ -84,7 +79,7 @@ if [[ ! -e $SILVA_DATA/refGene.pkl ]]; then
     datafile=silva-${version}_data.tar.gz
 
     if [[ ! -e $datafile ]]; then
-	prompt "\n\nFinal step:\nDownloading required SilVA $version databases ($datafile)...\nWARNING: these databases are rather large (~700MB), so this might take a while...\nIf you already downloaded this file, exit this script and set the SILVA_DATA\nenvironment variable to data directory's path."
+	prompt "\n\nFinal step:\nDownloading required SilVA $version databases ($datafile)...\nWARNING: these databases are rather large (~700MB), so this might take a while...\nIf you already downloaded and unpacked this file, exit this script and set the SILVA_DATA\nenvironment variable to data directory's path."
 	wget -v "$SILVA_DATA_URL"
     fi
     if [[ ! -e $SILVA_DATA/refGene.pkl ]]; then
@@ -105,7 +100,8 @@ cat >&2 <<EOF
 
 SilVA $version successfully installed.
 
-To run SilVA on a VCF file, first preprocess the file with './silva-preprocess',
-and then generate results from the output directory with './silva-run'
+To run SilVA on a VCF file, first preprocess the file with 
+'./silva-preprocess', and then generate results from the output 
+directory with './silva-run'
 EOF
 
