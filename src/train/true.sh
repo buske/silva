@@ -36,7 +36,8 @@ merged=$outdir/$basename.merged.input
 cp $base.input $merged
 grep -v "^#" $controlbase.input >> $merged
 
-./src/train/split_data.py $merged $outdir
-./src/train/train_models.sh $outdir{,/models} forest
+#./src/train/split_data.py  $merged $outdir
+#./src/train/train_models.sh $outdir{,/models} forest
+./src/models/forest/train $outdir/0.model $merged
 
 # Update control symlinks

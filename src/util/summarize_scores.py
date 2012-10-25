@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 """
-Usage: $0 INPUT FILE SCORED...
+Usage: $0 FILE SCORED...
 
 FILE has variants, one per line.
-INPUT is the standardized input file for FILE.
 Each SCORED file has a score, one per variant in FILE.
 
-Reports ranked, annoated lines.
+Reports ranked, annotated lines.
 """
 
 
@@ -46,25 +45,10 @@ def rankdata(a):
 
 
 args = sys.argv[1:]
-if len(args) < 3:
+if len(args) < 2:
     print __doc__
     sys.exit(1)
 
-def read_mat(filename):
-    mat = []
-    features = []
-    with open(filename) as ifp:
-        for line in ifp:
-            line = line.strip()
-            if not line: continue
-            if line.startswith('#'):
-                features = line.translate(None, '#').split('\t')
-            else:
-                values = [float(val) for val in line.split()]
-                mat.append(values)
-            
-    return features, mat
-    
 def read_scores(filename):
     scores = []
     with open(filename) as ifp:
@@ -73,10 +57,8 @@ def read_scores(filename):
     # Rank the negated scores
     return array(scores)
 
-matfile, file = args[:2]
-scored = args[2:]
-
-features, mat = read_mat(matfile)
+file = args[0]
+scored = args[1:]
 
 ranks_list = []
 for filename in scored:
@@ -98,11 +80,14 @@ lines = []
 with open(file) as ifp:
     for line in ifp:
         line = line.strip()
+        # Reorder gene and tx columns to the front, as hack until
+        # internal file formats can be cleaned up
+        tokens = line.lstrip('#').split('\t')
+        tokens = tokens[5:7] + tokens[:5] + tokens[7:]
         if line.startswith('#'):
-            print "#%s" % '\t'.join(["rank", "score", 
-                                     "features", line.strip('#')])
+            print "#%s" % '\t'.join(["rank", "score"] + tokens)
         else:
-            lines.append(line)
+            lines.append('\t'.join(tokens))
 
 assert len(lines) == len(order)
 
@@ -110,17 +95,7 @@ assert len(lines) == len(order)
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 for i in order:
     score, rank, line = scores[i], ranks[i], lines[i]
-    mat_row = mat[i]
-    assert len(mat_row) == len(features)
-    extreme_features = []
-    for feature, value in zip(features, mat_row):
-        # Ignore class values
-        if feature == 'class': continue
-        if value > 3.0:  # 3 sigma
-            extreme_features.append(feature)
-
-    extreme_features = ','.join(extreme_features) if extreme_features else '.'
     rank = '%.1f' % rank
     rank = rank[:-2] if rank.endswith('.0') else rank
-    print "%s\t%.3f\t%s\t%s" % (rank, score, extreme_features, line)
+    print '\t'.join([rank, '%.3f' % score, line])
 
