@@ -11,7 +11,7 @@ set -o pipefail
 #
 
 # Used to run the 'silva-preprocess' script, which uses 4 threads and about 6GB of memory
-preprocess_args="-l h_vmem=6G -l num_proc=4"
+preprocess_args="-l h_vmem=6G -l num_proc=6"
 # Used to run the 'run' script, which uses 1 thread and about 2GB of memory
 run_args="-l h_vmem=2G"
 # Any additional parameters to include with both runs
@@ -49,13 +49,13 @@ for vcf in "$@"; do
     mkdir -pv "$outdir"
 
     id=$(uuidgen)
-    qsub -b y -N "pre_$id" \
+    qsub -b y -N "silva_pre_$id" \
 	$preprocess_args \
 	$custom_args \
 	-S /bin/bash -v "PATH=$PATH" \
-	"$(pwd)/silva-preprocess $vcf $outdir"
+	"$(pwd)/silva-preprocess $outdir $vcf"
 
-    qsub -b y -N "run_$id" -hold_jid "pre_$id" \
+    qsub -b y -N "silva_run_$id" -hold_jid "pre_$id" \
 	$run_args \
 	$custom_args \
 	-S /bin/bash -v "PATH=$PATH" \

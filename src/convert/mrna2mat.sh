@@ -64,17 +64,17 @@ function run {
     fi
 }
 
-n_threads=${SILVA_N_THREADS:-1}
+n_threads=0
+n_cols=0
 function setup {
-    if [[ $n_threads -lt 1 ]]; then
+    if [[ $n_threads -ge ${SILVA_N_THREADS:-1} ]]; then
 	wait
-	n_threads=${SILVA_N_THREADS:-1}
+	n_threads=0
     fi
 
-    n_threads=$(expr $n_threads - 1);
+    n_threads=$(expr $n_threads + 1);
     n_cols=$(expr $n_cols + 1); 
 }
-n_cols=0
 
 setup; run cpg     $featuredir/other   ./cpg.py     -q $in &
 setup; run splice  $featuredir/other   ./splice.py  -q $in &
