@@ -16,6 +16,11 @@ import signal
 from collections import defaultdict
 from numpy import array, column_stack, median, argsort
 
+LOW_LABEl = "likely benign"
+MID_LABEL = "potentially pathogenic"
+MID_CUTOFF = 0.28
+HIGH_LABEL = "likely pathogenic"
+HIGH_CUTOFF = 0.48
 
 # The following two rank functions are used in place of scipy's rankdata,
 # in order to remove scipy as a dependency.
@@ -85,7 +90,7 @@ with open(file) as ifp:
         tokens = line.lstrip('#').split('\t')
         tokens = tokens[5:7] + tokens[:5] + tokens[7:]
         if line.startswith('#'):
-            print "#%s" % '\t'.join(["rank", "score"] + tokens)
+            print "#%s" % '\t'.join(["rank", "score", "class"] + tokens)
         else:
             lines.append('\t'.join(tokens))
 
@@ -95,7 +100,13 @@ assert len(lines) == len(order)
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 for i in order:
     score, rank, line = scores[i], ranks[i], lines[i]
+    cls = LOW_LABEL
+    if score >= HIGH_CUTOFF:
+        cls = HIGH_LABEL
+    elif score >= MID_CUTOFF:
+        cls = MID_LABEL
+
     rank = '%.1f' % rank
     rank = rank[:-2] if rank.endswith('.0') else rank
-    print '\t'.join([rank, '%.3f' % score, line])
+    print '\t'.join([rank, '%.3f' % score, cls, line])
 

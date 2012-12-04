@@ -1,14 +1,11 @@
 - .*
 - *~
-- src/bench
-- src/control
 - lib
 - tools/svmmap
-- tools/milk/build
-- tools/milk/dist
-- tools/milk/milk.egg-info
 - tools/unafold
+- tools/weka
 - data
 - bin
 - build
 - dist
+- control/*.pcoord

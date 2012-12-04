@@ -83,7 +83,6 @@ if [[ -z "$pcoord" ]]; then
         && echo "Annotating with 1000 Genomes Project allele frequency..." >&2 \
         && cut -f 1,2,5 $outdir/$base.syn \
            | $gp1k \
-           | paste - $outdir/$base.syn \
            > $TMPDIR/$out \
         && mv $TMPDIR/$out $outdir/$out
     test -s $outdir/$out
@@ -91,7 +90,8 @@ if [[ -z "$pcoord" ]]; then
     out=$base.flt
     skip_if_exists $outdir/$out \
         && echo "Filtering by allele frequency..." >&2 \
-        && awk -F"\t" '/^#/; /^[^#]/{OFS="\t"; if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' $outdir/$base.af \
+        && paste $outdir/$base.af $outdir/$base.syn \
+	   | awk -F"\t" '/^#/; /^[^#]/{OFS="\t"; if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' \
            | cut -f 2- \
            > $TMPDIR/$out \
         && mv $TMPDIR/$out $outdir/$out \

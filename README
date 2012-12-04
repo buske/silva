@@ -10,9 +10,9 @@ SilVA is a tool for the automated harmfulness prediction of SYNONYMOUS single-nu
 
 If you use this tool, please cite:
 
-    Buske OJ, Manickaraj A, Mital S, Brudno M. (2012)
+    Buske OJ, Manickaraj A, Mital S, Ray PN, Brudno M. (2012)
     Identification of deleterious synonymous variants in human genomes.
-    In preparation.
+    Submitted.
 
 Send questions, comments, and difficulties to: silva-snv@cs.toronto.edu
 
@@ -49,18 +49,17 @@ Prerequisites
 - Python 2.6 or 2.7 in your PATH
 -- The 'numpy' Python package
 - Perl in your PATH (for maxentscan)
-- Java in your PATH (for weka)
+- R in your PATH (for randomForest)
+
 
 Dependencies
 ------------
 SilVA requires several tools and databases to run. Most of these were included with this release, but the 'setup.sh' script will download and configure the rest.
 
-- included: milk 0.4.2 Python package, with slight modification, available from:
-  http://pypi.python.org/pypi/milk/
-- included: weka 3.6.6 machine learning toolkit, available from:
-  http://www.cs.waikato.ac.nz/ml/weka/
 - included: maxentscan, available from:
   http://genes.mit.edu/burgelab/maxent/download/
+- setup.sh: randomForest package, available on CRAN:
+  http://cran.r-project.org/web/packages/randomForest/
 - setup.sh: UNAfold, available from:
   http://mfold.rna.albany.edu/?q=DINAMelt/software
 - setup.sh: SilVA databases, available from:
@@ -81,14 +80,13 @@ Single-nucleotide variants should be given to SilVA in VCF or a VCF-like file fo
 
 Output Format
 -------------
-SilVA will print the synonymous variants to stdout, ordered by score, with the variants most likely to be harmful listed first. Variants are first filtered down to just rare and novel synonymous variants. The variants are then annotated with a number of features and several pre-trained models are used to rank the variants.
+SilVA will print the synonymous variants to stdout, ordered by score, with the variants most likely to be harmful listed first. Variants are first filtered down to just rare and novel synonymous variants. The variants are then annotated with a number of features and the machine learning model is used to rank the variants. The output contains the following tab-delimited columns:
 
 1. Score (the mean reciprocal rank)
 2. Range of ranks assigned from the various models (min, median, max)
-3. Potentially-important features.*
+3. HGNC gene name
+4. RefSeq mRNA identifier
 ... Fields from the input file
-
-* More specifically, these are features for which this variants had a value at least 3 standard deviations away from the mean in the control data. This field is intended as a helpful guess at the features that might have been important in classifying that variant as harmful. In reality, it may be nonlinear interactions between variables that result in a high score, but this is not captured in this field. A list of all the features and their descriptions is available in the paper.
 
 
 Installation
@@ -112,21 +110,30 @@ SilVA is packaged with most of its dependencies. The remaining few can be downlo
 Running SilVA
 =============
 
-In addition to running SilVA on your local machine, we provide a convenience script to dispatch multiple SilVA runs across an SGE cluster. SilVA uses TMPDIR for all temporary files. If TMPDIR is not set, it will use the current directory. 
+In addition to running SilVA on your local machine, we provide a convenience script to dispatch multiple SilVA runs across an SGE cluster. SilVA uses TMPDIR for all temporary files. If TMPDIR is not set, it will use the current directory.
 
 Local machine
 -------------
-To run SilVA on your local machine, you should have already downloaded dependencies with the 'setup.sh' script. You can then run SilVA on your file of variants, <VCF>, (see Input Format) from the root directory of this package (or add this directory to your PATH):
+To run SilVA on your local machine, you should have already installed dependencies with the 'setup.sh' script. You can then run SilVA on your file of variants, <VCF>, (see Input Format) from the root directory of this package (or add this directory to your PATH):
 
-1. Filter an annotate the variants in the VCF file:
+1. Filter an annotate the variants in the VCF file (this takes a while):
 
     ./silva-preprocess <VCF> <OUTDIR>
 
-2. Run the trained models on the annotated variants and print the top variants in order of decreasing predicted harmfulness:
+2. Run the trained models on the annotated variants and print the top variants in order of decreasing predicted harmfulness (this is fast):
 
     ./silva-run <OUTDIR> | head
 
 SilVA should handle errors and early termination gracefully, so if something goes wrong, you can re-run the same command and it will pick up where it left off.
+
+Example
+-------
+The 'example/' folder in the root directory of this package contains a sample input file for you to test SilVA on. You can run SilVA on it with the following commands:
+
+    ./silva-preprocess example/example.vcf example
+    ./silva-run example | head
+
+You should see the known-harmful ACVRL1 variant appear at the top! Granted, for simplicity, the example only has 28 other rare synonymous variants in it. SilVA's expected output on this example is included in 'example/example.out'.
 
 SGE Cluster
 -----------
