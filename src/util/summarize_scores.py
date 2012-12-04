@@ -16,7 +16,7 @@ import signal
 from collections import defaultdict
 from numpy import array, column_stack, median, argsort
 
-LOW_LABEl = "likely benign"
+LOW_LABEL = "likely benign"
 MID_LABEL = "potentially pathogenic"
 MID_CUTOFF = 0.28
 HIGH_LABEL = "likely pathogenic"

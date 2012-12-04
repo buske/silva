@@ -32,7 +32,7 @@ Quickstart
 
 3. Preprocess VCF file:
 
-    ./silva-preprocess VCF OUTDIR
+    ./silva-preprocess OUTDIR VCF
 
 4. Run models and print highest-scoring synonymous variants:
 
@@ -82,8 +82,9 @@ Output Format
 -------------
 SilVA will print the synonymous variants to stdout, ordered by score, with the variants most likely to be harmful listed first. Variants are first filtered down to just rare and novel synonymous variants. The variants are then annotated with a number of features and the machine learning model is used to rank the variants. The output contains the following tab-delimited columns:
 
-1. Score (the mean reciprocal rank)
-2. Range of ranks assigned from the various models (min, median, max)
+1. The variant rank, out of all synonymous variants considered.
+2. The SilVA score, between 0 and 1, where close to 1 is more likely to be harmful.
+3. The variant classification, based upon several SilVA score thresholds.
 3. HGNC gene name
 4. RefSeq mRNA identifier
 ... Fields from the input file
@@ -118,7 +119,7 @@ To run SilVA on your local machine, you should have already installed dependenci
 
 1. Filter an annotate the variants in the VCF file (this takes a while):
 
-    ./silva-preprocess <VCF> <OUTDIR>
+    ./silva-preprocess <OUTDIR> <VCF>
 
 2. Run the trained models on the annotated variants and print the top variants in order of decreasing predicted harmfulness (this is fast):
 
@@ -130,7 +131,7 @@ Example
 -------
 The 'example/' folder in the root directory of this package contains a sample input file for you to test SilVA on. You can run SilVA on it with the following commands:
 
-    ./silva-preprocess example/example.vcf example
+    ./silva-preprocess example example/example.vcf
     ./silva-run example | head
 
 You should see the known-harmful ACVRL1 variant appear at the top! Granted, for simplicity, the example only has 28 other rare synonymous variants in it. SilVA's expected output on this example is included in 'example/example.out'.

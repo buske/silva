@@ -64,19 +64,31 @@ function run {
     fi
 }
 
-n_cols=0
-n_cols=$(expr $n_cols + 1); run cpg     $featuredir/other   ./cpg.py     -q $in &
-n_cols=$(expr $n_cols + 1); run splice  $featuredir/other   ./splice.py  -q $in &
-n_cols=$(expr $n_cols + 1); run ese3    $featuredir/ese3    ./ese3.py    -q $in &
-n_cols=$(expr $n_cols + 1); run fas-ess $featuredir/fas-ess ./fas-ess.py -q $in &
-n_cols=$(expr $n_cols + 1); run pesx    $featuredir/pesx    ./pesx.py    -q $in &
-n_cols=$(expr $n_cols + 1); cut -f 1,2 $mrna \
-    | run 0_gerp $featuredir/other ./gerp.py dummy $datadir/gerp.refGene.pkl* &
-wait
+n_threads=${SILVA_N_THREADS:-1}
+function setup {
+    if [[ $n_threads -lt 1 ]]; then
+	wait
+	n_threads=${SILVA_N_THREADS:-1}
+    fi
 
-n_cols=$(expr $n_cols + 1); run maxent  $featuredir/maxent  ./maxent.py  -q $in &
-n_cols=$(expr $n_cols + 1); grep -v "^#" $mrna | cut -f $CODON_COLS \
+    n_threads=$(expr $n_threads - 1);
+    n_cols=$(expr $n_cols + 1); 
+}
+n_cols=0
+
+setup; run cpg     $featuredir/other   ./cpg.py     -q $in &
+setup; run splice  $featuredir/other   ./splice.py  -q $in &
+setup; run ese3    $featuredir/ese3    ./ese3.py    -q $in &
+setup; run fas-ess $featuredir/fas-ess ./fas-ess.py -q $in &
+setup; run pesx    $featuredir/pesx    ./pesx.py    -q $in &
+setup; cut -f 1,2 $mrna \
+    | run 0_gerp $featuredir/other ./gerp.py dummy $datadir/gerp.refGene.pkl* &
+
+setup; run maxent  $featuredir/maxent  ./maxent.py  -q $in &
+setup; grep -v "^#" $mrna | cut -f $CODON_COLS \
     | run codon $featuredir/other ./codon_usage.py -q - &
+
+# Wait for any others to finish
 wait
 
 found_n_cols=$(ls -1 $outbase.*.col | wc -l)

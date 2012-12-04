@@ -13,7 +13,7 @@ gp1k="$src/input/1000gp.py dummy ${SILVA_DATA}/1000gp.refGene.pkl*"
 
 function usage {
     cat <<EOF
-Usage: $0 VCF OUTDIR
+Usage: $0 OUTDIR VCF
 
 Annotates rare, synonymous variants in VCF file,
 creating files necessary to run this tool.
@@ -32,8 +32,8 @@ EOF
 if [[ $# -ne 2 ]]; then
     usage
 fi
-vcf="$1"
-outdir="$2"
+outdir="$1"
+vcf="$2"
 
 if [[ ! -s "$vcf" ]]; then
     echo -e "Error: missing input file: $vcf\n" >&2
