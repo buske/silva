@@ -89,7 +89,7 @@ if [[ -z "$pcoord" ]]; then
 
     out=$base.flt
     skip_if_exists $outdir/$out \
-        && echo "Filtering by allele frequency..." >&2 \
+        && echo "Filtering by allele frequency [$SILVA_AF_MIN, $SILVA_AF_MAX]..." >&2 \
         && paste $outdir/$base.af $outdir/$base.syn \
 	   | awk -F"\t" '/^#/; /^[^#]/{OFS="\t"; if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' \
            | cut -f 2- \

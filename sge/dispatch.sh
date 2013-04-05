@@ -3,6 +3,8 @@
 set -eu
 set -o pipefail
 
+SILVA_PATH=${SILVA_PATH:-$(cd -P $(dirname $0)/..; pwd)}
+
 #==============================
 # Set the values below as needed, according to your SGE configuration. 
 # For example:
@@ -11,7 +13,7 @@ set -o pipefail
 #
 
 # Used to run the 'silva-preprocess' script, which uses 4 threads and about 6GB of memory
-preprocess_args="-l h_vmem=6G -l num_proc=6"
+preprocess_args="-l h_vmem=6G -l num_proc=4"
 # Used to run the 'run' script, which uses 1 thread and about 2GB of memory
 run_args="-l h_vmem=2G"
 # Any additional parameters to include with both runs
@@ -33,8 +35,8 @@ EOF
 
 if [[ $# -lt 2 ]]; then
     usage
-elif [[ ! -e `pwd`/silva-preprocess ]]; then
-    echo -e "Could not find ./silva-preprocess.\n" >&2
+elif [[ ! -e $SILVA_PATH/silva-preprocess ]]; then
+    echo -e "Could not find $SILVA_PATH/silva-preprocess.\n" >&2
     usage
 fi
 
@@ -52,12 +54,12 @@ for vcf in "$@"; do
     qsub -b y -N "silva_pre_$id" \
 	$preprocess_args \
 	$custom_args \
-	-S /bin/bash -v "PATH=$PATH" \
-	"$(pwd)/silva-preprocess $outdir $vcf"
+	-S /bin/bash -v PATH \
+	"$SILVA_PATH/silva-preprocess $outdir $vcf"
 
-    qsub -b y -N "silva_run_$id" -hold_jid "pre_$id" \
+    qsub -b y -N "silva_run_$id" -hold_jid "silva_pre_$id" \
 	$run_args \
 	$custom_args \
-	-S /bin/bash -v "PATH=$PATH" \
-	"$(pwd)/silva-run $outdir > \$TMPDIR/RESULTS && mv -v \$TMPDIR/RESULTS $outdir/RESULTS"
+	-S /bin/bash -v PATH \
+	"$SILVA_PATH/silva-run $outdir > \$TMPDIR/RESULTS && mv -v \$TMPDIR/RESULTS $outdir/RESULTS"
 done

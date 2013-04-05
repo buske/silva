@@ -5,6 +5,6 @@
 ^tools/
 ^data/
 ^lib/
-^control/
+^control
 ^build
 ^dist
