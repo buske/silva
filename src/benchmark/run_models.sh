@@ -37,11 +37,11 @@ fi
 logdir=$outdir/log
 mkdir -pv $logdir
 for model in "${models[@]}"; do 
-    if [[ $model == "nnet" || $model == forest* ]]; then
+    if [[ $model == "nnet" ]]; then
 	$SILVA_PATH/src/benchmark/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model $logdir
     else
 	qsub -cwd -b y -V -e $logdir -o $logdir \
-	    -l h_vmem=14G -N $model -q lunchQ \
+	    -l h_vmem=14G -N $model -R y -l h_rt="00:05:00" \
 	    "bash -x $SILVA_PATH/src/benchmark/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model"
     fi
 done

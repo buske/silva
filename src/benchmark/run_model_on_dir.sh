@@ -60,7 +60,7 @@ function run_one_prefix {
     if [[ -n $logdir ]]; then
 	mkdir -pv $logdir
 	qsub -S /bin/bash -cwd -e $logdir -o $logdir -b y -V -N "$(basename $modeldir).$prefix" \
-	    -l h_vmem=2G -q lunchQ \
+	    -l h_vmem=2G -l h_rt="00:15:00" \
 	    "for id in ${ids[@]}; do echo \$id; train=$datadir/\$id.train.input; test=$datadir/\$id.test.input; model=$outdir/\$id.model; ./train \$model \$train && ./test \$model \$test > $outdir/.\$id.scored && mv $outdir/.\$id.scored $outdir/\$id.scored && rm -f \$model; done"
     else
 	for id in "${ids[@]}"; do

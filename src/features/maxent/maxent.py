@@ -246,7 +246,7 @@ def print_row(scores):
     print '\t'.join(strs)
 
 def script(filename, quiet=False, verbose=False, **kwargs):
-    fields = ['MES', 'diff_MES', 'MES+', 'MES-', 'MEC-MC?', 'MEC-CS?', 'MES-KM?']
+    fields = ['MES', 'dMES', 'MES+', 'MES-', 'MEC-MC?', 'MEC-CS?', 'MES-KM?']
     print '#%s' % '\t'.join(fields)
     NULL = [None] * len(fields)
 

@@ -40,13 +40,14 @@ DATA:            '$SILVA_DATA'
 SILVA_CONTROL:   '$SILVA_CONTROL'
 SILVA_TRAINED:   '$SILVA_TRAINED'
 TMPDIR:          '$TMPDIR'
+-----------
 EOF
 }
 
-if [[ ! -e $SILVA_DATA/refGene.pkl ]]; then
+if [[ ! -e $SILVA_DATA/refGene.ucsc.gz ]]; then
     cat >&2 <<EOF 
 Annotation databases seem to be missing.
-File does note exist: $SILVA_DATA/refGene.pkl
+File does note exist: $SILVA_DATA/refGene.ucsc.gz
 
 Please run the setup.sh script in this tool's root directory
 or set the SILVA_DATA environment variable appropriately.

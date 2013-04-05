@@ -56,14 +56,14 @@ fi
 
 
 # Download data
-if [[ ! -e $SILVA_DATA/refGene.pkl ]]; then
+if [[ ! -e $SILVA_DATA/refGene.ucsc.gz ]]; then
     datafile=silva-${version}_data.tar.gz
 
     if [[ ! -e $datafile ]]; then
 	prompt "\n\nFinal step:\nDownloading required SilVA $version databases ($datafile)...\nWARNING: these databases are rather large (~700MB), so this might take a while...\nIf you already downloaded and unpacked this file, exit this script and set the SILVA_DATA\nenvironment variable to data directory's path."
 	wget -v "$SILVA_DATA_URL"
     fi
-    if [[ ! -e $SILVA_DATA/refGene.pkl ]]; then
+    if [[ ! -e $SILVA_DATA/refGene.ucsc.gz ]]; then
 	echo -e "\n\nUnpacking required SilVA $version databases..." >&2
 	if [[ -e $datafile ]]; then
 	    tar -xzvf $datafile

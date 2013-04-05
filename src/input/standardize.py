@@ -25,6 +25,7 @@ from silva import maybe_gzip_open
 def read_examples(filename):
     lines = []
     header = []
+    ncols = None
     with maybe_gzip_open(filename) as ifp:
         header = ifp.readline().strip()
         assert header.startswith('#')
@@ -34,9 +35,19 @@ def read_examples(filename):
             if not line: continue
 
             assert not line.startswith('#')
-            lines.append([float(val) for val in line.split()])
+            tokens = [float(val) for val in line.split()]
+            if ncols is None:
+                ncols = len(tokens)
+            else:
+                assert ncols == len(tokens), \
+                    "Found row in %s with %d columns (%d expected)" % (filename, len(tokens), ncols)
 
-    data = array(lines, dtype=float)
+            lines.append(tokens)
+
+    try:
+        data = array(lines, dtype=float)
+    except ValueError:
+        print >>sys.stderr
 
     # Find class column
     cols = header.split()

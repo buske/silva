@@ -23,6 +23,7 @@ import os
 import sys
 import cPickle
 
+from array import array as pyarray
 from collections import defaultdict
 from string import maketrans
 from random import sample
@@ -96,7 +97,8 @@ class Transcript(object):
             
             exon_starts = [int(x) for x in exon_starts]
             exon_ends = [int(x) for x in exon_ends]
-            assert len(exon_starts) == len(exon_ends)
+            assert len(exon_starts) == len(exon_ends), \
+                "Different number of exon starts and ends"
             self._exons = zip(exon_starts, exon_ends)
             
             #print >>sys.stderr, "TX:  0 - %d" % (self._tx_length)
@@ -231,7 +233,7 @@ class Transcript(object):
         return self._project_from_intervals(offset, self._cds)
     
     def load_seq(self, seq):
-        assert seq is not None
+        assert seq is not None, "seq is None"
         stop_codons = set(['TAA', 'TAG', 'TGA'])
 
         premrna = seq[self._tx_start:self._tx_end].tostring().upper()
@@ -247,7 +249,7 @@ class Transcript(object):
         self._mrna = ''.join(seqs)
         self._premrna = premrna
         
-        assert len(self._mrna) == self._cds_length
+        assert len(self._mrna) == self._cds_length, "mRNA length != CDS length"
         assert self._mrna[-3:] in stop_codons, \
                "Transcript ends with : %s" % self._mrna[-3:]
     
@@ -348,45 +350,62 @@ def iter_ucsc_genes(filename):
                    'exon_ends': exonEnds,
                    'gene': name2,
                    'tx': name}
-    
+
+def load_genome(filename):
+    """Return dict from sequence name to character array from genome FASTA file"""
+    genome = defaultdict(lambda: pyarray('c'))
+    sequence = None
+    print >>sys.stderr, "Loading genome from FASTA file: %s" % filename
+    with maybe_gzip_open(filename) as ifp:
+        for line in ifp:
+            line = line.strip()
+            if line.startswith('>'):
+                name = line.lstrip('>').strip()
+                sequence = genome[name]
+            elif line:
+                sequence.fromstring(line)
+
+    print >>sys.stderr, "Found %d sequences." % len(genome)
+    return genome
 
 def get_genes(gene_filename=None, cache_filename=None,
-              genomedata=None, **kwargs):
+              genome_filename=None, **kwargs):
     """Loads (potentially cached) dict: gene_name -> set(genes)
 
-    If not cached, genomedata path expected to provide sequence data
+    If not cached, genome_filename FASTA expected to provide sequence data
     """
-    assert gene_filename and genomedata or cache_filename
+    assert gene_filename and genome_filename or cache_filename
     if cache_filename is not None and os.path.isfile(cache_filename):
         print >>sys.stderr, "Loading genes from pickled file: %s" % cache_filename
         with maybe_gzip_open(cache_filename) as ifp:
             genes = cPickle.load(ifp)
     else:
-        from genomedata import Genome
+        genome = load_genome(genome_filename)
 
         genes = defaultdict(set)
-        cur_chrom = None
-        cur_seq = None
-        with Genome(genomedata) as genome:
-            for entry in iter_ucsc_genes(gene_filename):
-                chrom = entry['chrom']
-                if chrom != cur_chrom:
-                    try:
-                        chromosome = genome['chr%s' % chrom]
-                    except KeyError:
-                        continue
-                    print >>sys.stderr, "Cached sequence for chr%s." % chrom
+        missed_chroms = set()
+        for entry in iter_ucsc_genes(gene_filename):
+            chrom = entry['chrom']
+            try:
+                sequence = genome['chr%s' % chrom]
+            except KeyError:
+                if chrom not in missed_chroms:
+                    print >>sys.stderr, "Could not find sequence for chr%s in: %s" % (chrom, genome_filename)
+                    missed_chroms.add(chrom)
 
-                    cur_seq = chromosome.seq[0:chromosome.end]
-                    cur_chrom = chrom
+                continue
 
-                # Substitute id with gene name
-                entry['seq'] = cur_seq
-                t = Transcript(**entry)
+            # Substitute id with gene name
+            entry['seq'] = sequence
+            t = Transcript(**entry)
 
-                if t.valid():
-                    genes[entry['gene']].add(t)
+            if t.valid():
+                genes[entry['gene']].add(t)
 
+        if missed_chroms:
+            print >>sys.stderr, "Missing sequences with gene annotations: %s" \
+                % ', '.join(sorted(missed_chroms))
+            
         genes = dict(genes)  # remove defaultdict
         if cache_filename:
             print >>sys.stderr, "Saving genes to pickled file: %s" % cache_filename
@@ -669,11 +688,10 @@ def annotate_variants(genes, filename):
 
 
 
-def script(action, filename, protein_coords=False, genomedata=None,
+def script(action, filename, protein_coords=False, genome_filename=None,
            all=False, random=False, match_cpg=False, avoid_splice=False,
            **kwargs):
-    genes = get_genes(genomedata=genomedata, **kwargs)
-
+    genes = get_genes(genome_filename=genome_filename, **kwargs)
 
     if action == 'generate':
         if random:
@@ -790,9 +808,9 @@ def parse_args(args):
                       dest="gene_filename", default=None,
                       help="Read genes from UCSC file, unless cache already"
                       " exists and specified with -O")
-    parser.add_option("-G", "--genomedata", metavar="GD",
-                      dest="genomedata", default=None,
-                      help="Extract sequence/track data from Genomedata")
+    parser.add_option("-G", "--genome", metavar="FASTA",
+                      dest="genome_filename", default=None,
+                      help="Extract sequence data from FASTA file (same assembly as --genes)")
     parser.add_option("--protein-coords", action="store_true",
                       dest="protein_coords", default=False,
                       help="If ACTION is 'filter', VARIANTS file contains"

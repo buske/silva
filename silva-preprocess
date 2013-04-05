@@ -8,8 +8,8 @@ source ${SILVA_PATH:-$(dirname $0)}/init.sh
 control=$SILVA_CONTROL.mat
 src=$SILVA_PATH/src
 
-synonymous="$src/input/synonymous.py -O ${SILVA_DATA}/refGene.pkl*"
-gp1k="$src/input/1000gp.py dummy ${SILVA_DATA}/1000gp.refGene.pkl*"
+synonymous="$src/input/synonymous.py --genome=${SILVA_DATA}/hg19.fa --genes=${SILVA_DATA}/refGene.ucsc.gz --cache-genes=${SILVA_DATA}/refGene.pkl"
+gp1k="$src/input/1000gp.py ${SILVA_DATA}/1000gp.refGene.vcf.gz ${SILVA_DATA}/1000gp.refGene.pkl"
 
 function usage {
     cat <<EOF
@@ -111,7 +111,7 @@ test -s $outdir/$out
 out=$outdir/$base.mat
 skip_if_exists $out \
     && echo "Annotating features from MRNA file..." >&2 \
-    && $src/convert/mrna2mat.sh $outdir/$base.mrna $outdir/$base
+    && $src/input/mrna2mat.sh $outdir/$base.mrna $outdir/$base
 test -s $out
 
 # Standardize according to control dataset

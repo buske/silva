@@ -4,7 +4,7 @@ set -eu
 set -o pipefail
 
 featuredir=$SILVA_PATH/src/features
-datadir=$SILVA_DATA
+datadir=${SILVA_DATA:-$SILVA_PATH/data}
 MRNA_COL=11
 CODON_COLS="4-5,8-10"
 
@@ -80,13 +80,14 @@ setup; run cpg     $featuredir/other   ./cpg.py     -q $in &
 setup; run splice  $featuredir/other   ./splice.py  -q $in &
 setup; run ese3    $featuredir/ese3    ./ese3.py    -q $in &
 setup; run fas-ess $featuredir/fas-ess ./fas-ess.py -q $in &
-setup; run pesx    $featuredir/pesx    ./pesx.py    -q $in &
 setup; cut -f 1,2 $mrna \
-    | run 0_gerp $featuredir/other ./gerp.py dummy $datadir/gerp.refGene.pkl* &
+    | run 0_gerp $featuredir/other ./gerp.py $datadir/gerp.refGene.table.gz $datadir/gerp.refGene.pkl &
 
 setup; run maxent  $featuredir/maxent  ./maxent.py  -q $in &
 setup; grep -v "^#" $mrna | cut -f $CODON_COLS \
     | run codon $featuredir/other ./codon_usage.py -q - &
+setup; run vienna-50 $featuredir/vienna ./vienna.py -d 50 -q $in &
+# setup; run pesx    $featuredir/pesx    ./pesx.py    -q $in &
 
 # Wait for any others to finish
 wait
