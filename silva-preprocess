@@ -48,9 +48,7 @@ function skip_if_exists {
     test ! -s "$f"
 }
 
-init_message
-echo "SILVA_AF_MIN:    '$SILVA_AF_MIN'" >&2
-echo -e "SILVA_AF_MAX:    '$SILVA_AF_MAX'\n" >&2
+init_message "$0" "$@"
 
 mkdir -pv $outdir
 # Filter to just synonymous variants

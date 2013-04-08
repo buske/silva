@@ -66,7 +66,7 @@ def run_loo(root, print_all=False):
             print '%d\t%.1f' % (cutoff, count)
 
 
-def run_split(root, print_all=False, n=50):
+def run_split(root, print_all=False):
     cum_scores = []
     n_pos = None
     for filename in glob("%s/*.scored" % root):
@@ -79,7 +79,7 @@ def run_split(root, print_all=False, n=50):
             assert n_pos == len(pos)
 
         pos_ranks = ranks[:n_pos]
-        counts = [(pos_ranks <= i).sum() for i in range(1, n)]
+        counts = [(pos_ranks <= i).sum() for i in range(1, len(ranks))]
         cum_scores.append(tuple(counts))
 
     cum_scores = array(cum_scores).transpose()

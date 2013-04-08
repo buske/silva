@@ -1,3 +1,7 @@
+1.0.2: ????
+	- Streamlined pipeline
+	- Replaced unafold with vienna for RNA folding
+
 1.0.1: 30 September, 2012
 	- Now using R randomForest package instead of Python milk package
 	- Output format changed

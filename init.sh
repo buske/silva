@@ -5,7 +5,7 @@
 # Feel free to modify them if you know what you are doing.
 
 # Maximum number of threads to use
-export SILVA_N_THREADS=8
+export SILVA_N_THREADS="${SILVA_N_THREADS:-8}"
 # Path to the root of the SilVA directory.
 export SILVA_PATH="${SILVA_PATH:-$(cd -P $(dirname $0); pwd)}"
 # Path of the untar'd SilVA data directory
@@ -34,11 +34,13 @@ function init_message {
 
 SILVA $version
 -----------
-COMMAND:         '$0 $@'
-N_THREADS:       '$SILVA_N_THREADS'
-DATA:            '$SILVA_DATA'
+COMMAND:         '$@'
+SILVA_N_THREADS: '$SILVA_N_THREADS'
+SILVA_DATA:      '$SILVA_DATA'
 SILVA_CONTROL:   '$SILVA_CONTROL'
 SILVA_TRAINED:   '$SILVA_TRAINED'
+SILVA_AF_MIN:    '$SILVA_AF_MIN'
+SILVA_AF_MAX:    '$SILVA_AF_MAX'
 TMPDIR:          '$TMPDIR'
 -----------
 EOF

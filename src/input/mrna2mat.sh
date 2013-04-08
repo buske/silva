@@ -79,15 +79,19 @@ function setup {
 setup; run cpg     $featuredir/other   ./cpg.py     -q $in &
 setup; run splice  $featuredir/other   ./splice.py  -q $in &
 setup; run ese3    $featuredir/ese3    ./ese3.py    -q $in &
+setup; run pesx    $featuredir/pesx    ./pesx.py    -q $in &
 setup; run fas-ess $featuredir/fas-ess ./fas-ess.py -q $in &
-setup; cut -f 1,2 $mrna \
-    | run 0_gerp $featuredir/other ./gerp.py $datadir/gerp.refGene.table.gz $datadir/gerp.refGene.pkl &
-
 setup; run maxent  $featuredir/maxent  ./maxent.py  -q $in &
 setup; grep -v "^#" $mrna | cut -f $CODON_COLS \
     | run codon $featuredir/other ./codon_usage.py -q - &
+
+setup; cut -f 1,2 $mrna \
+    | run 0_gerp $featuredir/other ./gerp.py $datadir/gerp.refGene.table.gz $datadir/gerp.refGene.pkl &
+setup; run unafold-50 $featuredir/unafold ./unafold.py -d 50 -q $in &
 setup; run vienna-50 $featuredir/vienna ./vienna.py -d 50 -q $in &
-# setup; run pesx    $featuredir/pesx    ./pesx.py    -q $in &
+#setup; run vienna-30 $featuredir/vienna ./vienna.py -d 30 -q $in &
+#setup; run unafold-100 $featuredir/unafold ./unafold.py -d 100 -q $in &
+
 
 # Wait for any others to finish
 wait

@@ -41,27 +41,26 @@ fi
 
 if [[ ! -s $mat ]]; then
     echo "Creating feature matrix: $mat" >&2
-    ./src/convert/mrna2mat.sh $mrna $base
-fi
-
-if [[ ! -s $base.input ]]; then
-    echo "Standardizing against control file ($controlbase.mat) to prepare input: ${base}.input" >&2
-    ./src/input/standardize.py \
-	--class=1 --control=$controlbase.mat $base.mat > $base.input
+    ./src/input/mrna2mat.sh $mrna $base
 fi
 
 mkdir -pv $outdir
+norm=$outdir/$basename.input
 merged=$outdir/$basename.merged.input
+groups=$outdir/$basename.groups
+model=$outdir/0.model
 
-cp $base.input $merged
+echo "Standardizing against $(basename $controlbase.mat) to prepare input: ${norm}" >&2
+./src/input/standardize.py \
+    --class=1 --control=$controlbase.mat $base.mat > $norm
+
+cp $norm $merged
 grep -v "^#" $controlbase.input >> $merged
 echo "Creating unified training file: $merged" >&2
 
-groups=$outdir/$basename.groups
 echo "Creating groups file: $groups" >&2
 sed -e '1d' $flt | cut -f 6 > $groups
 
-model=$outdir/0.model
 echo "Training model: $model" >&2
 ./src/models/forest/train $model $merged
 

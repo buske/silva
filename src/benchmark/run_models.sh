@@ -41,7 +41,7 @@ for model in "${models[@]}"; do
 	$SILVA_PATH/src/benchmark/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model $logdir
     else
 	qsub -cwd -b y -V -e $logdir -o $logdir \
-	    -l h_vmem=14G -N $model -R y -l h_rt="00:05:00" \
+	    -l h_vmem=14G -N $model -R y -l h_rt="00:08:00" \
 	    "bash -x $SILVA_PATH/src/benchmark/run_model_on_dir.sh $MODELS_DIR/$model $datadir $outdir/$model"
     fi
 done
