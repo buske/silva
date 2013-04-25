@@ -1,12 +1,13 @@
-1.0.2: ????
+1.1.0: 24 April 2013
 	- Streamlined pipeline
-	- Replaced unafold with vienna for RNA folding
+	- Added vienna RNA folding features
+	- Improved input and output formats slightly
 
-1.0.1: 30 September, 2012
+1.0.1: 30 September 2012
 	- Now using R randomForest package instead of Python milk package
 	- Output format changed
 	- Removed WEKA as a requirement/dependency
 	- Added an example to the distribution
 
-1.0.0: 13 May, 2012
+1.0.0: 13 May 2012
 	- First public release.

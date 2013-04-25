@@ -109,7 +109,7 @@ test -s $outdir/$out
 out=$outdir/$base.mat
 skip_if_exists $out \
     && echo "Annotating features from MRNA file..." >&2 \
-    && $src/input/mrna2mat.sh $outdir/$base.mrna $outdir/$base
+    && $src/input/annotate_features.sh $outdir/$base.mrna $outdir/$base
 test -s $out
 
 # Standardize according to control dataset

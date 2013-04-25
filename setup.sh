@@ -7,6 +7,12 @@ version="$(cat VERSION)"
 SILVA_DATA_URL="http://compbio.cs.toronto.edu/silva/release/silva-${version}_data.tar.gz"
 SILVA_DATA=${SILVA_DATA:-data}
 
+UNAFOLD_VERSION="3.8"
+UNAFOLD_URL="http://mfold.rna.albany.edu/cgi-bin/UNAFold-download.cgi?unafold-${UNAFOLD_VERSION}.tar.gz"
+
+VIENNA_VERSION="2.1.1"
+VIENNA_URL="http://www.tbi.univie.ac.at/~ronny/RNA/ViennaRNA-${VIENNA_VERSION}.tar.gz"
+
 # Check python verison
 pyversion=$(python -c "import sys; print sys.version[:3]")
 if [[ $pyversion != 2.6 && $pyversion != 2.7 ]]; then
@@ -26,6 +32,40 @@ function prompt {
 
 echo -e "\nInstalling SilVA $version dependencies..." >&2
 
+
+function get_and_make_package {
+    local URL=$1
+    local from=$2
+    local to=$3
+    
+    pushd tools > /dev/null
+    if [[ ! -e $from.tar.gz ]]; then
+	prompt "\n\nDownloading $from..."
+        wget "$URL"
+    fi
+    if [[ ! -d $to ]]; then
+	prompt "\n\nUnpacking $from.tar.gz to tools/$to..."
+        tar -xzvf $from.tar.gz
+        mv $from $to
+    fi
+    pushd $to > /dev/null
+    prompt "\n\nConfiguring and making $to..."
+    ./configure && make
+    popd > /dev/null
+    popd > /dev/null
+}
+
+# Download unafold
+if [[ ! -e tools/unafold/src/hybrid-ss-min ]]; then
+    get_and_make_package $UNAFOLD_URL unafold-${UNAFOLD_VERSION} unafold
+fi
+
+# Make vienna
+if [[ ! -e tools/vienna/install/bin/RNAfold ]]; then
+    get_and_make_package $VIENNA_URL ViennaRNA-${VIENNA_VERSION} vienna
+fi
+
+# Install R randomForest package
 function is_rf_missing {
     echo 'suppressMessages(require("randomForest", quietly=TRUE))' \
         | R --vanilla --quiet --slave 2>&1
@@ -60,7 +100,7 @@ if [[ ! -e $SILVA_DATA/refGene.ucsc.gz ]]; then
     datafile=silva-${version}_data.tar.gz
 
     if [[ ! -e $datafile ]]; then
-	prompt "\n\nFinal step:\nDownloading required SilVA $version databases ($datafile)...\nWARNING: these databases are rather large (~700MB), so this might take a while...\nIf you already downloaded and unpacked this file, exit this script and set the SILVA_DATA\nenvironment variable to data directory's path."
+	prompt "\n\nFinal step:\nDownloading required SilVA $version databases ($datafile)...\nWARNING: these databases are rather large (~1GB), so this might take a while...\nIf you already downloaded and unpacked this file, exit this script and set the SILVA_DATA\nenvironment variable to path of the unpacked data directory."
 	wget -v "$SILVA_DATA_URL"
     fi
     if [[ ! -e $SILVA_DATA/refGene.ucsc.gz ]]; then

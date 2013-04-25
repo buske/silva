@@ -41,7 +41,7 @@ fi
 
 if [[ ! -s $mat ]]; then
     echo "Creating feature matrix: $mat" >&2
-    ./src/input/mrna2mat.sh $mrna $base
+    ./src/input/annotate_features.sh $mrna $base
 fi
 
 mkdir -pv $outdir

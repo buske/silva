@@ -9,29 +9,19 @@ function prompt {
 }
 
 name="silva"
-old_version=$(cat VERSION)
-echo "Found version: $old_version" >&2
-read -p "Enter the release version number (X.Y.Z)... " new_version
-if [[ $new_version != *.*.* ]]; then
-    echo "Error: invalid version number" >&2
-    exit 1
-fi
+version=$(cat VERSION)
+echo "Building release for version: $version" >&2
 
-
-prefix=${name}-${new_version}
+prefix=${name}-${version}
 builddir=build/$prefix
 distbase=dist/$prefix
 
 mkdir -pv build dist
 
-prompt "\nReplacing version number with: $new_version"
-if [[ ! -e VERSION ]]; then
-    echo "Error: missing VERSION file" >&2
-    exit 1
-fi
-echo $new_version > VERSION
 
 
+# Tarball source in two steps!
+# 1) Copy relevant source files to build
 prompt "\nCopying files to build directory: $builddir"
 if [[ ! -e .rsync-filter ]]; then
     echo "Error: expected .rsync-filter file in cwd" >&2
@@ -41,22 +31,23 @@ mkdir -pv $builddir
 rsync -r \
     -v \
     -u \
-    --links \
+    --copy-links \
     --filter='. .rsync-filter' \
     . \
     $builddir/
 
 
-prompt "\nReplacing <VERSION> tag and coded versions with: $new_version"
+prompt "\nReplacing <VERSION> tag and coded versions with $version within $builddir"
 pushd $builddir
-if [[ $new_version != $(cat VERSION) ]]; then
+if [[ $version != $(cat VERSION) ]]; then
     echo "Error: version mismatch" >&2
     exit 1
 fi
-replace "<VERSION>" $new_version -- README
+replace "<VERSION>" $version -- README
 popd
 
 
+# 2) tarball relevant source files
 src=${distbase}.tar.gz
 cont=y
 if [[ -e $src ]]; then
@@ -67,6 +58,7 @@ if [[ $cont == y* ]]; then
     tar -C build -hczf $src $prefix
 fi
 
+# Tarball data!
 data=${distbase}_data.tar.gz
 cont=y
 if [[ -e $data ]]; then
@@ -81,5 +73,23 @@ if [[ $cont == y* ]]; then
 	echo "Error: expected data/ directory" >&2
 	exit 1
     fi
-    tar -hczf $data data
+    tar --exclude="*.pkl" -hczf $data data
+fi
+
+# Tarball manuscript results
+data=${distbase}_manuscript.tar.gz
+cont=y
+if [[ -e $data ]]; then
+    read -p "Overwrite $data (y/n)? " cont
+    if [[ $cont == y* ]]; then
+	read -p "Are you absolutely positive (y/n)? " cont
+    fi
+fi
+if [[ $cont == y* ]]; then
+    prompt "\nTarballing manuscript files to: $data"
+    if [[ ! -d manuscript ]]; then
+	echo "Error: expected manuscript/ directory" >&2
+	exit 1
+    fi
+    tar -hczvf $data manuscript/{benchmark,train,*.*} manuscript/validation/{*.*,*/RESULTS} manuscript/validation/*/*.{pcoord,scored}
 fi

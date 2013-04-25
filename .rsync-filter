@@ -3,9 +3,10 @@
 - lib
 - tools/svmmap
 - tools/unafold
+- tools/vienna
 - tools/weka
 - data
 - bin
 - build
 - dist
-- control/*.pcoord
+- manuscript
