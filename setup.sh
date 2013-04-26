@@ -41,7 +41,7 @@ function get_and_make_package {
     pushd tools > /dev/null
     if [[ ! -e $from.tar.gz ]]; then
 	prompt "\n\nDownloading $from..."
-        wget "$URL"
+        wget -O $from.tar.gz "$URL"
     fi
     if [[ ! -d $to ]]; then
 	prompt "\n\nUnpacking $from.tar.gz to tools/$to..."
