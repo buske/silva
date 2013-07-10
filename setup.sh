@@ -11,7 +11,7 @@ UNAFOLD_VERSION="3.8"
 UNAFOLD_URL="http://mfold.rna.albany.edu/cgi-bin/UNAFold-download.cgi?unafold-${UNAFOLD_VERSION}.tar.gz"
 
 VIENNA_VERSION="2.1.1"
-VIENNA_URL="http://www.tbi.univie.ac.at/~ronny/RNA/ViennaRNA-${VIENNA_VERSION}.tar.gz"
+VIENNA_URL="http://www.tbi.univie.ac.at/~ronny/RNA/packages/source/ViennaRNA-${VIENNA_VERSION}.tar.gz"
 
 # Check python verison
 pyversion=$(python -c "import sys; print sys.version[:3]")
