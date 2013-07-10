@@ -1,3 +1,6 @@
+1.1.0: 10 July 2013
+	- Silently updated ViennaRNA download URL
+
 1.1.0: 24 April 2013
 	- Streamlined pipeline
 	- Added vienna RNA folding features
