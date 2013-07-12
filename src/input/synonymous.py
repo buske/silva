@@ -23,15 +23,16 @@ import os
 import sys
 import cPickle
 
-from array import array as pyarray
 from collections import defaultdict
 from string import maketrans
 from random import sample
 
 assert os.getenv('SILVA_PATH') is not None, \
     "Error: SILVA_PATH is unset."
-sys.path.insert(0, os.path.expandvars('$SILVA_PATH/src/share'))
+sys.path.insert(0, os.path.expandvars('$SILVA_PATH/lib/python'))
+
 from silva import maybe_gzip_open
+from twobitreader import TwoBitFile as Genome
 
 STOP = '*'
 AA_CODE = {
@@ -72,57 +73,51 @@ class Transcript(object):
         """
         starts and ends: 0-indexed half-open
         """
-        try:
-            self._valid = False
-            self._chrom = chrom
-            self._strand = strand
-            self._gene = gene
-            self._tx = tx
-            
-            self._tx_start = int(tx_start)
-            self._tx_end = int(tx_end)
-            self._tx_length = self._tx_end - self._tx_start
-            
-            self._cds = []
-            self._cds_start = int(cds_start)
-            self._cds_end = int(cds_end)
-            self._mrna = None
-            self._premrna = None
+        self._valid = False
+        self._chrom = chrom
+        self._strand = strand
+        self._gene = gene
+        self._tx = tx
 
-            assert self._cds_start != self._cds_end, "Zero-length CDS"
-            assert self._tx_start <= self._cds_start <= \
-                   self._cds_end <= self._tx_end, "CDS outside transcript"
-            assert self._strand == '+' or self._strand == '-', \
-                   "Invalid strand: %s" % self._strand
-            
-            exon_starts = [int(x) for x in exon_starts]
-            exon_ends = [int(x) for x in exon_ends]
-            assert len(exon_starts) == len(exon_ends), \
-                "Different number of exon starts and ends"
-            self._exons = zip(exon_starts, exon_ends)
-            
-            #print >>sys.stderr, "TX:  0 - %d" % (self._tx_length)
-            #print >>sys.stderr, "CDS: %d - %d" % (self._cds_start - self._tx_start, self._cds_end - self._tx_start)
-            for exon_start, exon_end in self._exons:
-                #print >>sys.stderr, "Exon: %d - %d" % (b_start, b_start + b_len)
-                cds_start = max(exon_start, self._cds_start)
-                cds_end = min(exon_end, self._cds_end)
-                if cds_start < cds_end:
-                    self._cds.append((cds_start, cds_end))
-                    
-            assert self._cds, "Empty CDS"
-            self._cds_length = sum([end - start for start, end in self._cds])
-            assert self._cds_length % 3 == 0, "CDS length not a multiple of 3"
+        self._tx_start = int(tx_start)
+        self._tx_end = int(tx_end)
+        self._tx_length = self._tx_end - self._tx_start
 
-            if seq is not None:
-                self.load_seq(seq)
-            
-            self._valid = True
-        except AssertionError, e:
-            print >>sys.stderr, "Skipping transcript: %s: %s" % (self, e)
-            #print >>sys.stderr, self.__dict__
-            #raise
-            pass
+        self._cds = []
+        self._cds_start = int(cds_start)
+        self._cds_end = int(cds_end)
+        self._mrna = None
+        self._premrna = None
+
+        assert self._cds_start != self._cds_end, "Zero-length CDS"
+        assert self._tx_start <= self._cds_start <= \
+               self._cds_end <= self._tx_end, "CDS outside transcript"
+        assert self._strand == '+' or self._strand == '-', \
+               "Invalid strand: %s" % self._strand
+
+        exon_starts = [int(x) for x in exon_starts]
+        exon_ends = [int(x) for x in exon_ends]
+        assert len(exon_starts) == len(exon_ends), \
+            "Different number of exon starts and ends"
+        self._exons = zip(exon_starts, exon_ends)
+
+        #print >>sys.stderr, "TX:  0 - %d" % (self._tx_length)
+        #print >>sys.stderr, "CDS: %d - %d" % (self._cds_start - self._tx_start, self._cds_end - self._tx_start)
+        for exon_start, exon_end in self._exons:
+            #print >>sys.stderr, "Exon: %d - %d" % (b_start, b_start + b_len)
+            cds_start = max(exon_start, self._cds_start)
+            cds_end = min(exon_end, self._cds_end)
+            if cds_start < cds_end:
+                self._cds.append((cds_start, cds_end))
+
+        assert self._cds, "Empty CDS"
+        self._cds_length = sum([end - start for start, end in self._cds])
+        assert self._cds_length % 3 == 0, "CDS length not a multiple of 3"
+
+        if seq is not None:
+            self.load_seq(seq)
+
+        self._valid = True
 
     def __str__(self):
         s = "%s/%s, %s:%d-%d (%s)" % (self._gene, self._tx, self._chrom,
@@ -351,22 +346,6 @@ def iter_ucsc_genes(filename):
                    'gene': name2,
                    'tx': name}
 
-def load_genome(filename):
-    """Return dict from sequence name to character array from genome FASTA file"""
-    genome = defaultdict(lambda: pyarray('c'))
-    sequence = None
-    print >>sys.stderr, "Loading genome from FASTA file: %s" % filename
-    with maybe_gzip_open(filename) as ifp:
-        for line in ifp:
-            line = line.strip()
-            if line.startswith('>'):
-                name = line.lstrip('>').strip()
-                sequence = genome[name]
-            elif line:
-                sequence.fromstring(line)
-
-    print >>sys.stderr, "Found %d sequences." % len(genome)
-    return genome
 
 def get_genes(gene_filename=None, cache_filename=None,
               genome_filename=None, **kwargs):
@@ -380,24 +359,39 @@ def get_genes(gene_filename=None, cache_filename=None,
         with maybe_gzip_open(cache_filename) as ifp:
             genes = cPickle.load(ifp)
     else:
-        genome = load_genome(genome_filename)
+        genome = Genome(genome_filename)
 
         genes = defaultdict(set)
         missed_chroms = set()
+        cur_chrom = None
+        chromosome = None
         for entry in iter_ucsc_genes(gene_filename):
             chrom = entry['chrom']
-            try:
-                sequence = genome['chr%s' % chrom]
-            except KeyError:
+            if not chrom.startswith('chr'):
+                chrom = 'chr%s' % chrom
+                
+            if chrom in genome:
+                if chrom != cur_chrom:
+                    print >>sys.stderr, "Loading full %s sequence from" \
+                        " 2bit..." % chrom
+                    chromosome = genome[chrom].get_slice(0, None)
+                    cur_chrom = chrom
+            else:
                 if chrom not in missed_chroms:
-                    print >>sys.stderr, "Could not find sequence for chr%s in: %s" % (chrom, genome_filename)
+                    print >>sys.stderr, "Could not find sequence for %s" \
+                        " in: %s" % (chrom, genome_filename)
                     missed_chroms.add(chrom)
-
+                
                 continue
 
             # Substitute id with gene name
-            entry['seq'] = sequence
-            t = Transcript(**entry)
+            entry['seq'] = chromosome
+            try:
+                t = Transcript(**entry)
+            except AssertionError:
+                print >>sys.stderr, "Skipping transcript: %s: %s" \
+                    % (entry['gene'], e)
+                continue
 
             if t.valid():
                 genes[entry['gene']].add(t)
@@ -808,9 +802,9 @@ def parse_args(args):
                       dest="gene_filename", default=None,
                       help="Read genes from UCSC file, unless cache already"
                       " exists and specified with -O")
-    parser.add_option("-G", "--genome", metavar="FASTA",
+    parser.add_option("-G", "--genome", metavar="2BIT",
                       dest="genome_filename", default=None,
-                      help="Extract sequence data from FASTA file (same assembly as --genes)")
+                      help="Extract sequence data from 2bit file (same assembly as --genes)")
     parser.add_option("--protein-coords", action="store_true",
                       dest="protein_coords", default=False,
                       help="If ACTION is 'filter', VARIANTS file contains"

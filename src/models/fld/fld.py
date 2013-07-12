@@ -20,7 +20,7 @@ import cPickle
 from numpy import loadtxt, cov, dot
 from numpy.linalg import inv
 
-sys.path.insert(0, os.path.expandvars("$SILVA_PATH/src/share"))
+sys.path.insert(0, os.path.expandvars("$SILVA_PATH/lib/python"))
 from silva import maybe_gzip_open
 
 

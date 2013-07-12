@@ -20,7 +20,7 @@ import re
 
 assert os.getenv('SILVA_PATH') is not None, \
            "Error: SILVA_PATH is unset."
-sys.path.insert(0, os.path.expandvars('$SILVA_PATH/src/share'))
+sys.path.insert(0, os.path.expandvars('$SILVA_PATH/lib/python'))
 from silva import maybe_gzip_open, print_args
 
 def iter_sequences(filename):

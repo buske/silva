@@ -1,11 +1,10 @@
 - .*
 - *~
-- lib
 - tools/svmmap
 - tools/unafold
 - tools/vienna
 - tools/weka
-- data
+- data/*
 - bin
 - build
 - dist

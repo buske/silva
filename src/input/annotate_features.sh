@@ -4,7 +4,7 @@ set -eu
 set -o pipefail
 
 featuredir=$SILVA_PATH/src/features
-datadir=${SILVA_DATA:-$SILVA_PATH/data}
+datadir=$SILVA_PATH/data
 MRNA_COL=11
 CODON_COLS="4-5,8-10"
 
@@ -87,10 +87,13 @@ setup; grep -v "^#" $mrna | cut -f $CODON_COLS \
 
 setup; cut -f 1,2 $mrna \
     | run 0_gerp $featuredir/other ./gerp.py $datadir/gerp.refGene.table.gz $datadir/gerp.refGene.pkl &
-setup; run unafold-50 $featuredir/unafold ./unafold.py -d 50 -q $in &
-setup; run vienna-50 $featuredir/vienna ./vienna.py -d 50 -q $in &
-#setup; run vienna-30 $featuredir/vienna ./vienna.py -d 30 -q $in &
-#setup; run unafold-100 $featuredir/unafold ./unafold.py -d 100 -q $in &
+
+if [[ -z "${EXCLUDE_RNA_FOLDING:-}" ]]; then
+    setup; run unafold-50 $featuredir/unafold ./unafold.py -d 50 -q $in &
+    setup; run vienna-50 $featuredir/vienna ./vienna.py -d 50 -q $in &
+else
+    echo "EXCLUDE_RNA_FOLDING=${EXCLUDE_RNA_FOLDING}... excluding RNA folding features." >&2
+fi
 
 
 # Wait for any others to finish

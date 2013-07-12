@@ -4,7 +4,6 @@
 \.o$
 ^tools/
 ^data/
-^lib/
 ^control
 ^build
 ^dist

@@ -1,11 +1,23 @@
 #!/usr/bin/env bash
 
+
 set -eu
 set -o pipefail
 
+
+######################################################################
+# Uncomment the line below to exclude RNA folding (UNAfold/ViennaRNA)
+# from the installation process:
+
+#EXCLUDE_RNA_FOLDING=1
+
+######################################################################
+
 version="$(cat VERSION)"
 SILVA_DATA_URL="http://compbio.cs.toronto.edu/silva/release/silva-${version}_data.tar.gz"
-SILVA_DATA=${SILVA_DATA:-data}
+
+GENOME_URL="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit"
+
 
 UNAFOLD_VERSION="3.8"
 UNAFOLD_URL="http://mfold.rna.albany.edu/cgi-bin/UNAFold-download.cgi?unafold-${UNAFOLD_VERSION}.tar.gz"
@@ -55,14 +67,18 @@ function get_and_make_package {
     popd > /dev/null
 }
 
-# Download unafold
-if [[ ! -e tools/unafold/src/hybrid-ss-min ]]; then
-    get_and_make_package $UNAFOLD_URL unafold-${UNAFOLD_VERSION} unafold
-fi
+if [ -z "${EXCLUDE_RNA_FOLDING:-}" ]; then
+    # Download unafold
+    if [[ ! -e tools/unafold/src/hybrid-ss-min ]]; then
+	get_and_make_package $UNAFOLD_URL unafold-${UNAFOLD_VERSION} unafold
+    fi
 
-# Make vienna
-if [[ ! -e tools/vienna/install/bin/RNAfold ]]; then
-    get_and_make_package $VIENNA_URL ViennaRNA-${VIENNA_VERSION} vienna
+    # Make vienna
+    if [[ ! -e tools/vienna/install/bin/RNAfold ]]; then
+	get_and_make_package $VIENNA_URL ViennaRNA-${VIENNA_VERSION} vienna
+    fi
+else
+    echo "EXCLUDE_RNA_FOLDING=${EXCLUDE_RNA_FOLDING}... excluding RNA folding packages." >&2
 fi
 
 # Install R randomForest package
@@ -96,24 +112,37 @@ fi
 
 
 # Download data
-if [[ ! -e $SILVA_DATA/refGene.ucsc.gz ]]; then
-    datafile=silva-${version}_data.tar.gz
-
-    if [[ ! -e $datafile ]]; then
-	prompt "\n\nFinal step:\nDownloading required SilVA $version databases ($datafile)...\nWARNING: these databases are rather large (~1GB), so this might take a while...\nIf you already downloaded and unpacked this file, exit this script and set the SILVA_DATA\nenvironment variable to path of the unpacked data directory."
+datafile=data/refGene.ucsc.gz
+if [[ ! -e $datafile ]]; then
+    tarball=silva-${version}_data.tar.gz
+    if [[ ! -e $tarball ]]; then
+	prompt "\n\nDownloading required SilVA $version databases ($tarball)..."
 	wget -v "$SILVA_DATA_URL"
     fi
-    if [[ ! -e $SILVA_DATA/refGene.ucsc.gz ]]; then
-	echo -e "\n\nUnpacking required SilVA $version databases..." >&2
-	if [[ -e $datafile ]]; then
-	    tar -xzvf $datafile
+    if [[ ! -e $datafile ]]; then
+	echo -e "\n\nUnpacking required SilVA $version databases into data/..." >&2
+	if [[ -e $tarball ]]; then
+	    tar -xzvf $tarball
 	else
-	    echo -e "\n\nError: missing file: $datafile"
+	    echo -e "\n\nError: missing file: $tarball"
 	    exit 1
 	fi
     fi
 fi
 
+# Download hg19 twobit file
+mkdir -pv data
+datafile=data/hg19.2bit
+if [[ ! -e $datafile ]]; then
+    if [[ ! -e $datafile ]]; then
+	prompt "\n\nFinal step:\nDownloading hg19 2-bit file from UCSC...\n\nThis file is large (~800M) and may take a while to download.\n\nIf you already have hg19.2bit, press CTRL+C to exit this script and make a symlink to it within the data directory. Then, re-run this script to make sure everything is properly linked."
+	wget -v -O $datafile $GENOME_URL
+    fi
+    if [[ ! -e $datafile ]]; then
+	echo -e "\n\nError: missing file: $datafile"
+	exit 1
+    fi
+fi
 
 
 cat >&2 <<EOF

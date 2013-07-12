@@ -1,0 +1,7 @@
+This is a modified version of the twobitreader v2.9 package, available from:
+https://pypi.python.org/pypi/twobitreader
+
+Several modifications were made to the get_slice() method of the 
+TwoBitSequence class. One compensatory modification was made to
+the __str__() method as well. These are documented in the source code.
+

@@ -46,7 +46,6 @@ fi
 replace "<VERSION>" $version -- README
 popd
 
-
 # 2) tarball relevant source files
 src=${distbase}.tar.gz
 cont=y
@@ -57,6 +56,31 @@ if [[ $cont == y* ]]; then
     prompt "\nTarballing dist files: $builddir to $src"
     tar -C build -hczf $src $prefix
 fi
+
+# 1b) Make RNA folding-free version
+prompt "\nMake RNA-folding-free version of source: $builddir"
+nofoldingdir=${builddir}-nofolding
+cp -Trd $builddir ${nofoldingdir}
+pushd $nofoldingdir
+replace "#EXCLUDE_RNA_FOLDING" "EXCLUDE_RNA_FOLDING" \
+    -- setup.sh
+replace \
+    "#export EXCLUDE_RNA_FOLDING" "export EXCLUDE_RNA_FOLDING" \
+    "#controldir" "controldir" \
+    -- init.sh
+popd
+
+# 2b) tarball relevant source files
+src=${distbase}-nofolding.tar.gz
+cont=y
+if [[ -e $src ]]; then
+    read -p "Overwrite $src (y/n)? " cont
+fi
+if [[ $cont == y* ]]; then
+    prompt "\nTarballing dist files: $nofoldingdir to $src"
+    tar -C build -hczf $src ${prefix}-nofolding
+fi
+
 
 # Tarball data!
 data=${distbase}_data.tar.gz
@@ -73,7 +97,7 @@ if [[ $cont == y* ]]; then
 	echo "Error: expected data/ directory" >&2
 	exit 1
     fi
-    tar --exclude="*.pkl" -hczf $data data
+    tar --exclude="*.pkl" --exclude="*.2bit" -hczf $data data
 fi
 
 # Tarball manuscript results

@@ -7,9 +7,10 @@ source ${SILVA_PATH:-$(dirname $0)}/init.sh
 
 control=$SILVA_CONTROL.mat
 src=$SILVA_PATH/src
+data=$SILVA_PATH/data
 
-synonymous="$src/input/synonymous.py --genome=${SILVA_DATA}/hg19.fa --genes=${SILVA_DATA}/refGene.ucsc.gz --cache-genes=${SILVA_DATA}/refGene.pkl"
-gp1k="$src/input/1000gp.py ${SILVA_DATA}/1000gp.refGene.vcf.gz ${SILVA_DATA}/1000gp.refGene.pkl"
+synonymous="$src/input/synonymous.py --genome=$data/hg19.2bit --genes=$data/refGene.ucsc.gz --cache-genes=$data/refGene.pkl"
+gp1k="$src/input/1000gp.py $data/1000gp.refGene.vcf.gz $data/1000gp.refGene.pkl"
 
 function usage {
     cat <<EOF

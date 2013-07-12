@@ -18,7 +18,7 @@ from math import log10
 
 assert os.getenv('SILVA_PATH') is not None, \
        "Error: SILVA_PATH is unset."
-sys.path.insert(0, os.path.expandvars("$SILVA_PATH/src/share"))
+sys.path.insert(0, os.path.expandvars("$SILVA_PATH/lib/python"))
 from silva import maybe_gzip_open, print_args
 
 BIN = os.path.expandvars("$SILVA_PATH/tools/vienna/install/bin/RNAfold")

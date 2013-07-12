@@ -1,19 +1,29 @@
 #!/usr/bin/env bash
 
+controldir=control
 #==================================
 # Necessary environment variables.
 # Feel free to modify them if you know what you are doing.
+
+
+
+# Uncomment the two lines below to remove RNA folding features and SilVA's
+# dependency on UNAfold/ViennaRNA:
+#export EXCLUDE_RNA_FOLDING=1
+#controldir=control/no-folding
+if [[ ! -z "${EXCLUDE_RNA_FOLDING:-}" ]]; then
+    echo "EXCLUDE_RNA_FOLDING=${EXCLUDE_RNA_FOLDING}... excluding RNA folding features." >&2
+fi
+
 
 # Maximum number of threads to use
 export SILVA_N_THREADS="${SILVA_N_THREADS:-8}"
 # Path to the root of the SilVA directory.
 export SILVA_PATH="${SILVA_PATH:-$(cd -P $(dirname $0); pwd)}"
-# Path of the untar'd SilVA data directory
-export SILVA_DATA="${SILVA_DATA:-$SILVA_PATH/data}"
 # Control dataset to use
-export SILVA_CONTROL="${SILVA_CONTROL:-$SILVA_PATH/control/NA10851}"
+export SILVA_CONTROL="${SILVA_CONTROL:-$SILVA_PATH/$controldir/NA10851}"
 # Directory of pre-trained models
-export SILVA_TRAINED="${SILVA_TRAINED:-$SILVA_PATH/control/models}"
+export SILVA_TRAINED="${SILVA_TRAINED:-$SILVA_PATH/$controldir/models}"
 
 # Directory to use for any temporary files. It's recommended that this point
 # to somewhere on the local machine (such as /tmp).
@@ -36,7 +46,6 @@ SILVA $version
 -----------
 COMMAND:         '$@'
 SILVA_N_THREADS: '$SILVA_N_THREADS'
-SILVA_DATA:      '$SILVA_DATA'
 SILVA_CONTROL:   '$SILVA_CONTROL'
 SILVA_TRAINED:   '$SILVA_TRAINED'
 SILVA_AF_MIN:    '$SILVA_AF_MIN'
@@ -46,13 +55,13 @@ TMPDIR:          '$TMPDIR'
 EOF
 }
 
-if [[ ! -e $SILVA_DATA/refGene.ucsc.gz ]]; then
+if [[ ! -e $SILVA_PATH/data/refGene.ucsc.gz ]]; then
     cat >&2 <<EOF 
 Annotation databases seem to be missing.
-File does note exist: $SILVA_DATA/refGene.ucsc.gz
+File does note exist: $SILVA_PATH/data/refGene.ucsc.gz
 
 Please run the setup.sh script in this tool's root directory
-or set the SILVA_DATA environment variable appropriately.
+and make sure all necessary data files are in $SILVA_PATH/data/
 EOF
     exit 1
 fi
