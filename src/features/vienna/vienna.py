@@ -21,7 +21,7 @@ assert os.getenv('SILVA_PATH') is not None, \
 sys.path.insert(0, os.path.expandvars("$SILVA_PATH/lib/python"))
 from silva import maybe_gzip_open, print_args
 
-BIN = os.path.expandvars("$SILVA_PATH/tools/vienna/install/bin/RNAfold")
+BIN = os.path.expandvars("$SILVA_PATH/tools/vienna/Progs/RNAfold")
 assert os.path.isfile(BIN), \
     "Error: missing file: %s" % BIN
 

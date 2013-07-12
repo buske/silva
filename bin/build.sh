@@ -50,7 +50,7 @@ popd
 src=${distbase}.tar.gz
 cont=y
 if [[ -e $src ]]; then
-    read -p "Overwrite $src (y/n)? " cont
+    read -p "Overwrite $src (y/N)? " cont
 fi
 if [[ $cont == y* ]]; then
     prompt "\nTarballing dist files: $builddir to $src"
@@ -74,7 +74,7 @@ popd
 src=${distbase}-nofolding.tar.gz
 cont=y
 if [[ -e $src ]]; then
-    read -p "Overwrite $src (y/n)? " cont
+    read -p "Overwrite $src (y/N)? " cont
 fi
 if [[ $cont == y* ]]; then
     prompt "\nTarballing dist files: $nofoldingdir to $src"
@@ -86,9 +86,9 @@ fi
 data=${distbase}_data.tar.gz
 cont=y
 if [[ -e $data ]]; then
-    read -p "Overwrite $data (y/n)? " cont
+    read -p "Overwrite $data (y/N)? " cont
     if [[ $cont == y* ]]; then
-	read -p "Are you absolutely positive (y/n)? " cont
+	read -p "Are you absolutely positive (y/N)? " cont
     fi
 fi
 if [[ $cont == y* ]]; then
@@ -104,9 +104,9 @@ fi
 data=${distbase}_manuscript.tar.gz
 cont=y
 if [[ -e $data ]]; then
-    read -p "Overwrite $data (y/n)? " cont
+    read -p "Overwrite $data (y/N)? " cont
     if [[ $cont == y* ]]; then
-	read -p "Are you absolutely positive (y/n)? " cont
+	read -p "Are you absolutely positive (y/N)? " cont
     fi
 fi
 if [[ $cont == y* ]]; then

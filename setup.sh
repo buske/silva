@@ -74,7 +74,7 @@ if [ -z "${EXCLUDE_RNA_FOLDING:-}" ]; then
     fi
 
     # Make vienna
-    if [[ ! -e tools/vienna/install/bin/RNAfold ]]; then
+    if [[ ! -e tools/vienna/Progs/RNAfold ]]; then
 	get_and_make_package $VIENNA_URL ViennaRNA-${VIENNA_VERSION} vienna
     fi
 else
