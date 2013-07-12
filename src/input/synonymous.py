@@ -365,6 +365,7 @@ def get_genes(gene_filename=None, cache_filename=None,
         missed_chroms = set()
         cur_chrom = None
         chromosome = None
+        n_zero_len = 0
         for entry in iter_ucsc_genes(gene_filename):
             chrom = entry['chrom']
             if not chrom.startswith('chr'):
@@ -388,13 +389,20 @@ def get_genes(gene_filename=None, cache_filename=None,
             entry['seq'] = chromosome
             try:
                 t = Transcript(**entry)
-            except AssertionError:
-                print >>sys.stderr, "Skipping transcript: %s: %s" \
-                    % (entry['gene'], e)
+            except AssertionError, e:
+                if "Zero-length CDS" in str(e):
+                    n_zero_len += 1
+                else:
+                    print >>sys.stderr, "Skipping transcript: %s: %s" \
+                        % (entry['gene'], e)
                 continue
 
             if t.valid():
                 genes[entry['gene']].add(t)
+
+        if n_zero_len:
+            print >>sys.stderr, "Skipped %d transcripts with zero-length CDS" \
+                " annotations" % n_zero_len
 
         if missed_chroms:
             print >>sys.stderr, "Missing sequences with gene annotations: %s" \
