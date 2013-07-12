@@ -363,21 +363,13 @@ def get_genes(gene_filename=None, cache_filename=None,
 
         genes = defaultdict(set)
         missed_chroms = set()
-        cur_chrom = None
-        chromosome = None
         n_zero_len = 0
         for entry in iter_ucsc_genes(gene_filename):
             chrom = entry['chrom']
             if not chrom.startswith('chr'):
                 chrom = 'chr%s' % chrom
                 
-            if chrom in genome:
-                if chrom != cur_chrom:
-                    print >>sys.stderr, "Loading full %s sequence from" \
-                        " 2bit..." % chrom
-                    chromosome = genome[chrom].get_slice(0, None)
-                    cur_chrom = chrom
-            else:
+            if chrom not in genome:
                 if chrom not in missed_chroms:
                     print >>sys.stderr, "Could not find sequence for %s" \
                         " in: %s" % (chrom, genome_filename)
@@ -386,7 +378,7 @@ def get_genes(gene_filename=None, cache_filename=None,
                 continue
 
             # Substitute id with gene name
-            entry['seq'] = chromosome
+            entry['seq'] = genome[chrom]
             try:
                 t = Transcript(**entry)
             except AssertionError, e:

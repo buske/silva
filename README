@@ -57,6 +57,8 @@ SilVA requires several tools and databases to run. Most of these were included w
 
 - included: maxentscan, available from:
   http://genes.mit.edu/burgelab/maxent/download/
+- included: twobitreader, available on pypi:
+  https://pypi.python.org/pypi/twobitreader
 - setup.sh: randomForest package, available on CRAN:
   http://cran.r-project.org/web/packages/randomForest/
 - setup.sh: UNAfold, available from:
