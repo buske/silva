@@ -21,7 +21,6 @@ distbase=dist/$prefix
 
 if [[ ! -d $builddir || 
       ! -e $distbase.tar.gz || 
-      ! -e ${distbase}_manuscript.tar.gz || 
       ! -e ${distbase}_data.tar.gz ]]; then
     echo "Error: some input files are missing" >&2
     exit 1
