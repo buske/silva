@@ -19,7 +19,7 @@ fi
 vcf=$1
 base=$(dirname $1)/$(basename $1 .vcf)
 
-$SILVA_PATH/silva-preprocess $(dirname $vcf) $vcf || true
+$SILVA_PATH/silva $(dirname $vcf) $vcf || true
 echo "Overwriting standardization: $base.input" >&2
 ./src/input/standardize.py --class=0 $base.mat \
     > $base.input

@@ -31,20 +31,21 @@ def read_weights(filename):
 
 def iter_sequences(filename):
     # Get exon
-    seq_re = re.compile(r'([ACGT]*)\[([ACGT])/([ACGT])\]([ACGT]*)')
     with maybe_gzip_open(filename) as ifp:
         for line in ifp:
             seq = line.strip().upper()
             mut_exons = [chunk for chunk in seq.split('|') if '/' in chunk]
             assert len(mut_exons) == 1
             exon = mut_exons[0]
-            m = seq_re.search(exon)
-            if m:
-                pre, old, new, post = m.groups()
-                yield pre, old, new, post
-            else:
+            try:
+                pre, post = exon.split('/')
+                pre, old = pre.split('[')
+                new, post = post.split(']')
+            except ValueError:
                 print >>sys.stderr, "Error, invalid sequence: %s" % exon
                 yield None
+                
+            yield pre, old, new, post
 
 def score_target(motif, target):
     assert len(target) == len(motif['A'])
@@ -107,12 +108,11 @@ def script(filename, weight_filename='weights.txt',
         old = pre + mut_old + post
         
         tot = tot_lost = tot_gained = 0
+        short_old = pre[-7:] + mut_old + post[:7]
+        short_new = pre[-7:] + mut_new + post[:7]
         for name in sorted(weights):
             pssm = weights[name]
             n_old = len(score_sequence(pssm, old))
-
-            short_old = pre[-7:] + mut_old + post[:7]
-            short_new = pre[-7:] + mut_new + post[:7]
             n_lost, n_gained = score_mutation(pssm, short_old, short_new,
                                               verbose=verbose)
 

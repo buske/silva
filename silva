@@ -8,6 +8,8 @@ source ${SILVA_PATH:-$(dirname $0)}/init.sh
 control=$SILVA_CONTROL.mat
 src=$SILVA_PATH/src
 data=$SILVA_PATH/data
+modeldir=$SILVA_PATH/src/models/forest
+traineddir=$SILVA_TRAINED
 
 synonymous="$src/input/synonymous.py --genome=$data/hg19.2bit --genes=$data/refGene.ucsc.gz --cache-genes=$data/refGene.pkl"
 gp1k="$src/input/1000gp.py $data/1000gp.refGene.vcf.gz $data/1000gp.refGene.pkl"
@@ -16,14 +18,17 @@ function usage {
     cat <<EOF
 Usage: $0 OUTDIR VCF
 
-Annotates rare, synonymous variants in VCF file,
-creating files necessary to run this tool.
+Annotates rare, synonymous variants in VCF file.
+
+Ranked results printed to stdout.
+
 OUTDIR should be a directory specific to the VCF file.
+Creates OUTDIR if it does not exit.
 
 Existing files in OUTDIR are NOT overwritten, so this
 script can be stopped and resumed.
 
-Creates OUTDIR if it does not exit.
+Pretrained models found in: $traineddir
 Will use TMPDIR='$TMPDIR' as needed.
 EOF
     exit 1
@@ -33,12 +38,16 @@ EOF
 if [[ $# -ne 2 ]]; then
     usage
 fi
-outdir="$1"
+outdir="$(cd -P "$1"; pwd)"
 vcf="$2"
 
 if [[ ! -s "$vcf" ]]; then
     echo -e "Error: missing input file: $vcf\n" >&2
     usage
+fi
+if [[ ! -e $modeldir/test ]]; then
+    echo "Could not find test script: $modeldir/test" >&2
+    exit 1
 fi
 
 function skip_if_exists {
@@ -75,8 +84,8 @@ skip_if_exists $outdir/$out \
     && echo "Left with $(grep -v '^#' $outdir/$out | wc -l) variants..." >&2
 test -s $outdir/$out
 
-# Annotate 1000 Genomes Project AF
-if [[ -z "$pcoord" ]]; then
+# Possibly filter by 1000 Genomes Project AF
+if [[ -z "$pcoord" && -n $SILVA_AF_MAX && -n $SILVA_AF_MIN ]]; then
     out=$base.af
     skip_if_exists $outdir/$out \
         && echo "Annotating with 1000 Genomes Project allele frequency..." >&2 \
@@ -90,12 +99,14 @@ if [[ -z "$pcoord" ]]; then
     skip_if_exists $outdir/$out \
         && echo "Filtering by allele frequency [$SILVA_AF_MIN, $SILVA_AF_MAX]..." >&2 \
         && paste $outdir/$base.af $outdir/$base.syn \
-	   | awk -F"\t" '/^#/; /^[^#]/{OFS="\t"; if ($1 == ".") {$1 = 0} if ($1 >= '"$SILVA_AF_MIN"' && $1 <= '"$SILVA_AF_MAX"') {print $0}}' \
+	   | awk -F"\t" '/^#/; /^[^#]/{OFS="\t"; if ($1 == ".") {$1 = 0} if ($1 >= '"${SILVA_AF_MIN}"' && $1 <= '"${SILVA_AF_MAX}"') {print $0}}' \
            | cut -f 2- \
            > $TMPDIR/$out \
         && mv $TMPDIR/$out $outdir/$out \
         && echo "Left with $(grep -v '^#' $outdir/$out | wc -l) variants..." >&2
     test -s $outdir/$out
+elif [[ -z "$pcoord" ]]; then
+    ln -s -T $outdir/$base.flt $outdir/$base.syn
 fi
 
 # Annotate with mrna sequence
@@ -121,5 +132,41 @@ skip_if_exists $outdir/$out \
        --class=0 --control=$control $outdir/$base.mat > $TMPDIR/$out \
     && mv $TMPDIR/$out $outdir/$out
 test -s $outdir/$out
+
+
+
+### End of code originally in silva-preprocess ###
+### Code originally in silva-run is below ###
+
+
+fltfile="$outdir/$base.flt"
+test -s "$fltfile"
+	
+matfile="$outdir/$base.input"
+test -s "$matfile"
+
+for modelfile in $traineddir/*.model; do
+    pushd $modeldir > /dev/null
+    if [[ ! -s $modelfile ]]; then
+	echo "Error: could not find saved model: $modelfile" >&2
+	exit 1
+    fi
+    
+    # Run saved model on MAT file and created score file
+    model=$(basename $modelfile .model)
+    scorefile=$model.scored
+    if [[ ! -s $outdir/$scorefile ]]; then
+	echo "Running model $model..." >&2
+	./test $modelfile $matfile | cut -f 1 > $outdir/.$scorefile \
+	    && mv $outdir/.$scorefile $outdir/$scorefile
+	test -e $outdir/$scorefile
+    fi
+    popd > /dev/null
+done
+
+# Print scored examples to stdout
+echo -e "\nPrinting scored variants to stdout..." >&2
+$SILVA_PATH/src/util/summarize_scores.py $fltfile $outdir/*.scored
+
 
 echo "$0: SUCCESS" >&2

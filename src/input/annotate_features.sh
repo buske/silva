@@ -77,7 +77,7 @@ function setup {
 }
 
 setup; run cpg     $featuredir/other   ./cpg.py     -q $in &
-setup; run splice  $featuredir/other   ./splice.py  -q $in &
+#setup; run splice  $featuredir/other   ./splice.py  -q $in &
 setup; run ese3    $featuredir/ese3    ./ese3.py    -q $in &
 setup; run pesx    $featuredir/pesx    ./pesx.py    -q $in &
 setup; run fas-ess $featuredir/fas-ess ./fas-ess.py -q $in &

@@ -3,6 +3,8 @@
 set -eu
 set -o pipefail
 
+source ${SILVA_PATH}/init.sh
+
 function usage {
     cat <<EOF
 Usage: $0 TRUE.pcoord controlbase OUTDIR
