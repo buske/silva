@@ -5,12 +5,10 @@ set -o pipefail
 
 featuredir=$SILVA_PATH/src/features
 datadir=$SILVA_PATH/data
-MRNA_COL=11
-CODON_COLS="4-5,8-10"
 
 function usage {
     cat >&2 <<EOF
-Usage: $0 MRNA OUTBASE
+Usage: $0 SYN OUTBASE
 
 Creates OUTBASE.mat
 EOF
@@ -19,7 +17,7 @@ EOF
 if [[ $# -ne 2 ]]; then
     usage
 fi
-mrna="$1"
+in="$1"
 outdir="$(cd -P $(dirname "$2"); pwd)"
 outbase="$outdir/$(basename "$2")"
 
@@ -38,11 +36,6 @@ function die {
 
 
 trap die INT TERM EXIT
-
-in=$temp.mrna-col
-grep -v "^#" $mrna \
-    | cut -f $MRNA_COL \
-    > $in || exit 1
 
 function run {
     local name=$1.col

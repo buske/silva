@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Usage: gerp.py TABLE [TABLE.pkl] < POSITIONS > GERP
+Usage: gerp.py (-|FILE) TABLE [TABLE.pkl] > GERP
 
 Given input lines of the form: chrom, pos, ...
 (with pos 1-indexed), prints the corresponding GERP
@@ -31,15 +31,14 @@ if sys.stdin.isatty():
     print >>sys.stderr, __doc__
     sys.exit(1)
 
-if len(args) == 1:
+input_file, table_file = args[:2]
+if len(args) == 2:
     optfile = None
-elif len(args) == 2:
-    optfile = args[1]
+elif len(args) == 3:
+    optfile = args[2]
 else:
     print >>sys.stderr, __doc__
     sys.exit(1)
-    
-tablefile = args[0]
 
 def read_table(filename, optfile=None):
     data = defaultdict(dict)
@@ -63,14 +62,14 @@ if optfile and os.path.isfile(optfile):
     with maybe_gzip_open(optfile, 'rb') as ifp:
         table = cPickle.load(ifp)
 else:
-    print >>sys.stderr, "Loading table from:", tablefile
-    table = read_table(tablefile, optfile)
+    print >>sys.stderr, "Loading table from:", table_file
+    table = read_table(table_file, optfile)
 
 print '#GERP++'
-for line in sys.stdin:
+for line in maybe_gzip_open(input_file):
     line = line.strip()
     if not line or line.startswith('#'): continue
-    chrom, pos = line.split(None)
+    chrom, pos, rest = line.split(None, 2)
     try:
         value = '%.4f' % table[chrom.lstrip('chr')][int(pos)]
     except (IndexError, KeyError):
