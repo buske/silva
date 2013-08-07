@@ -64,10 +64,8 @@ def script(gene_cache, filename, hex_filename='fas-hex3.txt', quiet=False, **kwa
     fields = ['FAS6-', 'FAS6+']
     if quiet:
         print '#%s' % '\t'.join(fields)
-        NULL = '\t'.join(['na'] * len(fields))
     else:
         print '#n_initial n_lost n_gained'
-        NULL = 'na na na'
         
     def safe_div(num, denom):
         if num + denom > 0:

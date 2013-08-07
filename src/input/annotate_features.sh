@@ -8,7 +8,7 @@ datadir=$SILVA_PATH/data
 
 function usage {
     cat >&2 <<EOF
-Usage: $0 SYN OUTBASE
+Usage: $0 FLT OUTBASE
 
 Creates OUTBASE.mat
 EOF
@@ -69,17 +69,14 @@ function setup {
     n_cols=$(expr $n_cols + 1); 
 }
 
-setup; run cpg     $featuredir/other   ./cpg.py     -q $in &
-#setup; run splice  $featuredir/other   ./splice.py  -q $in &
-setup; run ese3    $featuredir/ese3    ./ese3.py    -q $in &
-setup; run pesx    $featuredir/pesx    ./pesx.py    -q $in &
-setup; run fas-ess $featuredir/fas-ess ./fas-ess.py -q $in &
-setup; run maxent  $featuredir/maxent  ./maxent.py  -q $in &
-setup; grep -v "^#" $mrna | cut -f $CODON_COLS \
-    | run codon $featuredir/other ./codon_usage.py -q - &
-
-setup; cut -f 1,2 $mrna \
-    | run 0_gerp $featuredir/other ./gerp.py $datadir/gerp.refGene.table.gz $datadir/gerp.refGene.pkl &
+cache=$datadir/refGene.pkl
+setup; run cpg     $featuredir/other   ./cpg.py     -q $cache $in &
+setup; run ese3    $featuredir/ese3    ./ese3.py    -q $cache $in &
+setup; run pesx    $featuredir/pesx    ./pesx.py    -q $cache $in &
+setup; run fas-ess $featuredir/fas-ess ./fas-ess.py -q $cache $in &
+setup; run maxent  $featuredir/maxent  ./maxent.py  -q $cache $in &
+setup; run codon   $featuredir/other   ./codon_usage.py -q $cache $in &
+setup; run 0_gerp  $featuredir/other   ./gerp.py $in $datadir/gerp.refGene.table.gz $datadir/gerp.refGene.pkl &
 
 if [[ -z "${EXCLUDE_RNA_FOLDING:-}" ]]; then
     setup; run unafold-50 $featuredir/unafold ./unafold.py -d 50 -q $in &

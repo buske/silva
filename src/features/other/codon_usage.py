@@ -56,11 +56,17 @@ def iter_codons(filename, genes):
             if not line or line.startswith('#'): continue
 
             tokens = line.strip().split('\t')
-            pos, ref, alt = tokens[1], tokens[3], tokens[4]
+            chrom, pos, ref, alt = tokens[0], tokens[1], tokens[3], tokens[4]
+            pos = int(pos)
             gene, tx_id = tokens[5], tokens[6]
 
             assert len(ref) == len(alt) == 1
-            tx = genes[gene][tx_id]
+            tx = None
+            for t in genes[gene]:
+                if t.tx() == tx_id and chrom == t.chrom() and t.start() <= pos <= t.end():
+                    tx = t
+
+            assert tx
 
             # Get codon, frame, and mrna
             cds_offset = tx.project_to_cds(pos)
@@ -70,8 +76,7 @@ def iter_codons(filename, genes):
 
             # Make alt and ref relative to transcript
             if tx.strand() == '-':
-                ref = COMPLEMENT[ref]
-                alt = COMPLEMENT[alt]
+                ref, alt = COMPLEMENT[ref], COMPLEMENT[alt]
 
             assert codon[frame] == ref
             new_codon = codon[:frame] + alt + codon[frame+1:]

@@ -43,11 +43,17 @@ class Seq(object):
         and relevant subsequence (str)
         """
         tokens = line.strip().split('\t')
-        pos, ref, alt = tokens[1], tokens[3], tokens[4]
+        chrom, pos, ref, alt = tokens[0], tokens[1], tokens[3], tokens[4]
         pos = int(pos)
         gene, tx_id = tokens[5], tokens[6]
+        
+        tx = None
+        for t in genes[gene]:
+            if t.tx() == tx_id and chrom == t.chrom() and t.start() <= pos <= t.end():
+                tx = t
 
-        tx = genes[gene][tx_id]
+        assert tx
+
         if tx.strand() == '-':
             ref, alt = COMPLEMENT[ref], COMPLEMENT[alt]
 
@@ -251,7 +257,7 @@ def script(gene_cache, filename, quiet=False, verbose=False, **kwargs):
     with maybe_gzip_open(filename) as ifp:
         for line in ifp:
             line = line.strip()
-            if line:
+            if line and not line.startswith('#'):
                 seqs.append(Seq(line, genes))
                 
     sites = {}

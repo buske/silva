@@ -19,7 +19,7 @@ write("Training random forest...", stderr())
 ##classes <- as.factor(data[,1])
 classes <- as.factor(data[,1])
 rf <- randomForest(data[,-1], classes,
-  proximity=TRUE, importance=TRUE, ntree=2001, do.trace=100)
+  proximity=TRUE, importance=TRUE, ntree=301, do.trace=100)
 
 ## Store trained model
 write(paste("Saving model to:", modelfile), stderr())

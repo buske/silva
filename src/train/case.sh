@@ -36,14 +36,9 @@ if [[ ! -s $flt ]]; then
     ./src/input/synonymous.py --protein-coords -O data/refGene.pkl filter $pcoord > $flt
 fi
 
-if [[ ! -s $mrna ]]; then
-    echo "Creating mRNA annotations: $mrna" >&2
-    ./src/input/synonymous.py -O data/refGene.pkl annotate $flt > $mrna
-fi
-
 if [[ ! -s $mat ]]; then
     echo "Creating feature matrix: $mat" >&2
-    ./src/input/annotate_features.sh $mrna $base
+    ./src/input/annotate_features.sh $flt $base
 fi
 
 mkdir -pv $outdir

@@ -129,6 +129,14 @@ class Transcript(object):
     def chrom(self):
         return self._chrom
 
+    def start(self):
+        """Return start genomic coordinate (1-indexed)"""
+        return self._tx_start + 1
+
+    def end(self):
+        """Return end genomic coordinate (1-indexed)"""
+        return self._tx_end
+
     def strand(self):
         return self._strand
 
@@ -306,7 +314,7 @@ class Transcript(object):
         
         return "c.%d%s>%s" % (cds_offset + 1, ref, alt)
 
-    def get_exon_bounds(pos):
+    def get_exon_bounds(self, pos):
         """Given genomic pos (1-indexed), return [left, right] offsets
         of exon containing position, such that exon sequence can be
         retrieved with premrna[left:right+1]
@@ -326,8 +334,10 @@ class Transcript(object):
                 assert pre_left < pre_right
                 return pre_left, pre_right
         
+        assert False, "Error, pos (%r) outside of premrna: [%d, %d)" % \
+            (pos, self._tx_start, self._tx_end)
 
-    def mrna_exon(pos, left=0, right=0):
+    def mrna_exon(self, pos, left=0, right=0):
         """Given genomic pos (1-indexed), return premrna sequence of exon,
         with buffer on left and right
 
@@ -337,9 +347,9 @@ class Transcript(object):
         pre_left, pre_right = self.get_exon_bounds(pos)
         pre_left = max(pre_left - left, 0)
         pre_right = min(pre_right + right + 1, len(self._premrna))
-        return self._premrna[pre_left:pre_right+1]
+        return self._premrna[pre_left:pre_right]
 
-    def mrna_window(pos, left=0, right=0):
+    def mrna_window(self, pos, left=0, right=0):
         """Given genomic pos (1-indexed), return premrna sequence around
         pos with buffer on left and right, and index of pos into sequence
         """
@@ -490,6 +500,12 @@ def get_transcript_from_protein(genes, gene, aa_pos, aa, mutation, *args, **kwar
             cds_offset = (aa_pos - 1) * 3 + frame
             pos = tx.project_from_cds(cds_offset)
             matches.append((tx, tx.chrom(), pos, ref, alt))
+
+    # If many hits, first try removing those on alternative haplotypes
+    if len(matches) > 1:
+        matches_no_haps = [m for m in matches if '_' not in m[1]]
+        if matches_no_haps:
+            matches = matches_no_haps
             
     if matches:
         return max(matches)  # longest transcript
@@ -529,7 +545,7 @@ def get_transcript(genes, pos, ref, alt, gene_id, tx_id):
         return
 
 
-def iter_mutation_seqs(filename, genes, left, right):
+def iter_mutation_seqs(filename, genes, left=0, right=0):
     """Reads VCF-like annotated SilVA variants from file and returns
     old, new, and exonic sequences around each line's variant
     left/right bp buffer returned around variant and exon sequence
@@ -539,12 +555,21 @@ def iter_mutation_seqs(filename, genes, left, right):
 
     with maybe_gzip_open(filename) as ifp:
         for line in ifp:
-            tokens = line.strip().split('\t')
-            pos, ref, alt = tokens[1], tokens[3], tokens[4]
-            pos = int(pos)
-            gene, tx_id = tokens[5], tokens[6]
+            if line.startswith('#'): continue
 
-            tx = genes[gene][tx_id]
+            tokens = line.strip().split('\t')
+            chrom, pos = tokens[:2]
+            pos = int(pos)
+            ref, alt = tokens[3:5]
+            gene, tx_id = tokens[5:7]
+
+            tx = None
+            for t in genes[gene]:
+                if t.tx() == tx_id and chrom == t.chrom() and t.start() <= pos <= t.end():
+                    tx = t
+
+            assert tx
+
             exon = tx.mrna_exon(pos, left=left, right=right)
             assert exon
 
