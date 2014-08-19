@@ -27,19 +27,19 @@ cd silva-<VERSION>
 
 2. Install dependencies:
 
-```bash
+  ```bash
 ./setup.sh
 ```
 
 3. Preprocess VCF file:
 
-```bash
+  ```bash
     ./silva-preprocess OUTDIR VCF
 ```
 
 4. Run models and print highest-scoring synonymous variants:
 
-```bash
+  ```bash
     ./silva-run OUTDIR | head
 ```
 
@@ -56,7 +56,7 @@ cd silva-<VERSION>
 
 ### Dependencies ###
 
-SilVA requires several tools and databases to run. Most of these were included with this release, but the 'setup.sh' script will download and configure the rest.
+SilVA requires several tools and databases to run. Most of these were included with this release, but the `setup.sh` script will download and configure the rest.
 
 - included: maxentscan, available from:
   http://genes.mit.edu/burgelab/maxent/download/
@@ -78,25 +78,25 @@ SilVA requires several tools and databases to run. Most of these were included w
 ### Data files ###
 
 After running setup.sh, all necessary data files should be automatically downloaded into the data/ directory. Here is a list of the files that should be there:
-- refGene.ucsc.gz
-- 1000gp.refGene.vcf.gz
-- gerp.refGene.table.gz
-- hg19.2bit
+- `refGene.ucsc.gz`
+- `1000gp.refGene.vcf.gz`
+- `gerp.refGene.table.gz`
+- `hg19.2bit`
 
 * Note: The very first time you run SilVA, it will take much longer than normal (~45min longer) because the reference genome needs to be processed and mapped to the refSeq gene annotations and data files need to be parsed. This only needs to be done once, since the following pre-processed databases are saved to the data/ directory for future runs:
-- refGene.pkl
-- 1000gp.refGene.pkl
-- gerp.refGene.pkl
+- `refGene.pkl`
+- `1000gp.refGene.pkl`
+- `gerp.refGene.pkl`
 
 ### Input File Format ###
 
 Single-nucleotide variants should be given to SilVA in VCF or a VCF-like file format. This file may be gzip'd, but then must have a '.gz' extension. There should be one line per variant, with tab-delimited fields:
 
-1. chrom - chromosome (any 'chr' prefix will be trimmed)
-2. pos - the position of the variant, 1-indexed
-3. id - the id field is ignored, but is here to provide compatibility with the VCF format.
-4. ref - the reference nucleotide
-5. alt - the alternate nucleotide (if multiple are present, comma-separated, only the first will be used)
+1. `chrom` - chromosome (any 'chr' prefix will be trimmed)
+2. `pos` - the position of the variant, 1-indexed
+3. `id` - the id field is ignored, but is here to provide compatibility with the VCF format.
+4. `ref` - the reference nucleotide
+5. `alt` - the alternate nucleotide (if multiple are present, comma-separated, only the first will be used)
 ... Additional columns can be present and are ignored
 
 ### Output Format ###
@@ -117,7 +117,7 @@ SilVA is packaged with most of its dependencies. The remaining few can be downlo
 
 1. Download, untar, and unzip the package tarball:
 
-```bash
+  ```bash
 wget http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>.tar.gz
 tar -xzf silva-<VERSION>.tar.gz
 cd silva-<VERSION>
@@ -125,7 +125,7 @@ cd silva-<VERSION>
 
 2. Run the setup script in the package's root directory:
 
-```bash
+  ```bash
 ./setup.sh
 ```
 
@@ -142,13 +142,13 @@ To run SilVA on your local machine, you should have already installed dependenci
 
 1. Filter an annotate the variants in the VCF file (this takes a while):
 
-```bash
+  ```bash
 ./silva-preprocess <OUTDIR> <VCF>
 ```
 
 2. Run the trained models on the annotated variants and print the top variants in order of decreasing predicted harmfulness (this is fast):
 
-```bash
+  ```bash
 ./silva-run <OUTDIR> | head
 ```
 
