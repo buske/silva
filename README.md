@@ -1,12 +1,10 @@
-==================
-SILVA <VERSION> README
-==================
+# SILVA README #
 
 SilVA: Silent variant analysis using random forests.
-"When a synonymous mutation falls in the exome, does it make a sound?"
+*"When a synonymous mutation falls in the exome, does it make a sound?"*
 
 
-SilVA is a tool for the automated harmfulness prediction of SYNONYMOUS single-nucleotide variants. Given variants in a VCF file, SilVA will rank the rare synonymous variants according to their predicted harmfulness. SilVA predicts the harmfulness of mutations using features that include conservation, codon usage, splice sites, splicing enhancers and suppressors, and mRNA folding free energy.
+SilVA is a tool for the automated harmfulness prediction of **SYNONYMOUS** single-nucleotide variants. Given variants in a VCF file, SilVA will rank the rare synonymous variants according to their predicted harmfulness. SilVA predicts the harmfulness of mutations using features that include conservation, codon usage, splice sites, splicing enhancers and suppressors, and mRNA folding free energy.
 
 If you use this tool, please cite:
 
@@ -17,42 +15,47 @@ If you use this tool, please cite:
 Send questions, comments, and difficulties to: silva-snv@cs.toronto.edu
 
 
-Quickstart
-==========
+## Quickstart ##
 
 1. Download SilVA:
 
-    wget http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>.tar.gz
-    tar -xzf silva-<VERSION>.tar.gz
-    cd silva-<VERSION>
+  ```bash
+wget http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>.tar.gz
+tar -xzf silva-<VERSION>.tar.gz
+cd silva-<VERSION>
+```
 
 2. Install dependencies:
 
-    ./setup.sh
+```bash
+./setup.sh
+```
 
 3. Preprocess VCF file:
 
+```bash
     ./silva-preprocess OUTDIR VCF
+```
 
 4. Run models and print highest-scoring synonymous variants:
 
+```bash
     ./silva-run OUTDIR | head
+```
 
+## Overview ##
 
-Overview
-========
+### Prerequisites ###
 
-Prerequisites
--------------
 - Linux or Mac OS, x86
 - 6GB of RAM
 - Python 2.6 or 2.7 in your PATH
--- The 'numpy' Python package
+  - The 'numpy' Python package
 - Perl in your PATH (for maxentscan)
 - R in your PATH (for randomForest)
 
-Dependencies
-------------
+### Dependencies ###
+
 SilVA requires several tools and databases to run. Most of these were included with this release, but the 'setup.sh' script will download and configure the rest.
 
 - included: maxentscan, available from:
@@ -72,8 +75,8 @@ SilVA requires several tools and databases to run. Most of these were included w
 
 * Note: if you have the SilVA databases already installed, you can point SilVA to them by changing the appropriate lines in the 'init.sh' file.
 
-Data files
-----------
+### Data files ###
+
 After running setup.sh, all necessary data files should be automatically downloaded into the data/ directory. Here is a list of the files that should be there:
 - refGene.ucsc.gz
 - 1000gp.refGene.vcf.gz
@@ -85,8 +88,8 @@ After running setup.sh, all necessary data files should be automatically downloa
 - 1000gp.refGene.pkl
 - gerp.refGene.pkl
 
-Input File Format
------------------
+### Input File Format ###
+
 Single-nucleotide variants should be given to SilVA in VCF or a VCF-like file format. This file may be gzip'd, but then must have a '.gz' extension. There should be one line per variant, with tab-delimited fields:
 
 1. chrom - chromosome (any 'chr' prefix will be trimmed)
@@ -96,8 +99,8 @@ Single-nucleotide variants should be given to SilVA in VCF or a VCF-like file fo
 5. alt - the alternate nucleotide (if multiple are present, comma-separated, only the first will be used)
 ... Additional columns can be present and are ignored
 
-Output Format
--------------
+### Output Format ###
+
 SilVA will print the synonymous variants to stdout, ordered by score, with the variants most likely to be harmful listed first. Variants are first filtered down to just rare and novel synonymous variants. The variants are then annotated with a number of features and the machine learning model is used to rank the variants. The output contains the following tab-delimited columns:
 
 1. The variant rank, out of all synonymous variants considered.
@@ -108,60 +111,68 @@ SilVA will print the synonymous variants to stdout, ordered by score, with the v
 ... Fields from the input file
 
 
-Installation
-============
+## Installation ##
 
 SilVA is packaged with most of its dependencies. The remaining few can be downloaded and configured by running the 'setup.sh' script from the root directory of this package:
 
 1. Download, untar, and unzip the package tarball:
 
-    wget http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>.tar.gz
-    tar -xzf silva-<VERSION>.tar.gz
-    cd silva-<VERSION>
+```bash
+wget http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>.tar.gz
+tar -xzf silva-<VERSION>.tar.gz
+cd silva-<VERSION>
+```
 
 2. Run the setup script in the package's root directory:
 
-    ./setup.sh
+```bash
+./setup.sh
+```
 
 * SilVA uses a number of environment variables to communicate important paths and parameters, such as what directory to use for temporary files and what allele frequency threshold to use. SilVA has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'init.sh' script.
 
 
-Running SilVA
-=============
+## Running SilVA ##
 
 In addition to running SilVA on your local machine, we provide a convenience script to dispatch multiple SilVA runs across an SGE cluster. SilVA uses TMPDIR for all temporary files. If TMPDIR is not set, it will use the current directory.
 
-Local machine
--------------
+### Local machine ###
+
 To run SilVA on your local machine, you should have already installed dependencies with the 'setup.sh' script. You can then run SilVA on your file of variants, <VCF>, (see Input Format) from the root directory of this package (or add this directory to your PATH):
 
 1. Filter an annotate the variants in the VCF file (this takes a while):
 
-    ./silva-preprocess <OUTDIR> <VCF>
+```bash
+./silva-preprocess <OUTDIR> <VCF>
+```
 
 2. Run the trained models on the annotated variants and print the top variants in order of decreasing predicted harmfulness (this is fast):
 
-    ./silva-run <OUTDIR> | head
+```bash
+./silva-run <OUTDIR> | head
+```
 
 SilVA should handle errors and early termination gracefully, so if something goes wrong, you can re-run the same command and it will pick up where it left off.
 
-Example
--------
+### Example ###
+
 The 'example/' folder in the root directory of this package contains a sample input file for you to test SilVA on. You can run SilVA on it with the following commands:
 
-    ./silva-preprocess example example/example.vcf
-    ./silva-run example | head
+```bash
+./silva-preprocess example example/example.vcf
+./silva-run example | head
+```
 
 You should see the known-harmful ACVRL1 variant appear at the top! Granted, for simplicity, the example only has 28 other rare synonymous variants in it. SilVA's expected output on this example is included in 'example/example.out'.
 
-SGE Cluster
------------
+### SGE Cluster ###
+
 In case you have a large number of VCF files and an SGE cluster, we have provided a dispatch script for your convenience, 'sge/dispatch.sh'. Because SGE configurations vary widely, you should first open the file and take a look at the three SGE configuration variables at the top of the script. Edit them as you see fit. You can then dispatch SGE jobs for a number of VCF files from the root directory of the package with:
 
-    ./sge/dispatch.sh <OUTDIR> <VCF1> <VCF2> ...
+```bash
+./sge/dispatch.sh <OUTDIR> <VCF1> <VCF2> ...
+```
 
+## Support ##
 
-Support
-=======
-
-Send questions, comments, and difficulties to: silva-snv@cs.toronto.edu
+Send questions, comments, and difficulties to: `silva-snv@cs.toronto.edu`
