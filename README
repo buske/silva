@@ -67,8 +67,8 @@ SilVA requires several tools and databases to run. Most of these were included w
   http://www.tbi.univie.ac.at/~ronny/RNA/
 - setup.sh: SilVA databases, available from:
   http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>_data.tar.gz
-- setup.sh: hg19.2bit, available from:
-  http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit
+- setup.sh: UCSC hg19 multifasta file, available from:
+  http://compbio.cs.toronto.edu/silva/release/hg19.fa.gz
 
 * Note: if you have the SilVA databases already installed, you can point SilVA to them by changing the appropriate lines in the 'init.sh' file.
 
@@ -78,9 +78,9 @@ After running setup.sh, all necessary data files should be automatically downloa
 - refGene.ucsc.gz
 - 1000gp.refGene.vcf.gz
 - gerp.refGene.table.gz
-- hg19.2bit
+- hg19.fa.gz
 
-* Note: The very first time you run SilVA, it will take much longer than normal (~45min longer) because the reference genome needs to be processed and mapped to the refSeq gene annotations and data files need to be parsed. This only needs to be done once, since the following pre-processed databases are saved to the data/ directory for future runs:
+* Note: The very first time you run SilVA, it will take much longer than normal (~30min longer) because the reference genome needs to be processed and mapped to the refSeq gene annotations and data files need to be parsed. This only needs to be done once, since the following pre-processed databases are saved to the data/ directory for future runs:
 - refGene.pkl
 - 1000gp.refGene.pkl
 - gerp.refGene.pkl
@@ -105,6 +105,7 @@ SilVA will print the synonymous variants to stdout, ordered by score, with the v
 3. The variant classification, based upon several SilVA score thresholds.
 3. HGNC gene name
 4. RefSeq mRNA identifier
+5. HGVS coding mutation identifier
 ... Fields from the input file
 
 

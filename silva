@@ -11,7 +11,7 @@ data=$SILVA_PATH/data
 modeldir=$SILVA_PATH/src/models/forest
 traineddir=$SILVA_TRAINED
 
-synonymous="$src/input/synonymous.py --genome=$data/hg19.2bit --genes=$data/refGene.ucsc.gz --cache-genes=$data/refGene.pkl"
+synonymous="$src/input/synonymous.py --genome=$data/hg19.fa.gz --genes=$data/refGene.ucsc.gz --cache-genes=$data/refGene.pkl"
 gp1k="$src/input/1000gp.py $data/1000gp.refGene.vcf.gz $data/1000gp.refGene.pkl"
 
 function usage {

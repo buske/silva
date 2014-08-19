@@ -4,13 +4,12 @@ import os
 import sys
 import cPickle
 
+from array import array as pyarray
 from datetime import datetime
 from gzip import open as _gzip_open
 from contextlib import closing
 from collections import defaultdict
 from string import maketrans
-
-from twobitreader import TwoBitFile as Genome
 
 
 def maybe_gzip_open(filename, *args, **kwargs):
@@ -319,7 +318,7 @@ class Transcript(object):
         of exon containing position, such that exon sequence can be
         retrieved with premrna[left:right+1]
 
-        Return None if pos doesn't overlap exon
+        Raise exception if pos doesn't overlap exon
         """
         pos = pos - 1
         for exon_start, exon_end in self._exons:
@@ -334,14 +333,12 @@ class Transcript(object):
                 assert pre_left < pre_right
                 return pre_left, pre_right
         
-        assert False, "Error, pos (%r) outside of premrna: [%d, %d)" % \
-            (pos, self._tx_start, self._tx_end)
+        assert False, "Error, %s:%r outside of %s:%s" % \
+            (self._chrom, pos, self.tx(), str(list(self._exons)))
 
     def mrna_exon(self, pos, left=0, right=0):
         """Given genomic pos (1-indexed), return premrna sequence of exon,
         with buffer on left and right
-
-        Return None if pos doesn't overlap exon
         """
         # return exon sequence, potentially buffered
         pre_left, pre_right = self.get_exon_bounds(pos)
@@ -404,6 +401,23 @@ def iter_ucsc_genes(filename):
                    'gene': name2,
                    'tx': name}
 
+def load_genome(filename):
+    """Return dict from sequence name to character array from genome FASTA file"""
+    genome = defaultdict(lambda: pyarray('c'))
+    sequence = None
+    print >>sys.stderr, "Loading genome into memory from FASTA file: %s" % filename
+    with maybe_gzip_open(filename) as ifp:
+        for line in ifp:
+            line = line.strip()
+            if line.startswith('>'):
+                name = line.lstrip('>').strip()
+                sequence = genome[name]
+            elif line:
+                sequence.fromstring(line)
+
+    print >>sys.stderr, "Found %d sequences." % len(genome)
+    return genome
+
 def get_genes(gene_filename=None, cache_filename=None,
               genome_filename=None, **kwargs):
     """Loads (potentially cached) dict: gene_name -> set(genes)
@@ -413,10 +427,10 @@ def get_genes(gene_filename=None, cache_filename=None,
     assert gene_filename and genome_filename or cache_filename
     if cache_filename is not None and os.path.isfile(cache_filename):
         print >>sys.stderr, "Loading genes from pickled file: %s" % cache_filename
-        with maybe_gzip_open(cache_filename) as ifp:
+        with maybe_gzip_open(cache_filename, 'rb') as ifp:
             genes = cPickle.load(ifp)
     else:
-        genome = Genome(genome_filename)
+        genome = load_genome(genome_filename)
 
         genes = defaultdict(set)
         missed_chroms = set()
@@ -545,13 +559,22 @@ def get_transcript(genes, pos, ref, alt, gene_id, tx_id):
         return
 
 
-def iter_mutation_seqs(filename, genes, left=0, right=0):
+def iter_mutation_seqs(filename, genes, left=0, right=0, 
+                       exon_left=None, exon_right=None):
     """Reads VCF-like annotated SilVA variants from file and returns
-    old, new, and exonic sequences around each line's variant
-    left/right bp buffer returned around variant and exon sequence
+    exonic, old, and new sequences around each line's variant
+    left/right bp buffer returned around variant and 
+    exon_left/exon_right bp buffer around exon sequence
     Yields tuple of (exon, old, new) sequences for each line.
+
+    exon_left and exon_right default to the values of left and right
     """
     global COMPLEMENT
+
+    if exon_left is None:
+        exon_left = left
+    if exon_right is None:
+        exon_right = right
 
     with maybe_gzip_open(filename) as ifp:
         for line in ifp:
@@ -563,14 +586,15 @@ def iter_mutation_seqs(filename, genes, left=0, right=0):
             ref, alt = tokens[3:5]
             gene, tx_id = tokens[5:7]
 
-            tx = None
+            txs = []
             for t in genes[gene]:
                 if t.tx() == tx_id and chrom == t.chrom() and t.start() <= pos <= t.end():
-                    tx = t
+                    txs.append(t)
 
-            assert tx
+            assert txs
+            tx = max(txs)
 
-            exon = tx.mrna_exon(pos, left=left, right=right)
+            exon = tx.mrna_exon(pos, left=exon_left, right=exon_right)
             assert exon
 
             if tx.strand() == '-':

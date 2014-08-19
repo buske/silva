@@ -83,8 +83,7 @@ def script(gene_cache, filename, weight_filename='weights.txt',
         else:
             return 'na'
 
-    for exon, old, new in \
-            iter_mutation_seqs(filename, genes, left=PRE_LEN, right=POST_LEN):
+    for exon, old, new in iter_mutation_seqs(filename, genes, left=PRE_LEN, right=POST_LEN):
         tot = tot_lost = tot_gained = 0
         for name in sorted(weights):
             pssm = weights[name]

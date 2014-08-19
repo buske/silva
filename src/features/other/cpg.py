@@ -41,10 +41,16 @@ def calc_cpg(seq):
 def script(gene_cache, filename, quiet=False, **kwargs):
     genes = get_genes(cache_filename=gene_cache)
     fields = ['CpG?', 'CpG_exon']
+    NULL = '\t'.join(['na'] * 2)
+
     print '#%s' % '\t'.join(fields)
     for exon, old, new in iter_mutation_seqs(filename, genes, left=1, right=1):
         # Was a CpG created or destroyed by the mutation?
-        assert len(old) == len(new) == 3 and old[0] == new[0]
+        if not (len(old) == len(new) == 3 and old[0] == new[0]):
+            print >>sys.stderr, "Warning: mutation at edge of pre-mRNA"
+            print NULL
+            continue
+
         pre = old[0]
         post = old[2]
         old = old[1]

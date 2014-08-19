@@ -95,7 +95,7 @@ def script(gene_cache, filename, pese_filename='pese262.txt',
 
 def parse_args(args):
     from optparse import OptionParser
-    usage = "usage: %prog [options] GENE_CACHE (SEQ|-)"
+    usage = "usage: %prog [options] GENE_CACHE FILT"
     description = __doc__.strip()
     
     parser = OptionParser(usage=usage,

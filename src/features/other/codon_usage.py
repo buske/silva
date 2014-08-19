@@ -61,12 +61,13 @@ def iter_codons(filename, genes):
             gene, tx_id = tokens[5], tokens[6]
 
             assert len(ref) == len(alt) == 1
-            tx = None
+            txs = []
             for t in genes[gene]:
                 if t.tx() == tx_id and chrom == t.chrom() and t.start() <= pos <= t.end():
-                    tx = t
+                    txs.append(t)
 
-            assert tx
+            assert txs
+            tx = max(txs)
 
             # Get codon, frame, and mrna
             cds_offset = tx.project_to_cds(pos)

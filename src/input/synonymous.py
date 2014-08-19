@@ -362,9 +362,9 @@ def parse_args(args):
                       dest="gene_filename", default=None,
                       help="Read genes from UCSC file, unless cache already"
                       " exists and specified with -O")
-    parser.add_option("-G", "--genome", metavar="2BIT",
+    parser.add_option("-G", "--genome", metavar="FASTA",
                       dest="genome_filename", default=None,
-                      help="Extract sequence data from 2bit file (same assembly as --genes)")
+                      help="Extract sequence data from FASTA file (same assembly as --genes)")
     parser.add_option("--protein-coords", action="store_true",
                       dest="protein_coords", default=False,
                       help="If ACTION is 'filter', VARIANTS file contains"

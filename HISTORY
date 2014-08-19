@@ -1,3 +1,8 @@
+1.2.0:
+	- Switched back to hg19 FASTA for speed
+	- Removed use of space-intensive .mrna files
+	- Added HGVS mutation output column
+
 1.1.1: 12 July 2013
 	- Switched from hg19.fa as part of data tarball to hg19.2bit from UCSC
 	- Added no-folding release, without UNAfold and ViennaRNA dependencies

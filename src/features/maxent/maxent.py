@@ -47,12 +47,13 @@ class Seq(object):
         pos = int(pos)
         gene, tx_id = tokens[5], tokens[6]
         
-        tx = None
+        txs = []
         for t in genes[gene]:
             if t.tx() == tx_id and chrom == t.chrom() and t.start() <= pos <= t.end():
-                tx = t
+                txs.append(t)
 
-        assert tx
+        assert txs
+        tx = max(txs)
 
         if tx.strand() == '-':
             ref, alt = COMPLEMENT[ref], COMPLEMENT[alt]
@@ -315,7 +316,7 @@ def run_tests():
 
 def parse_args(args):
     from optparse import OptionParser
-    usage = "usage: %prog [options] GENE_CACHE (SEQ|-)"
+    usage = "usage: %prog [options] GENE_CACHE FLT"
     description = __doc__.strip()
     
     parser = OptionParser(usage=usage,

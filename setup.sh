@@ -16,8 +16,7 @@ set -o pipefail
 version="$(cat VERSION)"
 SILVA_DATA_URL="http://compbio.cs.toronto.edu/silva/release/silva-${version}_data.tar.gz"
 
-GENOME_URL="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit"
-
+GENOME_URL="http://compbio.cs.toronto.edu/silva/release/hg19.fa.gz"
 
 UNAFOLD_VERSION="3.8"
 UNAFOLD_URL="http://mfold.rna.albany.edu/cgi-bin/UNAFold-download.cgi?unafold-${UNAFOLD_VERSION}.tar.gz"
@@ -130,12 +129,12 @@ if [[ ! -e $datafile ]]; then
     fi
 fi
 
-# Download hg19 twobit file
+# Download hg19 multifasta file
 mkdir -pv data
-datafile=data/hg19.2bit
+datafile=data/hg19.fa.gz
 if [[ ! -e $datafile ]]; then
     if [[ ! -e $datafile ]]; then
-	prompt "\n\nFinal step:\nDownloading hg19 2-bit file from UCSC...\n\nThis file is large (~800M) and may take a while to download.\n\nIf you already have hg19.2bit, press CTRL+C to exit this script and make a symlink to it within the data directory. Then, re-run this script to make sure everything is properly linked."
+	prompt "\n\nFinal step:\nDownloading hg19 FASTA file from UofT servers...\n\nThis file is large (~800M) and may take a while to download.\n\nIf you already have hg19.fa.gz, press CTRL+C to exit this script and make a symlink to it within the data directory. Then, re-run this script to make sure everything is properly linked."
 	wget -v -O $datafile $GENOME_URL
     fi
     if [[ ! -e $datafile ]]; then
