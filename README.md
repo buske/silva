@@ -20,9 +20,9 @@ Send questions, comments, and difficulties to: silva-snv@cs.toronto.edu
 1. Download SilVA:
 
   ```bash
-wget http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>.tar.gz
-tar -xzf silva-<VERSION>.tar.gz
-cd silva-<VERSION>
+wget http://compbio.cs.toronto.edu/silva/release/silva-1.1.1.tar.gz
+tar -xzf silva-1.1.1.tar.gz
+cd silva-1.1.1
 ```
 
 2. Install dependencies:
@@ -118,9 +118,9 @@ SilVA is packaged with most of its dependencies. The remaining few can be downlo
 1. Download, untar, and unzip the package tarball:
 
   ```bash
-wget http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>.tar.gz
-tar -xzf silva-<VERSION>.tar.gz
-cd silva-<VERSION>
+wget http://compbio.cs.toronto.edu/silva/release/silva-1.1.1.tar.gz
+tar -xzf silva-1.1.1.tar.gz
+cd silva-1.1.1
 ```
 
 2. Run the setup script in the package's root directory:
