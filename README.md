@@ -69,11 +69,11 @@ SilVA requires several tools and databases to run. Most of these were included w
 - setup.sh: ViennaRNA, available from:
   http://www.tbi.univie.ac.at/~ronny/RNA/
 - setup.sh: SilVA databases, available from:
-  http://compbio.cs.toronto.edu/silva/release/silva-<VERSION>_data.tar.gz
+  http://compbio.cs.toronto.edu/silva/release/silva-1.1.1_data.tar.gz
 - setup.sh: hg19.2bit, available from:
   http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit
 
-* Note: if you have the SilVA databases already installed, you can point SilVA to them by changing the appropriate lines in the 'init.sh' file.
+**Note**: _if you have the SilVA databases already installed, you can point SilVA to them by changing the appropriate lines in the `init.sh` file._
 
 ### Data files ###
 
@@ -83,7 +83,7 @@ After running setup.sh, all necessary data files should be automatically downloa
 - `gerp.refGene.table.gz`
 - `hg19.2bit`
 
-* Note: The very first time you run SilVA, it will take much longer than normal (~45min longer) because the reference genome needs to be processed and mapped to the refSeq gene annotations and data files need to be parsed. This only needs to be done once, since the following pre-processed databases are saved to the data/ directory for future runs:
+**Note**: _The very first time you run SilVA, it will take much longer than normal (~45min longer) because the reference genome needs to be processed and mapped to the refSeq gene annotations and data files need to be parsed. This only needs to be done once, since the following pre-processed databases are saved to the data/ directory for future runs:_
 - `refGene.pkl`
 - `1000gp.refGene.pkl`
 - `gerp.refGene.pkl`
