@@ -129,7 +129,7 @@ cd silva-<VERSION>
 ./setup.sh
 ```
 
-* SilVA uses a number of environment variables to communicate important paths and parameters, such as what directory to use for temporary files and what allele frequency threshold to use. SilVA has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your ~/.bashrc, for example). To see a list of these variables or to change their settings, see the 'init.sh' script.
+**Note**: _SilVA uses a number of environment variables to communicate important paths and parameters, such as what directory to use for temporary files and what allele frequency threshold to use. SilVA has default settings that should work, but will defer to any settings in your environment (so you can hard-code values by exporting variables in your `~/.bashrc`, for example). To see a list of these variables or to change their settings, see the `init.sh` script._
 
 
 ## Running SilVA ##
