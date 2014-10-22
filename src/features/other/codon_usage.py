@@ -20,7 +20,7 @@ import sys
 assert os.getenv('SILVA_PATH') is not None, \
        "Error: SILVA_PATH is unset."
 sys.path.insert(0, os.path.expandvars('$SILVA_PATH/lib/python'))
-from silva import maybe_gzip_open, print_args, get_genes, AA_CODE
+from silva import maybe_gzip_open, print_args, get_genes, AA_CODE, get_transcript
 
 COMPLEMENT = dict(zip('ACGT', 'TGCA'))
 CODON_FREQ = {
@@ -58,16 +58,11 @@ def iter_codons(filename, genes):
             tokens = line.strip().split('\t')
             chrom, pos, ref, alt = tokens[0], tokens[1], tokens[3], tokens[4]
             pos = int(pos)
-            gene, tx_id = tokens[5], tokens[6]
+            gene_id, tx_id = tokens[5], tokens[6]
 
             assert len(ref) == len(alt) == 1
-            txs = []
-            for t in genes[gene]:
-                if t.tx() == tx_id and chrom == t.chrom() and t.start() <= pos <= t.end():
-                    txs.append(t)
-
-            assert txs
-            tx = max(txs)
+            tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
+            assert tx
 
             # Get codon, frame, and mrna
             cds_offset = tx.project_to_cds(pos)

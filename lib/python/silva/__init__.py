@@ -556,7 +556,7 @@ def get_transcript(genes, pos, ref, alt, gene_id, tx_id):
     else:
         print >>sys.stderr, "Mutation g.%d%s>%s is not uniquely" \
               "synonymous among copies of %s" % (pos, ref, alt, tx_id)
-        return
+        return max(txs)  # Return longest valid transcript
 
 
 def iter_mutation_seqs(filename, genes, left=0, right=0, 
@@ -584,15 +584,10 @@ def iter_mutation_seqs(filename, genes, left=0, right=0,
             chrom, pos = tokens[:2]
             pos = int(pos)
             ref, alt = tokens[3:5]
-            gene, tx_id = tokens[5:7]
+            gene_id, tx_id = tokens[5:7]
 
-            txs = []
-            for t in genes[gene]:
-                if t.tx() == tx_id and chrom == t.chrom() and t.start() <= pos <= t.end():
-                    txs.append(t)
-
-            assert txs
-            tx = max(txs)
+            tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
+            assert tx
 
             exon = tx.mrna_exon(pos, left=exon_left, right=exon_right)
             assert exon

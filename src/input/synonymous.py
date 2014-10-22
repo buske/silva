@@ -214,35 +214,6 @@ def filter_variants(genes, filename, protein_coords=False):
         print >>sys.stderr, "Found %d synonymous variants (%d dropped)" % \
               (n_kept, n_total - n_kept)
 
-# def annotate_variants(genes, filename):
-#     fields = ['chrom', 'pos', 'id', 'ref', 'alt', 'gene', 'tx', 'strand',
-#               'codon', 'frame', 'premrna']
-#     print '#%s' % '\t'.join(fields)
-#     with maybe_gzip_open(filename) as ifp:
-#         for line in ifp:
-#             line = line.rstrip()
-#             if not line or line.startswith('#'): continue
-
-#             tokens = line.split()
-#             chrom, pos, id, ref, alt, gene_id, tx_id = tokens[:7]
-#             chrom = chrom[3:] if chrom.startswith('chr') else chrom
-#             pos = int(pos)
-
-#             tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
-#             if not tx:
-#                 continue
-
-#             # Get codon, frame, and mrna
-#             cds_offset = tx.project_to_cds(pos)
-#             aa_pos = int(cds_offset / 3) + 1
-#             codon = tx.get_codon(aa_pos)
-#             frame = cds_offset % 3
-
-#             mut_str = tx.mutation_str(pos, ref, alt)
-#             print '\t'.join([chrom, str(pos), id, ref, alt, tx.gene(), tx.tx(),
-#                               tx.strand(), codon, str(frame), mut_str] + tokens[7:])
-
-
 
 def script(action, filename, protein_coords=False, genome_filename=None,
            all=False, random=False, match_cpg=False, avoid_splice=False,
