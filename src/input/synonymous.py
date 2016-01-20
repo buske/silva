@@ -22,6 +22,7 @@ from __future__ import division, with_statement
 import os
 import sys
 import cPickle
+import logging
 
 from collections import defaultdict
 from string import maketrans
@@ -306,16 +307,19 @@ class Transcript(object):
             cds_pos = self.project_to_cds(pos)
             assert cds_pos is not None
         except AssertionError:
-            return False
+            logging.warning('%s:%d %s->%s does not overlap any CDS' % (self._chrom, pos, ref, alt))
+            return None
         
         # Make nucs tx strand
         if self._strand == '-':
             alt = COMPLEMENT[alt]
             ref = COMPLEMENT[ref]
 
-        assert self._mrna[cds_pos] == ref, \
-               "Reference mismatch: %s:%s (%s)  %s != %s" % \
-               (self._chrom, pos, self._strand, self._mrna[cds_pos], ref)
+        if self._mrna[cds_pos] != ref:
+            logging.warning('Reference mismatch: %s:%s (%s)  %s != %s' %
+                            (self._chrom, pos, self._strand, 
+                             self._mrna[cds_pos], ref))
+            return None
         
         frame = cds_pos % 3
         codon_start = cds_pos - frame
@@ -629,7 +633,10 @@ def filter_variants(genes, filename, protein_coords=False):
                 chrom = chrom[3:] if chrom.startswith('chr') else chrom
                 alt = alts.split(',')[0]
                 # Only process SNVs
+                ref = ref.strip()
+                alt = alt.strip()
                 if len(ref) != 1 or len(alt) != 1:
+                    logging.debug('Dropping non-SNP line: %s' % line)
                     continue
 
                 pos = int(pos)
@@ -644,13 +651,14 @@ def filter_variants(genes, filename, protein_coords=False):
                 tx = max(txs) if txs else None  # Take longest valid transcript
 
             if not tx:
+                logging.debug('Variant is not synonymous on any transcript: %s' % line)
                 continue
 
             n_kept += 1
             print '\t'.join([chrom, str(pos), id, ref, alt, tx.gene(), tx.tx()] + rest)
 
-        print >>sys.stderr, "Found %d synonymous variants (%d dropped)" % \
-              (n_kept, n_total - n_kept)
+        logging.info("Found %d synonymous variants (%d dropped)" % \
+              (n_kept, n_total - n_kept))
 
 def annotate_variants(genes, filename):
     fields = ['chrom', 'pos', 'id', 'ref', 'alt', 'gene', 'tx', 'strand',
@@ -668,6 +676,7 @@ def annotate_variants(genes, filename):
 
             tx = get_transcript(genes, pos, ref, alt, gene_id, tx_id)
             if not tx:
+                logging.warning('Transcript not found for variant: %s' % line)
                 continue
 
             # Get codon, frame, and mrna
@@ -836,7 +845,7 @@ def parse_args(args):
 def main(args=sys.argv[1:]):
     options, args = parse_args(args)
     kwargs = dict(options.__dict__)
-
+    logging.basicConfig(level='DEBUG')
     script(*args, **kwargs)
 
 if __name__ == '__main__':
