@@ -9,7 +9,7 @@ controldir=control
 
 # Uncomment the two lines below to remove RNA folding features and SilVA's
 # dependency on UNAfold/ViennaRNA:
-#export EXCLUDE_RNA_FOLDING=1
+export EXCLUDE_RNA_FOLDING=1
 #controldir=control/no-folding
 if [[ ! -z "${EXCLUDE_RNA_FOLDING:-}" ]]; then
     echo "EXCLUDE_RNA_FOLDING=${EXCLUDE_RNA_FOLDING}... excluding RNA folding features." >&2
