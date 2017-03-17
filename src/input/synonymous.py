@@ -31,6 +31,7 @@ from random import sample
 assert os.getenv('SILVA_PATH') is not None, \
     "Error: SILVA_PATH is unset."
 sys.path.insert(0, os.path.expandvars('$SILVA_PATH/lib/python'))
+LOG_LEVEL = os.getenv('SILVA_LOG_LEVEL', 'INFO')
 
 from silva import maybe_gzip_open
 from twobitreader import TwoBitFile as Genome
@@ -845,7 +846,7 @@ def parse_args(args):
 def main(args=sys.argv[1:]):
     options, args = parse_args(args)
     kwargs = dict(options.__dict__)
-    logging.basicConfig(level='DEBUG')
+    logging.basicConfig(level=LOG_LEVEL)
     script(*args, **kwargs)
 
 if __name__ == '__main__':

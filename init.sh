@@ -37,6 +37,10 @@ export TMPDIR="${TMPDIR:-$(pwd)}"
 export SILVA_AF_MIN="${SILVA_AF_MIN:-0}"
 export SILVA_AF_MAX="${SILVA_AF_MAX:-0.05}"
 
+# Used to initialize the logging sensitivity of the python logger
+# Set to "DEBUG" for more logs, "WARNING" for fewer
+export SILVA_LOG_LEVEL="INFO"
+
 #==================================
 
 version="$(cat ${SILVA_PATH}/VERSION)"
@@ -52,6 +56,7 @@ SILVA_CONTROL:   '$SILVA_CONTROL'
 SILVA_TRAINED:   '$SILVA_TRAINED'
 SILVA_AF_MIN:    '$SILVA_AF_MIN'
 SILVA_AF_MAX:    '$SILVA_AF_MAX'
+SILVA_LOG_LEVEL: '$SILVA_LOG_LEVEL'
 TMPDIR:          '$TMPDIR'
 -----------
 EOF
