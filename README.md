@@ -58,10 +58,10 @@ cd silva-1.1.1
 
 SilVA requires several tools and databases to run. Most of these were included with this release, but the `setup.sh` script will download and configure the rest.
 
-- included: maxentscan, available from:
-  http://genes.mit.edu/burgelab/maxent/download/
 - included: twobitreader, available on pypi:
   https://pypi.python.org/pypi/twobitreader
+- setup.sh: maxentscan, available from:
+  http://genes.mit.edu/burgelab/maxent/download/
 - setup.sh: randomForest package, available on CRAN:
   http://cran.r-project.org/web/packages/randomForest/
 - setup.sh: SilVA databases, available from:
