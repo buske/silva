@@ -124,16 +124,30 @@ if [[ "$(is_rf_missing)" ]]; then
     rf_fail
 fi
 
+# Download hg19 twobit file
+mkdir -pv data
+datafile=data/hg19.2bit
+if [[ ! -e $datafile ]]; then
+    if [[ ! -e $datafile ]]; then
+        prompt "\n\nFinal step:\nDownloading hg19 2-bit file from UCSC...\n\nThis file is large (~800M) and may take a while to download.\n\nIf you already have hg19.2bit, press CTRL+C to exit this script and make a symlink to it within the data directory. Then, re-run this script to make sure everything is properly linked."
+        wget -v -O $datafile $GENOME_URL
+    fi
+    if [[ ! -e $datafile ]]; then
+        echo -e "\n\nError: missing file: $datafile"
+        exit 1
+    fi
+fi
+
 # Download data
 datafile=data/refGene.ucsc.gz
 if [[ ! -e $datafile ]]; then
     tarball=silva-${version}_data.tar.gz
     if [[ ! -e $tarball ]]; then
-    prompt "\n\nDownloading required SilVA $version databases ($tarball)..."
-    wget -v "$SILVA_DATA_URL"
+        prompt "\n\nDownloading required SilVA $version databases ($tarball)..."
+        wget -v "$SILVA_DATA_URL" || (echo -e "*** Sorry! The SilVA data file is currently unavailable from compbio.cs.toronto.edu\n*** Please see: https://github.com/buske/silva/issues/3" >&2 && exit 1)
     fi
     if [[ ! -e $datafile ]]; then
-    echo -e "\n\nUnpacking required SilVA $version databases into data/..." >&2
+        echo -e "\n\nUnpacking required SilVA $version databases into data/..." >&2
     if [[ -e $tarball ]]; then
         tar -xzvf $tarball
     else
@@ -142,21 +156,6 @@ if [[ ! -e $datafile ]]; then
     fi
     fi
 fi
-
-# Download hg19 twobit file
-mkdir -pv data
-datafile=data/hg19.2bit
-if [[ ! -e $datafile ]]; then
-    if [[ ! -e $datafile ]]; then
-    prompt "\n\nFinal step:\nDownloading hg19 2-bit file from UCSC...\n\nThis file is large (~800M) and may take a while to download.\n\nIf you already have hg19.2bit, press CTRL+C to exit this script and make a symlink to it within the data directory. Then, re-run this script to make sure everything is properly linked."
-    wget -v -O $datafile $GENOME_URL
-    fi
-    if [[ ! -e $datafile ]]; then
-    echo -e "\n\nError: missing file: $datafile"
-    exit 1
-    fi
-fi
-
 
 cat >&2 <<EOF
 
