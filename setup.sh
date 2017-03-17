@@ -6,10 +6,10 @@ set -o pipefail
 
 
 ######################################################################
-# Uncomment the line below to exclude RNA folding (UNAfold/ViennaRNA)
-# from the installation process:
+# Comment out the line below to include RNA folding (UNAfold/ViennaRNA)
+# in the installation process:
 
-#EXCLUDE_RNA_FOLDING=1
+EXCLUDE_RNA_FOLDING=1
 
 ######################################################################
 
@@ -49,7 +49,7 @@ function get_and_make_package {
     local URL=$1
     local from=$2
     local to=$3
-    
+
     pushd tools > /dev/null
     if [[ ! -e $from.tar.gz ]]; then
 	prompt "\n\nDownloading $from..."
@@ -150,8 +150,8 @@ cat >&2 <<EOF
 
 SilVA $version successfully installed.
 
-To run SilVA on a VCF file, first preprocess the file with 
-'./silva-preprocess', and then generate results from the output 
+To run SilVA on a VCF file, first preprocess the file with
+'./silva-preprocess', and then generate results from the output
 directory with './silva-run'
 EOF
 

@@ -64,14 +64,14 @@ SilVA requires several tools and databases to run. Most of these were included w
   https://pypi.python.org/pypi/twobitreader
 - setup.sh: randomForest package, available on CRAN:
   http://cran.r-project.org/web/packages/randomForest/
-- setup.sh: UNAfold, available from:
-  http://mfold.rna.albany.edu/?q=DINAMelt/software
-- setup.sh: ViennaRNA, available from:
-  http://www.tbi.univie.ac.at/~ronny/RNA/
 - setup.sh: SilVA databases, available from:
   http://compbio.cs.toronto.edu/silva/release/silva-1.1.1_data.tar.gz
 - setup.sh: hg19.2bit, available from:
   http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit
+- setup.sh: UNAfold (optional), available from:
+  http://mfold.rna.albany.edu/?q=DINAMelt/software
+- setup.sh: ViennaRNA (optional), available from:
+  http://www.tbi.univie.ac.at/~ronny/RNA/
 
 **Note**: _if you have the SilVA databases already installed, you can point SilVA to them by changing the appropriate lines in the `init.sh` file._
 
@@ -105,7 +105,7 @@ SilVA will print the synonymous variants to stdout, ordered by score, with the v
 
 1. The variant rank, out of all synonymous variants considered.
 2. The SilVA score, between 0 and 1, where close to 1 is more likely to be harmful.
-3. The variant classification, based upon several SilVA score thresholds.
+3. The variant classification, based upon several SilVA score thresholds (see the paper).
 3. HGNC gene name
 4. RefSeq mRNA identifier
 ... Fields from the input file

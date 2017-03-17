@@ -4,7 +4,6 @@
 *.o
 tools/
 data/
-control/
 build/
 dist/
 manuscript/

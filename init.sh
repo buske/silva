@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 
-controldir=control
 #==================================
-# Necessary environment variables.
+# This file defines necessary environment variables.
 # Feel free to modify them if you know what you are doing.
 
 
-
-# Uncomment the two lines below to remove RNA folding features and SilVA's
+# Comment out the line below to include RNA folding features and SilVA's
 # dependency on UNAfold/ViennaRNA:
 export EXCLUDE_RNA_FOLDING=1
-#controldir=control/no-folding
+
+
 if [[ ! -z "${EXCLUDE_RNA_FOLDING:-}" ]]; then
     echo "EXCLUDE_RNA_FOLDING=${EXCLUDE_RNA_FOLDING}... excluding RNA folding features." >&2
+    controldir=control/no-folding
+else
+    controldir=control/folding
 fi
 
 
@@ -56,7 +58,7 @@ EOF
 }
 
 if [[ ! -e $SILVA_PATH/data/refGene.ucsc.gz ]]; then
-    cat >&2 <<EOF 
+    cat >&2 <<EOF
 Annotation databases seem to be missing.
 File does note exist: $SILVA_PATH/data/refGene.ucsc.gz
 
