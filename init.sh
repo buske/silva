@@ -39,7 +39,7 @@ export SILVA_AF_MAX="${SILVA_AF_MAX:-0.05}"
 
 # Used to initialize the logging sensitivity of the python logger
 # Set to "DEBUG" for more logs, "WARNING" for fewer
-export SILVA_LOG_LEVEL="INFO"
+export SILVA_LOG_LEVEL="${SILVA_LOG_LEVEL:-INFO}"
 
 #==================================
 
