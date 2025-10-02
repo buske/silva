@@ -1,4 +1,7 @@
-# SILVA README #
+# SILVA [ARCHIVED] #
+
+> [!NOTE]
+> This project is no longer maintained as of 2017, and no future work is planned. More robust genome-wide pathogenicity scores are now widespread, such as CADD and SpliceAI.
 
 SilVA: Silent variant analysis using random forests.
 *"When a synonymous mutation falls in the exome, does it make a sound?"*
